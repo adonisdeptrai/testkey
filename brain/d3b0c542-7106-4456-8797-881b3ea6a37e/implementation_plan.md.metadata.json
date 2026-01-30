@@ -1,5 +1,6 @@
 {
   "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
-  "summary": "Kế hoạch sửa lỗi Đăng nhập, Đăng ký và Quản trị Admin. Tập trung vào việc đồng bộ Supabase Auth với bảng users và hoàn thiện UI Admin.",
-  "updatedAt": "2026-01-30T06:00:06.481045700Z"
+  "summary": "Kế hoạch chi tiết chuyển đổi Authentication sang Supabase API. Tập trung vào việc thay thế các cuộc gọi fetch API thủ công bằng phương thức của Supabase SDK và sử dụng Postgres Triggers để tự động tạo dữ liệu người dùng trong bảng public.",
+  "updatedAt": "2026-01-30T06:52:55.365806300Z",
+  "version": "1"
 }

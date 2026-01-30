@@ -7,9 +7,5 @@
     - [x] Cập nhật Logout và Password Reset
 - [x] Cập nhật Auth.tsx để tương thích với Supabase Client <!-- id: 3 -->
 - [x] Xử lý đồng bộ hóa `public.users` (Triggers/Edge Functions hoặc Backend Hook) <!-- id: 4 -->
-- [x] Gỡ bỏ các route API Auth dư thừa trong Backend <!-- id: 5 -->
-- [/] Thêm trang chờ xác thực email <!-- id: 7 -->
-    - [ ] Cập nhật VerifyEmail.tsx (UI & Logic)
-    - [ ] Cập nhật App.tsx (Routing)
-    - [ ] Cập nhật AuthContext.tsx (emailRedirectTo)
-- [ ] Kiểm tra và xác nhận (Verification) <!-- id: 8 -->
+- [/] Gỡ bỏ các route API Auth dư thừa trong Backend <!-- id: 5 -->
+- [ ] Kiểm tra và xác nhận (Verification) <!-- id: 6 -->

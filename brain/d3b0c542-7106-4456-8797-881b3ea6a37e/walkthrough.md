@@ -17,6 +17,22 @@ Tôi đã hoàn tất việc sửa các lỗi liên quan đến Đăng nhập, �
     - Thêm logic tự động đồng bộ (Sync) trong route `/api/auth/me`. Khi frontend gọi API này (thường là khi khởi tạo app), backend sẽ kiểm tra trạng thái bên Supabase Auth. Nếu đã verify nhưng DB chưa cập nhật, hệ thống sẽ tự động set `is_verified = true`.
 - **Kết quả**: Đăng nhập mượt mà ngay sau khi xác thực email.
 
+### 4. Lỗi "Failed to fetch"
+- **Vấn đề**: Server backend không khởi động được do thiếu biến môi trường và lỗi cú pháp.
+- **Giải pháp**:
+    - Đồng bộ tệp `.env` vào thư mục `server`.
+    - Sửa lỗi cú pháp trong `server/routes/tickets.js` (lỗi khai báo `nodemailer`).
+    - Khởi động lại server thành công trên cổng 5000.
+- **Kết quả**: Giao diện frontend đã có thể kết nối với backend bình thường.
+
+### 5. Chuyển đổi sang Supabase Auth API (Native)
+- **Vấn đề**: Trước đây hệ thống gọi API backend làm trung gian (proxy) cho việc đăng ký/đăng nhập, gây phức tạp và khó quản lý session.
+- **Giải pháp**:
+    - **Frontend**: Chuyển đổi `AuthContext.tsx` và `Auth.tsx` sang gọi trực tiếp `supabase.auth` SDK.
+    - **Database (Automation)**: Tạo **Postgres Trigger** (`handle_new_user`) để tự động tạo bản ghi trong `public.users` ngay khi user đăng ký qua Supabase, gỡ bỏ gánh nặng cho backend.
+    - **Backend**: Gỡ bỏ (deprecated) các endpoint `/api/auth/register` và `/api/auth/login`. Hệ thống hiện chỉ sử dụng backend cho các logic nghiệp vụ (orders, stats, v.v.).
+- **Kết quả**: Hệ thống bảo mật hơn, tốc độ phản hồi nhanh hơn và session được quản lý chuẩn theo tiêu chuẩn Supabase.
+
 ### 3. Quản trị Admin
 - **Vấn đề**: Thiếu chức năng cấp quyền Admin cho người dùng khác từ giao diện.
 - **Giải pháp**:

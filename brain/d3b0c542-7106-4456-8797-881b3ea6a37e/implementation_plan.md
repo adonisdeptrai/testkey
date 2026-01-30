@@ -1,35 +1,43 @@
-# Kế hoạch sửa lỗi Login, Register và Thêm Admin
+# Chuyển đổi Authentication sang Supabase API hoàn toàn
 
-Người dùng gặp lỗi khi Đăng ký (do mismatch giữa OTP UI và link-based Auth), Đăng nhập (do trạng thái verification chưa đồng bộ) và Thêm Admin (do thiếu UI).
+Mục tiêu là sử dụng trực tiếp SDK của Supabase trên Frontend cho mọi tác vụ Authentication, thay vì gọi qua các middleware proxy của Backend. Điều này giúp tận dụng tối đa các tính năng bảo mật và session của Supabase.
 
-## Các thay đổi đề xuất
+## User Review Required
 
-### 1. Auth & Registration (Frontend)
-Loại bỏ giao diện nhập mã OTP 6 số vốn không tương thích với luồng Magic Link của Supabase.
+> [!IMPORTANT]
+> Việc chuyển đổi này sẽ thay đổi cách thức lưu giữ Session. Session sẽ được quản lý trực tiếp bởi Supabase SDK thay vì local JWT token tự quản.
+> Chúng ta sẽ cần kích hoạt một Postgres Trigger để tự động tạo bản ghi trong bảng `public.users` khi có user mới đăng ký qua Supabase Auth.
 
-#### [MODIFY] [Auth.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Auth.tsx)
-- Xóa bỏ `handleVerify` và logic liên quan đến `verificationCode`.
-- Cập nhật thông báo sau khi `register` thành công để người dùng biết là cần kiểm tra email và click vào link.
+## Proposed Changes
 
-### 2. Is_Verified Sync (Backend)
-Đảm bảo trạng thái `is_verified` trong bảng `public.users` được cập nhật khi người dùng đã xác thực email qua Supabase.
-
-#### [MODIFY] [auth.js](file:///c:/Users/Adonis/Downloads/App/server/routes/auth.js)
-- Trong route `/me` hoặc `/login`, thêm logic kiểm tra: nếu `supabase.auth.user().email_confirmed_at` có giá trị nhưng `users.is_verified` vẫn là `false`, thì cập nhật `is_verified = true`.
+### [Frontend] Auth Layer
 
 #### [MODIFY] [AuthContext.tsx](file:///c:/Users/Adonis/Downloads/App/src/contexts/AuthContext.tsx)
-- Cập nhật `syncUserData` để xử lý fallback tốt hơn nếu user chưa được verified trong DB nhưng đã verified trong Supabase Auth.
+- Thay đổi hàm `login`, `register`, `logout` để sử dụng `supabase.auth`.
+- Gỡ bỏ các đoạn mã truyền JWT token thủ công (nếu có) khi trao đổi với Supabase.
+- Duy trì việc gọi backend cho các API chức năng khác (products, orders) nhưng sử dụng `supabase.auth.getSession()` để xác thực.
 
-### 3. Quản lý Admin (Frontend)
-Thêm nút chuyển đổi quyền (Make Admin) trong danh sách khách hàng.
+#### [MODIFY] [Auth.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Auth.tsx)
+- Cập nhật logic xử lý lỗi dựa trên phản hồi trực tiếp từ Supabase SDK.
 
-#### [MODIFY] [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
-- Cập nhật component `AdminCustomers` để hiển thị nút "Promote to Admin" hoặc "Change Role".
-- Kết nối nút này với API `${API_URL}/api/users/:id` (method PUT) đã có sẵn.
+### [Backend] API Layer
 
-## Kế hoạch kiểm tra
+#### [MODIFY] [auth.js](file:///c:/Users/Adonis/Downloads/App/server/routes/auth.js)
+- Đánh dấu các route đăng ký/đăng nhập là deprecated hoặc gỡ bỏ nếu không cần thiết.
+- Giữ lại route `/me` để đồng bộ dữ liệu mở rộng từ `public.users`.
 
-### Kiểm tra thủ công (Manual Verification)
-1. **Đăng ký**: Thử đăng ký tài khoản mới và xác nhận email qua link gửi về. Kiểm tra xem có còn hiện UI nhập mã 6 số không.
-2. **Đăng nhập**: Đăng nhập sau khi verify email.
-3. **Thêm Admin**: Vào trang Quản trị -> Customers, thử đổi quyền một user thành admin và kiểm tra xem database có cập nhật không.
+### [Database] Automation
+
+#### [NEW] [Migration: Sync Users](file:///c:/Users/Adonis/Downloads/App/server/supabase/migrations/999_sync_auth_to_public_users.sql)
+- Tạo function và trigger đồng bộ người dùng từ `auth.users` sang `public.users` tự động.
+
+## Verification Plan
+
+### Automated Tests
+- Kiểm tra luồng đăng ký mới qua Browser Tool.
+- Kiểm tra luồng đăng nhập với email/password.
+- Kiểm tra luồng đăng nhập với Google OAuth.
+
+### Manual Verification
+- Xác nhận bản ghi được tạo tự động trong bảng `public.users` sau khi đăng ký.
+- Xác nhận session được duy trì sau khi tải lại trang.
