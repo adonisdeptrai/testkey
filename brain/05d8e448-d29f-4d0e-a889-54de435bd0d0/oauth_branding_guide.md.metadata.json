@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Hướng dẫn customize Google OAuth Consent Screen để hiển thị tên R4bbit thay vì subdomain Supabase dài dòng. Bao gồm app name, logo, homepage, và privacy policy setup.",
+  "updatedAt": "2026-01-30T04:24:39.336510300Z"
+}

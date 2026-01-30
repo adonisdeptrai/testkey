@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Bug report và test checklist sau khi migration Supabase Auth. Liệt kê các bugs hiện tại, issues cần fix, và hướng dẫn test manual.",
+  "updatedAt": "2026-01-30T04:34:32.525193500Z"
+}

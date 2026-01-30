@@ -11,16 +11,16 @@ Thay thế custom JWT authentication bằng Supabase Auth built-in để tận d
 ---
 
 ## Phase 1: Backend Refactoring
-- [x] Remove custom JWT logic khỏi `/api/auth/login`
-- [x] Remove custom JWT logic khỏi `/api/auth/register`
-- [x] Update auth middleware để verify Supabase session
-- [x] Simplify OAuth callback route
-- [x] Remove `JWT_SECRET` dependency
+- [/] Remove custom JWT logic khỏi `/api/auth/login`
+- [/] Remove custom JWT logic khỏi `/api/auth/register`
+- [/] Update auth middleware để verify Supabase session
+- [/] Simplify OAuth callback route
+- [/] Remove `JWT_SECRET` dependency
 
 ## Phase 2: Frontend Refactoring
-- [x] Update `AuthContext` để sử dụng Supabase session hooks
-- [x] Update `login()` method → `supabase.auth.signInWithPassword()`
-- [x] Update `register()` method → `supabase.auth.signUp()`
+- [x] Update [AuthContext](file:///c:/Users/Adonis/Downloads/App/src/contexts/AuthContext.tsx#6-15) để sử dụng Supabase session hooks
+- [x] Update [login()](file:///c:/Users/Adonis/Downloads/App/src/contexts/AuthContext.tsx#100-119) method → `supabase.auth.signInWithPassword()`
+- [x] Update [register()](file:///c:/Users/Adonis/Downloads/App/src/contexts/AuthContext.tsx#120-164) method → `supabase.auth.signUp()`
 - [x] Auto-sync Supabase session với React state
 - [x] Update logout để clear Supabase session
 - [x] Fix type errors với User interface

@@ -1,0 +1,316 @@
+# Bug Report & Testing Checklist
+
+Comprehensive check sau Supabase Auth migration.
+
+---
+
+## ✅ PASSING CHECKS
+
+### Build Status
+- ✅ **Frontend build successful** (no TypeScript errors)
+- ✅ **No compilation errors**
+- ✅ **Vercel Analytics integrated**
+- ✅ **SPA routing configured** (vercel.json)
+- ✅ **Dev server running** (port 8080)
+
+### Code Quality
+- ✅ **No critical linter errors detected**
+- ✅ **Error handling present** (35 console.error locations tracked)
+- ✅ **Type safety maintained** (User type fixed)
+
+---
+
+## ⚠️ KNOWN ISSUES
+
+### 1. **Supabase Auth Migration INCOMPLETE**
+
+**Status:** 🔴 **CRITICAL - Backend still using JWT**
+
+**Problem:**
+- Frontend đã migrate sang Supabase Auth ✓
+- **Backend CHƯA migrate** - vẫn expect custom JWT tokens
+- Authentication sẽ fail vì mismatch
+
+**Affected Routes:**
+- `POST /api/auth/login` - Still generates JWT
+- `POST /api/auth/register` - Still generates JWT
+- `GET /api/auth/verify-email` - Still uses JWT
+- Auth middleware - Still verifies JWT
+
+**Impact:**
+- ❌ Email/password login **KHÔNG hoạt động**
+- ❌ Registration **KHÔNG hoạt động**
+- ✅ Google OAuth **CÓ THỂ work** (if Supabase enabled)
+
+**Fix Required:**
+See [implementation_plan.md](file:///C:/Users/Adonis/.gemini/antigravity/brain/05d8e448-d29f-4d0e-a889-54de435bd0d0/implementation_plan.md) Phase 1
+
+---
+
+### 2. **Google OAuth Setup Required**
+
+**Status:** 🟡 **ACTION NEEDED**
+
+**Checklist:**
+- [x] Frontend code ready
+- [x] Supabase client configured
+- [ ] Google Cloud Console OAuth credentials created
+- [ ] Google provider enabled in Supabase Dashboard
+- [ ] OAuth consent screen branded with "R4bbit"
+
+**Test:** Click "Sign in with Google" → Should show Google login, not error
+
+**Guide:** [oauth_branding_guide.md](file:///C:/Users/Adonis/.gemini/antigravity/brain/05d8e448-d29f-4d0e-a889-54de435bd0d0/oauth_branding_guide.md)
+
+---
+
+### 3. **User Role Management**
+
+**Status:** 🟢 **READY TO USE**
+
+**Admin script created:**
+```bash
+node server/scripts/make-admin.js <email>
+```
+
+**Test:**
+1. Register new user
+2. Run script to promote to admin
+3. Login → Access `/admin` dashboard
+
+---
+
+## 🧪 MANUAL TEST CHECKLIST
+
+### Pre-Test Setup
+
+```bash
+# 1. Start dev server
+npm run dev
+
+# 2. Start backend
+cd server
+npm run dev
+```
+
+**Access:** http://localhost:8080
+
+---
+
+### Test Cases
+
+#### Test 1: Homepage Load
+- [ ] Navigate to http://localhost:8080
+- [ ] Page loads without errors
+- [ ] No console errors (F12)
+- [ ] "Sign in with Google" button visible
+
+**Expected:** Landing page renders correctly
+
+---
+
+#### Test 2: Google OAuth (If Configured)
+- [ ] Click "Sign in with Google"
+- [ ] Redirects to Google login
+- [ ] After authorize → Redirect to /auth/callback
+- [ ] Redirect to /shop
+
+**Expected:** Successful OAuth flow
+
+**If fails:**
+- Check error message
+- Verify Supabase Google provider enabled
+- Check redirect URLs configured
+
+---
+
+#### Test 3: Email/Password Registration
+- [ ] Click "Sign Up" tab
+- [ ] Enter username, email, password
+- [ ] Submit form
+
+**Expected:**
+- ❌ **WILL FAIL** (backend not migrated yet)
+- Error: JWT token mismatch
+
+**After backend migration:**
+- ✅ Success message
+- ✅ Email verification sent
+- ✅ Check inbox for Supabase email
+
+---
+
+#### Test 4: Email/Password Login
+- [ ] Enter email + password
+- [ ] Click "Login"
+
+**Expected:**
+- ❌ **WILL FAIL** (backend not migrated yet)
+
+**After backend migration:**
+- ✅ Successful login
+- ✅ Redirect to /shop
+- ✅ User data loaded
+
+---
+
+#### Test 5: Admin Access
+- [ ] Login as admin user
+- [ ] Navigate to /admin
+
+**Expected:**
+- ✅ Admin dashboard loads
+- ✅ Can view products, orders, settings
+
+**If fails:**
+- Check user role in Supabase users table
+- Run make-admin script
+
+---
+
+#### Test 6: Session Persistence
+- [ ] Login successfully
+- [ ] Refresh page (F5)
+- [ ] Close browser, reopen
+
+**Expected:**
+- ✅ Still logged in after refresh
+- ✅ User data persists
+
+---
+
+#### Test 7: Logout
+- [ ] Click logout
+- [ ] Try accessing /admin
+
+**Expected:**
+- ✅ Session cleared
+- ✅ Redirect to login
+- ✅ Cannot access protected routes
+
+---
+
+## 🔧 FIXES NEEDED (Priority Order)
+
+### Priority 1: Backend Migration (BLOCKING)
+
+**Task:** Migrate backend auth routes to Supabase Auth
+
+**Files to modify:**
+- [ ] [server/routes/auth.js](file:///c:/Users/Adonis/Downloads/App/server/routes/auth.js) - Login endpoint
+- [ ] [server/routes/auth.js](file:///c:/Users/Adonis/Downloads/App/server/routes/auth.js) - Register endpoint
+- [ ] [server/middleware/auth.js](file:///c:/Users/Adonis/Downloads/App/server/middleware/auth.js) - Token verification
+- [ ] [server/routes/oauth.js](file:///c:/Users/Adonis/Downloads/App/server/routes/oauth.js) - Simplify or remove
+
+**Estimated time:** 2-3 hours
+
+**Instructions:** Follow [implementation_plan.md](file:///C:/Users/Adonis/.gemini/antigravity/brain/05d8e448-d29f-4d0e-a889-54de435bd0d0/implementation_plan.md) Phase 1
+
+---
+
+### Priority 2: Google OAuth Setup
+
+**Task:** Enable Google OAuth in Supabase + Google Cloud Console
+
+**Steps:**
+1. Create OAuth credentials in Google Cloud Console
+2. Enable Google provider in Supabase Dashboard
+3. Configure authorized redirect URLs
+4. Brand OAuth consent screen
+
+**Estimated time:** 30 minutes
+
+**Guide:** [oauth_branding_guide.md](file:///C:/Users/Adonis/.gemini/antigravity/brain/05d8e448-d29f-4d0e-a889-54de435bd0d0/oauth_branding_guide.md)
+
+---
+
+### Priority 3: Database RLS Policies
+
+**Task:** Setup Row Level Security
+
+**Tables needing RLS:**
+- `users` - Users can only read/update their own data
+- `orders` - Users can only view their own orders
+- `product_keys` - Restricted to admin
+- `settings` - Admin only
+
+**Query template:**
+```sql
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own data"
+ON users FOR SELECT
+USING (auth.uid() = id);
+
+CREATE POLICY "Users can update own data"  
+ON users FOR UPDATE
+USING (auth.uid() = id);
+```
+
+---
+
+## 📊 VERIFICATION METRICS
+
+**After fixes, verify:**
+
+| Metric | Target | Status |
+|--------|--------|--------|
+| Frontend build | No errors | ✅ PASS |
+| Backend build | No errors | ⏳ TODO |
+| Email/Password auth | Working | ❌ BLOCKED |
+| Google OAuth | Working | 🟡 CONFIG NEEDED |
+| Session persistence | Working | ⏳ TEST AFTER FIX |
+| Admin access | Working | ✅ READY |
+| RLS policies | Configured | ❌ NOT SET |
+
+---
+
+## 🚀 DEPLOYMENT STATUS
+
+### localhost:8080 (Development)
+- ✅ Frontend running
+- ✅ Backend running
+- ⚠️ Auth partially broken (JWT mismatch)
+
+### r4bbit-hub.vercel.app (Production)
+- ✅ Deployed
+- ✅ SPA routing working
+- ✅ Analytics integrated
+- ⚠️ Auth issues same as localhost
+
+---
+
+## 📝 NEXT STEPS
+
+1. **IMMEDIATE:** Complete backend migration (Priority 1)
+2. **THEN:** Setup Google OAuth (Priority 2)
+3. **FINALLY:** Configure RLS policies (Priority 3)
+
+**After ALL fixes:**
+- Run full test suite
+- Verify all auth flows
+- Update [task.md](file:///C:/Users/Adonis/.gemini/antigravity/brain/05d8e448-d29f-4d0e-a889-54de435bd0d0/task.md) with completed items
+- Update [walkthrough.md](file:///C:/Users/Adonis/.gemini/antigravity/brain/05d8e448-d29f-4d0e-a889-54de435bd0d0/walkthrough.md) with test results
+
+---
+
+## 🔍 DEBUG COMMANDS
+
+```bash
+# Check Supabase connection
+node -e "const {supabase} = require('./server/config/supabase'); supabase.from('users').select('count').then(console.log)"
+
+# Check frontend env vars
+npm run dev -- --debug
+
+# View backend logs
+tail -f server/logs/app.log
+
+# SQL check user roles
+# Run in Supabase SQL Editor:
+SELECT username, email, role FROM users;
+```
+
+---
+
+**⚠️ Browser testing currently unavailable** due to environment issue. Manual testing required in actual browser.
