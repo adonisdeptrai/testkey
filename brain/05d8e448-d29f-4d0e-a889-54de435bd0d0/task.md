@@ -27,14 +27,14 @@ Thay thế custom JWT authentication bằng Supabase Auth built-in để tận d
 - [x] Update Auth.tsx để use email cho login
 
 ## Phase 3: Database & Migration
-- [ ] Enable Supabase Auth trong Dashboard
+- [/] Enable Supabase Auth trong Dashboard
 - [ ] Migrate existing users sang Supabase Auth
-- [ ] Setup RLS policies cho tables
-- [ ] Update `users` table structure nếu cần
+- [/] Setup RLS policies cho tables
+- [/] Update `users` table structure nếu cần
 
 ## Phase 4: Testing & Cleanup
-- [ ] Test email/password login flow
-- [ ] Test Google OAuth flow
+- [/] Test email/password login flow
+- [/] Test Google OAuth flow
 - [ ] Test session persistence
-- [ ] Remove unused JWT code
+- [x] Remove unused JWT code
 - [ ] Update documentation

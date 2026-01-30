@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Final verification report sau khi migrate toàn bộ backend sang Supabase Auth. Tất cả routes đã được refactor, JWT/bcrypt removed, ready for testing.",
+  "updatedAt": "2026-01-30T04:47:46.631062600Z"
+}
