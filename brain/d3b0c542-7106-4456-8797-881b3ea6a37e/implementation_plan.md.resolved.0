@@ -1,0 +1,35 @@
+# Kế hoạch sửa lỗi Login, Register và Thêm Admin
+
+Người dùng gặp lỗi khi Đăng ký (do mismatch giữa OTP UI và link-based Auth), Đăng nhập (do trạng thái verification chưa đồng bộ) và Thêm Admin (do thiếu UI).
+
+## Các thay đổi đề xuất
+
+### 1. Auth & Registration (Frontend)
+Loại bỏ giao diện nhập mã OTP 6 số vốn không tương thích với luồng Magic Link của Supabase.
+
+#### [MODIFY] [Auth.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Auth.tsx)
+- Xóa bỏ [handleVerify](file:///c:/Users/Adonis/Downloads/App/src/pages/Auth.tsx#48-75) và logic liên quan đến `verificationCode`.
+- Cập nhật thông báo sau khi [register](file:///c:/Users/Adonis/Downloads/App/src/contexts/AuthContext.tsx#120-146) thành công để người dùng biết là cần kiểm tra email và click vào link.
+
+### 2. Is_Verified Sync (Backend)
+Đảm bảo trạng thái `is_verified` trong bảng `public.users` được cập nhật khi người dùng đã xác thực email qua Supabase.
+
+#### [MODIFY] [auth.js](file:///c:/Users/Adonis/Downloads/App/server/routes/auth.js)
+- Trong route `/me` hoặc `/login`, thêm logic kiểm tra: nếu `supabase.auth.user().email_confirmed_at` có giá trị nhưng `users.is_verified` vẫn là `false`, thì cập nhật `is_verified = true`.
+
+#### [MODIFY] [AuthContext.tsx](file:///c:/Users/Adonis/Downloads/App/src/contexts/AuthContext.tsx)
+- Cập nhật [syncUserData](file:///c:/Users/Adonis/Downloads/App/src/contexts/AuthContext.tsx#57-99) để xử lý fallback tốt hơn nếu user chưa được verified trong DB nhưng đã verified trong Supabase Auth.
+
+### 3. Quản lý Admin (Frontend)
+Thêm nút chuyển đổi quyền (Make Admin) trong danh sách khách hàng.
+
+#### [MODIFY] [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+- Cập nhật component [AdminCustomers](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#647-674) để hiển thị nút "Promote to Admin" hoặc "Change Role".
+- Kết nối nút này với API `${API_URL}/api/users/:id` (method PUT) đã có sẵn.
+
+## Kế hoạch kiểm tra
+
+### Kiểm tra thủ công (Manual Verification)
+1. **Đăng ký**: Thử đăng ký tài khoản mới và xác nhận email qua link gửi về. Kiểm tra xem có còn hiện UI nhập mã 6 số không.
+2. **Đăng nhập**: Đăng nhập sau khi verify email.
+3. **Thêm Admin**: Vào trang Quản trị -> Customers, thử đổi quyền một user thành admin và kiểm tra xem database có cập nhật không.

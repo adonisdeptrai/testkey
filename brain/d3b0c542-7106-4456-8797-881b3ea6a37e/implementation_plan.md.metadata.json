@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Kế hoạch sửa lỗi Đăng nhập, Đăng ký và Quản trị Admin. Tập trung vào việc đồng bộ Supabase Auth với bảng users và hoàn thiện UI Admin.",
+  "updatedAt": "2026-01-30T06:00:06.481045700Z"
+}

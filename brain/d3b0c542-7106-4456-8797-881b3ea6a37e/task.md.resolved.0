@@ -1,0 +1,9 @@
+# Task: Debugging Application Issues
+
+- [/] Thu thập thông tin từ người dùng (Socratic Gate) <!-- id: 0 -->
+- [ ] Kiểm tra môi trường và cấu hình (.env, Supabase) <!-- id: 1 -->
+- [ ] Kiểm tra Logs (Backend, Browser) <!-- id: 2 -->
+- [ ] Tái lập lỗi (Reproduction) <!-- id: 3 -->
+- [ ] Phân tích nguyên nhân gốc rễ (Root Cause Analysis) <!-- id: 4 -->
+- [ ] Thực hiện bản sửa lỗi <!-- id: 5 -->
+- [ ] Kiểm tra và xác nhận (Verification) <!-- id: 6 -->
