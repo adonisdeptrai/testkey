@@ -1,0 +1,294 @@
+# Payment Verification Admin Interface - Implementation Plan
+
+## Goal
+
+Tạo giao diện admin để kiểm tra và xác minh payment manual khi user chuyển sai số tiền hoặc quên ghi mã đơn hàng, giúp admin hỗ trợ user một cách hiệu quả.
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Tính năng mới: Manual Payment Verification**
+> 
+> Admin sẽ có khả năng:
+> - Xem tất cả pending orders và transactions chưa match
+> - So sánh side-by-side: Expected vs Received
+> - Manual verify khi user chuyển sai số tiền hoặc thiếu mã
+> - Xem audit log đầy đủ mọi verification actions
+
+> [!WARNING]
+> **Breaking Changes**
+> 
+> Backend sẽ thêm endpoint mới cho manual verification. Cần JWT admin token.
+
+## Proposed Changes
+
+### Backend Changes
+
+#### [NEW] [routes/orders.js](file:///c:/Users/Adonis/Downloads/App/server/routes/orders.js)
+
+**New API endpoints:**
+
+```javascript
+// GET /api/orders/pending
+// List all pending orders with bank transfer method
+router.get('/pending', auth, adminAuth, async (req, res) => {
+  // Return orders with status in ['Pending', 'Pending Verification']
+  // Filter by paymentMethod='bank_transfer'
+});
+
+// POST /api/orders/:orderId/manual-verify
+// Manually verify a payment (admin override)
+router.post('/:orderId/manual-verify', auth, adminAuth, async (req, res) => {
+  const { transactionId, note } = req.body;
+  // Update order status to 'Completed'
+  // Set verifiedAt timestamp
+  // Log to SystemLog with note
+  // Return updated order
+});
+```
+
+**Purpose:** Cho phép admin list pending orders và manual verify khi cần.
+
+---
+
+### Frontend Changes
+
+#### [MODIFY] [TPBankMonitor.tsx](file:///c:/Users/Adonis/Downloads/App/src/components/admin/TPBankMonitor.tsx)
+
+**Thêm tab mới:'verification'**
+
+```typescript
+// Line ~17: Add new tab
+const [activeTab, setActiveTab] = useState<'dashboard' | 'verification' | 'raw' | 'logs'>('dashboard');
+
+// Line ~158-176: Add verification to tabs array
+{ id: 'dashboard', label: 'Dashboard', icon: Layout },
+{ id: 'verification', label: 'Verify Payments', icon: Search }, // NEW
+{ id: 'raw', label: 'Raw Data', icon: Database },
+{ id: 'logs', label: 'System Logs', icon: Terminal },
+```
+
+**Thêm Verification View mới** (sau line ~309):
+
+```typescript
+{/* VERIFICATION VIEW */}
+{activeTab === 'verification' && (
+  <PaymentVerificationView orders={orders} history={history} />
+)}
+```
+
+#### [NEW] [PaymentVerificationView.tsx](file:///c:/Users/Adonis/Downloads/App/src/components/admin/PaymentVerificationView.tsx)
+
+**Component structure:**
+
+```typescript
+interface PaymentVerificationViewProps {
+  orders: Order[];
+  history: any[];
+}
+
+const PaymentVerificationView = ({ orders, history }) => {
+  // State
+  const [pendingOrders, setPendingOrders] = useState([]);
+  const [searchCode, setSearchCode] = useState('');
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showManualVerifyModal, setShowManualVerifyModal] = useState(false);
+  
+  // Fetch pending orders từ API
+  // Search and filter logic
+  // Matching logic (phát hiện partial matches)
+  
+  return (
+    <div className="space-y-6">
+      {/* Search Box */}
+      <input placeholder="Search by order code..." />
+      
+      {/* Pending Orders Table */}
+      <table>
+        {/* Columns: Order ID, Amount, Status, Actions */}
+        {/* Show "Partial Match" badge if có transaction match order code nhưng sai số  */}
+      </table>
+      
+      {/* Transaction Comparison Modal */}
+      {selectedOrder && (
+        <ComparisonModal
+          order={selectedOrder}
+          matchingTransactions={findMatches(selectedOrder)}
+          onManualVerify={handleManualVerify}
+        />
+      )}
+    </div>
+ );
+};
+```
+
+**Features:**
+
+1. **Search by Order Code**: Input để search theo mã đơn
+2. **Pending Orders List**: Table hiển thị tất cả pending bank orders
+3. **Status Indicators**:
+   - ✅ **Exact Match**: Green - Số tiền và mã đều đúng
+   - ⚠️ **Partial Match**: Yellow - Có mã nhưng sai số tiền
+   - ❌ **No Match**: Red - Không tìm thấy transaction nào
+4. **Comparison View**: Modal so sánh Expected vs Received
+5. **Manual Verify Button**: Cho phép admin override verification
+
+#### [NEW] [ComparisonModal.tsx](file:///c:/Users/Adonis/Downloads/App/src/components/admin/ComparisonModal.tsx)
+
+**Modal UI:**
+
+```
+┌─────────────────────────────────────┐
+│   Payment Verification              
+│                                     │
+├─────────────────────────────────────┤
+│ Order Details          │ Transaction│
+│ ──────────────────────┼────────────┤
+│ Order: ORD-1234       │ Found 1 tx │
+│ Expected: 2500 VND    │ Recv: 2000 │
+│ Code: ORD-1234        │ Desc: ORD  │
+│                       │ -1234      │
+├─────────────────────────────────────┤
+│ ❌ Amount Mismatch: -500 VND        │
+│ ✅ Order code present              │
+├─────────────────────────────────────┤
+│ Reason/Note:                        │
+│ [textarea for admin note]           │
+│                                     │
+│ [Cancel] [Manual Verify & Complete]│
+└─────────────────────────────────────┘
+```
+
+---
+
+## Verification Plan
+
+### Automated Tests
+
+> [!CAUTION]
+> **No existing automated tests found.** Project chưa có test suite.
+
+Sẽ verify manually qua browser.
+
+### Manual Verification
+
+#### Test Case 1: View Pending Orders
+1. Login as admin (`mquyendeptrai` / `mquyendeptrai`)
+2. Navigate to Admin Dashboard → Transfer History → **Verify Payments** tab  
+3. **Expected**: Hiển thị list pending bank transfer orders
+4. **Check**: Table có columns: Order ID, Amount, Status, Actions
+
+#### Test Case 2: Search by Order Code
+1. Trong Verify Payments tab, type order code vào search box
+2. **Expected**: Filter results real-time
+3. **Check**: Chỉ hiển thị orders match search term
+
+#### Test Case 3: Detect Partial Match
+1. Tạo order mới 2500 VND (e.g. ORD-5678)
+2. User chuyển 2000 VND với description "R4B ORD-5678"
+3. Wait 60s để worker check
+4. Refresh Verify Payments tab
+5. **Expected**: Order hiển thị với badge "⚠️ Partial Match - Amount Mismatch"
+6. **Check**: Click "View" để xem comparison
+
+#### Test Case 4: Manual Verification
+1. Click "View" trên partial match order
+2. **Expected**: Modal hiển thị:
+   - Left: Order details (Expected amount, code)
+   - Right: Transaction details (Received amount, description)
+   - Difference highlighted
+3. Input reason: "User chuyển thiếu 500 VND, đã confirm qua Messenger"
+4. Click "Manual Verify & Complete"
+5. **Expected**:
+   - Order status → "Completed"
+   - Modal close
+   - Order biến mất khỏi pending list
+6. **Check System Logs**: Should see SUCCESS log với note
+
+#### Test Case 5: No Match Scenario
+1. Tạo order mới nhưng user KHÔNG chuyển tiền
+2. Wait > 60s
+3. **Expected**: Order vẫn ở trong pending list
+4. **Expected**: Không có partial match badge
+5. **Check**: Click "View" → "No matching transactions found"
+
+#### Test Case 6: Exact Match (Auto Verification)
+1. Tạo order 3000 VND với code ORD-9999
+2. User chuyển ĐÚNG 3000 VND với description "R4B ORD-9999"
+3. Wait 60s
+4. **Expected**: Order tự động verify, KHÔNG xuất hiện trong Verify Payments tab
+5. **Check Dashboard tab**: Order hiển thị trong "Cleaned Data (Matched Orders)"
+
+---
+
+## UI/UX Mockup
+
+### Verification Tab Layout
+
+```
+┌──────────────────────────────────────────────┐
+│ 🔍 Search: [_________________] [Filter ▼]    │
+├──────────────────────────────────────────────┤
+│ Order ID   │ Amount  │ Status        │ Action│
+├────────────┼─────────┼───────────────┼───────┤
+│ ORD-1234   │ 2500    │ ⚠️ Partial   │ [View]│
+│ ORD-5678   │ 1000    │ ❌ No Match  │ [View]│
+│ ORD-9012   │ 5000    │ 🕐 Pending   │ [View]│
+└──────────────────────────────────────────────┘
+```
+
+**Status Badge Colors:**
+- 🕐 **Pending**: Gray (no transaction yet)
+- ⚠️ **Partial Match**: Yellow/Amber (has code, wrong amount)
+- ✅ **Exact Match**: Green (shouldn't appear here, auto-verified)
+- ❌ **No Match**: Red (no code found in transactions)
+
+---
+
+## Security Considerations
+
+> [!WARNING]
+> **Admin Only Feature**
+> 
+> - All endpoints require JWT + Admin role
+> - Manual verification actions được log đầy đủ vào SystemLog
+> - Include admin username và reason trong log entry
+
+**Audit Log Format:**
+```javascript
+{
+  type: 'MANUAL_VERIFY',
+  message: 'Admin manually verified Order ORD-1234',
+  details: {
+    orderId: 'ORD-1234',
+    adminUser: 'mquyendeptrai',
+    note: 'User chuyển thiếu, confirmed via chat',
+    expectedAmount: 2500,
+    receivedAmount: 2000,
+    transactionId: 'xxx'
+  }
+}
+```
+
+---
+
+## File Summary
+
+| File | Type | Purpose |
+|------|------|---------|
+| [server/routes/orders.js](file:///c:/Users/Adonis/Downloads/App/server/routes/orders.js) | NEW | API endpoints cho pending orders & manual verify |
+| [src/components/admin/TPBankMonitor.tsx](file:///c:/Users/Adonis/Downloads/App/src/components/admin/TPBankMonitor.tsx) | MODIFY | Thêm verification tab |
+| `src/components/admin/PaymentVerificationView.tsx` | NEW | Main verification interface |
+| `src/components/admin/ComparisonModal.tsx` | NEW | Modal so sánh order vs transaction |
+
+---
+
+## Next Steps After Approval
+
+1. ✅ Implement backend API endpoints
+2. ✅ Create PaymentVerificationView component
+3. ✅ Create ComparisonModal component
+4. ✅ Integrate into TPBankMonitor
+5. ✅ Manual testing với tất cả test cases
+6. ✅ Rebuild Docker
+7. ✅ Create walkthrough documentation

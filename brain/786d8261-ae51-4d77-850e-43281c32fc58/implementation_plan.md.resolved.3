@@ -1,0 +1,49 @@
+# Product API Implementation Plan
+
+The goal is to move product management from local state (`PRODUCTS` array in [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)) to a persistent MongoDB database served by the Express backend.
+
+## User Review Required
+
+> [!NOTE]
+> This change requires a running MongoDB instance (already provided via `docker-compose`).
+
+## Proposed Changes
+
+### Backend (Server)
+#### [NEW] [models/Product.js](file:///c:/Users/Adonis/Downloads/App/server/models/Product.js)
+- Define Mongoose schema for [Product](file:///c:/Users/Adonis/Downloads/App/src/pages/Admin/AddProduct.tsx#7-316):
+    - `title`: String, required
+    - `type`: String (Enum: SCRIPT, TOOL, COURSE, KEY)
+    - `price`: Number
+    - `originalPrice`: Number
+    - `description`: String
+    - `image`: String
+    - `features`: [String]
+    - `stock`: Number
+    - `unlimitedStock`: Boolean
+    - `platformId`: String
+    - `rating`: Number (default 5)
+
+#### [MODIFY] [server.js](file:///c:/Users/Adonis/Downloads/App/server/server.js)
+- Connect to MongoDB (if not already robustly handled).
+- Implement routes:
+    - `GET /api/products`: Fetch all products.
+    - `POST /api/products`: Create a new product.
+    - `PUT /api/products/:id`: Update a product.
+    - `DELETE /api/products/:id`: Delete a product.
+
+### Frontend (Client)
+#### [MODIFY] [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+- Remove `PRODUCTS` constant.
+- Add `useEffect` to fetch products from `/api/products` on mount.
+- Update `handleSaveProduct` to call `POST` or `PUT`.
+- Update `handleDeleteProduct` to call `DELETE`.
+
+#### [MODIFY] [Dashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Dashboard.tsx)
+- Ensure the user-facing shop also fetches from `/api/products`.
+
+## Verification Plan
+
+### Manual Verification
+- Use `curl` or browser to hit `/api/products` and verify JSON response.
+- Create a product in Admin Dashboard, verify it persists after refresh.

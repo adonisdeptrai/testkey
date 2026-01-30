@@ -1,0 +1,44 @@
+# Desktop Performance Optimization Plan
+
+## Goal Description
+Address user-reported lag on the desktop version. The lag is primarily caused by:
+1.  **Expensive Animations**: Large `blur` filters and gradients animating indefinitely in [AnimatedBackground](file:///c:/Users/Adonis/Downloads/landing-page---v3/Shop.tsx#29-71).
+2.  **Excessive Re-renders**: The [Hero](file:///c:/Users/Adonis/Downloads/landing-page---v3/Landing.tsx#182-496) section's simulation loop (updating every 1.2s) triggers re-renders of the entire Hero component.
+3.  **Dead Network Requests**: A non-existent `index.css` is being requested.
+
+## User Review Required
+> [!TIP]
+> This optimization reorganizes the code to be more efficient. No visual features will be removed, but the code structure will change slightly to isolate heavy components.
+
+## Proposed Changes
+
+### Components Layer
+#### [NEW] [components/AnimatedBackground.tsx](file:///c:/Users/Adonis/Downloads/landing-page---v3/components/AnimatedBackground.tsx)
+- Extract the background logic from [Landing.tsx](file:///c:/Users/Adonis/Downloads/landing-page---v3/Landing.tsx).
+- **Optimization**: Add `will-change: transform` to hint the browser to promote layers to GPU.
+- **Optimization**: Use `React.memo` to prevent re-renders when parent state changes.
+
+#### [NEW] [components/HeroTerminal.tsx](file:///c:/Users/Adonis/Downloads/landing-page---v3/components/HeroTerminal.tsx)
+- Extract the "Terminal/Dashboard" mockup from [Landing.tsx](file:///c:/Users/Adonis/Downloads/landing-page---v3/Landing.tsx).
+- Move the `setInterval` simulation logic *inside* this component.
+- **Benefit**: State updates in the terminal will only re-render the terminal, not the Main Title, Buttons, or Background.
+
+### Pages layer
+#### [MODIFY] [Landing.tsx](file:///c:/Users/Adonis/Downloads/landing-page---v3/Landing.tsx)
+- Replace inline background with `<AnimatedBackground />`.
+- Replace inline terminal with `<HeroTerminal />`.
+- Remove the simulation state from the main component.
+
+#### [MODIFY] [Shop.tsx](file:///c:/Users/Adonis/Downloads/landing-page---v3/Shop.tsx)
+- Replace inline background with `<AnimatedBackground />`.
+
+### Root
+#### [MODIFY] [index.html](file:///c:/Users/Adonis/Downloads/landing-page---v3/index.html)
+- Remove the dead link `<link rel="stylesheet" href="/index.css">`.
+
+## Verification Plan
+
+### Manual Verification
+- **Performance Check**: Open Chrome DevTools > Performance and record a run. Verify "Layout Thrashing" is reduced.
+- **Visual Check**: Ensure animations still look correct (no clipping or missing layers).
+- **Functionality**: Verify the Terminal logs still update every 1.2s.

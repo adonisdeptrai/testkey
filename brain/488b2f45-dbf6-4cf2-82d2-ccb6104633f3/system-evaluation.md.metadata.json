@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Báo cáo đánh giá toàn diện hệ thống MMO Shop/Platform với chi tiết về architecture, features hiện tại, chức năng thiếu, và đề xuất cải tiến. Phân tích về Backend (models, routes, workers, integrations), Frontend (pages, components, contexts), Security, UX/UI, Performance, và Best practices.",
+  "updatedAt": "2026-01-25T11:22:26.359797100Z"
+}

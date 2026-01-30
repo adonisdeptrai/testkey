@@ -1,0 +1,7 @@
+# Task: Remove Toast Border
+
+- [x] Identify Toast Component ([src/components/common/Toast.tsx](file:///c:/Users/Adonis/Downloads/App/src/components/common/Toast.tsx)) <!-- id: 0 -->
+- [x] Remove outer border styles <!-- id: 1 -->
+    - [x] Remove `border` class from container <!-- id: 2 -->
+    - [x] Remove `border-xxx` color classes from `styles` object <!-- id: 3 -->
+- [x] Verify visual changes <!-- id: 4 -->

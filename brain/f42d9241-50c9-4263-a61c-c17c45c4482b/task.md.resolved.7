@@ -1,0 +1,11 @@
+# Task: Real-time Binance Fee & Auto-Currency
+
+- [x] Backend Implementation <!-- id: 0 -->
+    - [x] Update [server/utils/binance.js](file:///c:/Users/Adonis/Downloads/App/server/utils/binance.js): Add `getNetworkFee` method using `/sapi/v1/capital/config/getall` <!-- id: 1 -->
+    - [x] Update [server/routes/settings.js](file:///c:/Users/Adonis/Downloads/App/server/routes/settings.js): Add `POST /api/settings/binance-fee` endpoint <!-- id: 2 -->
+- [x] Frontend Implementation <!-- id: 3 -->
+    - [x] Update [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx): Logic for auto-setting Currency based on Network <!-- id: 4 -->
+    - [x] Update [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx): Integrate `binance-fee` API call on Network/Currency change <!-- id: 5 -->
+- [ ] Verification <!-- id: 6 -->
+    - [ ] Verify auto-currency logic <!-- id: 7 -->
+    - [ ] Verify fee fetching from Binance <!-- id: 8 -->

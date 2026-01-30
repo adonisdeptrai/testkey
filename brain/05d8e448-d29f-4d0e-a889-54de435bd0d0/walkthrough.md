@@ -1,0 +1,311 @@
+# Supabase Auth Migration - Phase 1 Complete
+
+Migration từ custom JWT authentication sang Supabase Auth built-in system.
+
+---
+
+## ✅ Phase 1: Frontend Migration (COMPLETE)
+
+### What Changed
+
+#### [AuthContext.tsx](file:///c:/Users/Adonis/Downloads/App/src/contexts/AuthContext.tsx)
+
+**Before:** Custom JWT với localStorage
+```typescript
+// Old approach
+const login = async (username, password) => {
+  const res = await fetch('/api/auth/login', { ... });
+  localStorage.setItem('token', data.token);
+};
+```
+
+**After:** Supabase Auth với auto session management
+```typescript
+// New approach
+const login = async (email, password) => {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email, password
+  });
+  // Session auto-synced via onAuthStateChange
+};
+```
+
+**Key improvements:**
+- ✅ Auto session sync với `onAuthStateChange` listener
+- ✅ Support cả email/password VÀ Google OAuth
+- ✅ Secure session management bởi Supabase
+- ✅ Auto refresh tokens
+- ✅ Sync user data từ `public.users` table
+
+---
+
+#### [Auth.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Auth.tsx)
+
+**Changed:**
+- Login form giờ yêu cầu **email** thay vì username (Supabase requirement)
+- Register form thêm success message: "Check your email to verify"
+- Input validation updated
+
+**Visual changes:**
+```diff
+- <label>Username</label>
+- <input type="text" value={username} />
+
++ <label>{mode === 'login' ? 'Email' : 'Username'}</label>
++ <input 
++   type={mode === 'login' ? 'email' : 'text'}
++   value={mode === 'login' ? email : username}
++ />
+```
+
+---
+
+#### [AuthCallback.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AuthCallback.tsx)
+
+**Simplified drastically:**
+
+**Before:** 90 lines - Backend sync + JWT handling
+**After:** 50 lines - Pure Supabase session sync
+
+**New flow:**
+1. Supabase auto-detects session from URL
+2. Check if user exists in `public.users`
+3. If not (first-time OAuth), create user record
+4. Redirect to `/shop`
+
+**NO MORE:**
+- ❌ Backend `/api/auth/google/callback` call
+- ❌ Manual JWT token storage
+- ❌ Complex error handling
+
+---
+
+#### [supabase.ts](file:///c:/Users/Adonis/Downloads/App/src/config/supabase.ts)
+
+**Fixed:** Prevent app crash khi thiếu credentials
+
+```typescript
+// Fallback to dummy client instead of crashing
+export const supabase = (supabaseUrl && supabaseAnonKey) 
+    ? createClient(supabaseUrl, supabaseAnonKey, { ... })
+    : createClient('https://placeholder.supabase.co', 'placeholder-key', { ... });
+```
+
+---
+
+## 🔄 How It Works Now
+
+### Registration Flow
+
+```
+User fills form (username, email, password)
+  ↓
+supabase.auth.signUp()
+  ↓
+Supabase sends verification email automatically
+  ↓
+User record created in public.users table
+  ↓
+User verifies email via link
+  ↓
+Can login normally
+```
+
+### Login Flow (Email/Password)
+
+```
+User enters email + password
+  ↓
+supabase.auth.signInWithPassword()
+  ↓
+onAuthStateChange fires
+  ↓
+syncUserData() fetches từ public.users
+  ↓
+React state + localStorage updated
+  ↓
+Redirect to /shop
+```
+
+### Google OAuth Flow
+
+```
+User clicks "Sign in with Google"
+  ↓
+Supabase redirects to Google consent
+  ↓
+Google authenticates user
+  ↓
+Redirect to /auth/callback
+  ↓
+AuthCallback.tsx:
+  - Check user exists in public.users
+  - If not, create user record
+  - Mark as verified (OAuth users auto-verified)
+  ↓
+onAuthStateChange fires → syncUserData()
+  ↓
+Redirect to /shop
+```
+
+---
+
+## 🧪 Testing Status
+
+### ✅ Build Status
+- Frontend build: **SUCCESS**
+- No TypeScript errors
+- No lint errors
+
+### ⏳ Manual Testing Required
+
+User needs to test:
+
+1. **Registration:**
+   ```
+   - Fill form với email, username, password
+   - Click Register
+   - Check email for verification link
+   - Click verification link
+   - Login với verified account
+   ```
+
+2. **Login:**
+   ```
+   - Enter email + password
+   - Should login successfully
+   - Should persist across page refreshes
+   ```
+
+3. **Google OAuth:**
+   ```
+   - Click "Sign in with Google"
+   - Complete Google authentication
+   - Should auto-create user if first time
+   - Should login successfully
+   ```
+
+4. **Session Persistence:**
+   ```
+   - Login
+   - Refresh page → should stay logged in
+   - Close browser, reopen → should stay logged in
+   ```
+
+5. **Logout:**
+   ```
+   - Click logout
+   - Session cleared
+   - Cannot access protected routes
+   ```
+
+---
+
+## ⚠️ Known Limitations
+
+### Backend Still Using Custom JWT
+
+Backend routes vẫn đang expect JWT tokens:
+- `/api/auth/login` - Still generates JWT
+- `/api/auth/register` - Still generates JWT  
+- Auth middleware - Still verifies JWT
+
+**Impact:** 
+- Email/password login **SẼ FAIL** vì frontend gọi Supabase nhưng backend expect JWT
+- Cần migrate backend trong Phase 3
+
+**Workaround for now:**
+- Google OAuth works (bypass backend login routes)
+- Can test OAuth flow ngay
+
+---
+
+## 🚀 Next Steps
+
+### Phase 2: Backend Migration (TODO)
+
+Priority updates needed:
+
+1. **Remove JWT logic:**
+   - Update `/api/auth/login` → verify Supabase session
+   - Update `/api/auth/register` → verify Supabase session
+   - Delete `/server/routes/oauth.js` (no longer needed)
+
+2. **Update auth middleware:**
+   ```javascript
+   // Old
+   const token = req.headers.authorization;
+   const decoded = jwt.verify(token, JWT_SECRET);
+   
+   // New
+   const token = req.headers.authorization;
+   const { data: { user } } = await supabase.auth.getUser(token);
+   ```
+
+3. **Environment cleanup:**
+   - Remove `JWT_SECRET` from `.env`
+   - Keep only Supabase keys
+
+### Phase 3: Database Migration
+
+1. Enable Supabase Auth in Dashboard
+2. Migrate existing users (if any)
+3. Setup RLS policies
+
+### Phase 4: Testing & Polish
+
+1. End-to-end testing all flows
+2. Remove dead code (old JWT utils)
+3. Update documentation
+
+---
+
+## 📝 Files Modified
+
+### Frontend
+- ✅ `src/contexts/AuthContext.tsx` - Complete refactor
+- ✅ `src/pages/Auth.tsx` - Email login support
+- ✅ `src/pages/AuthCallback.tsx` - Simplified
+- ✅ `src/config/supabase.ts` - Crash prevention
+- ✅ `src/types.ts` - No changes needed
+
+### Backend
+- ⏳ `server/routes/auth.js` - Needs migration
+- ⏳ `server/middleware/auth.js` - Needs migration
+- ⏳ `server/routes/oauth.js` - Can delete
+
+---
+
+## 💡 Key Takeaways
+
+**Why This Is Better:**
+
+1. **Less code** - Supabase handles 90% của auth logic
+2. **More secure** - Battle-tested authentication system
+3. **Auto features** - Email verification, password reset, session management
+4. **Unified flow** - Email/password và OAuth treated equally
+5. **Better UX** - Persistent sessions, auto-refresh tokens
+
+**Trade-offs:**
+
+- Breaking change: Existing users with JWT tokens need to re-login
+- Dependency on Supabase (vendor lock-in)
+- Learning curve cho Supabase-specific patterns
+
+---
+
+## 🛠️ Environment Variables Checklist
+
+Make sure `.env.local` has:
+```bash
+VITE_SUPABASE_URL=https://okalizcwyzpwaffrkbey.supabase.co
+VITE_SUPABASE_ANON_KEY=<your-anon-key>
+VITE_API_URL=http://localhost:5000
+```
+
+Backend `.env`:
+```bash
+SUPABASE_URL=https://okalizcwyzpwaffrkbey.supabase.co
+SUPABASE_SERVICE_KEY=<service-role-key>
+SUPABASE_ANON_KEY=<anon-key>
+```

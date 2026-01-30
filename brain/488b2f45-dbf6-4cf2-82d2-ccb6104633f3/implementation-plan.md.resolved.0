@@ -1,0 +1,210 @@
+# Password Reset Flow Implementation Plan
+
+## Goal
+Implement complete "Forgot Password / Reset Password" functionality với secure token-based email verification flow.
+
+## User Review Required
+
+> [!WARNING]
+> **Token Security**: Reset tokens sẽ expire sau 30 phút. Nếu user không click link trong thời gian này, họ phải request lại.
+
+> [!IMPORTANT]  
+> **Email không tới**: Nếu EMAIL_USER/EMAIL_PASS không được config, reset link sẽ print ra backend console (development mode).
+
+## Proposed Changes
+
+### Backend Changes
+
+#### 1. [MODIFY] [User.js](file:///c:/Users/Adonis/Downloads/App/server/models/User.js)
+
+**Changes:**
+- Add `resetPasswordToken: String` field
+- Add `resetPasswordExpires: Date` field
+
+**Rationale:** Store secure token và expiry time để validate reset requests.
+
+---
+
+#### 2. [MODIFY] [auth.js](file:///c:/Users/Adonis/Downloads/App/server/routes/auth.js)
+
+**Add Endpoints:**
+
+**a) POST /api/auth/forgot-password**
+```javascript
+// Input: { email }
+// Actions:
+//   1. Find user by email
+//   2. Generate crypto.randomBytes(32) token
+//   3. Hash token với crypto.createHash('sha256')
+//   4. Save hashed token + expires (30 min) to user
+//   5. Send email with reset link: CLIENT_URL/reset-password?token={rawToken}
+//   6. Return generic success (don't reveal if email exists - security)
+// Response: Always 200 với "If email exists, reset link sent"
+```
+
+**b) POST /api/auth/reset-password/:token**
+```javascript
+// Input: { password, confirmPassword } (body), :token (param)
+// Actions:
+//   1. Hash incoming token
+//   2. Find user by resetPasswordToken + check expires > now
+//   3. Validate passwords match
+//   4. Hash new password với bcrypt
+//   5. Update user password
+//   6. Clear resetPasswordToken và resetPasswordExpires
+//   7. Optional: Send confirmation email
+// Response: 200 với "Password reset successful"
+// Errors: 400 (token invalid/expired), 400 (passwords mismatch)
+```
+
+**Email Template (Forgot Password):**
+```html
+<h1>Password Reset Request</h1>
+<p>Click the link below to reset your password:</p>
+<a href="{resetUrl}">Reset Password</a>
+<p>This link expires in 30 minutes.</p>
+<p>If you didn't request this, ignore this email.</p>
+```
+
+---
+
+### Frontend Changes
+
+#### 3. [MODIFY] [Auth.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Auth.tsx)
+
+**Changes:**
+- Remove mock logic trong [handleSubmit](file:///c:/Users/Adonis/Downloads/App/src/pages/Auth.tsx#75-118) cho mode === 'forgot' (lines 80-89)
+- Replace với real API call:
+  ```typescript
+  const res = await fetch(`${API_URL}/api/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  });
+  ```
+- Hiển thị `resetSent` screen sau success (đã có UI sẵn lines 356-377)
+
+**No other UI changes needed** - forgot mode UI đã perfect!
+
+---
+
+#### 4. [NEW] [ResetPassword.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/ResetPassword.tsx)
+
+**Purpose:** Page để user nhập new password sau khi click email link.
+
+**Functionality:**
+- Read token từ URL query: `?token=abc123`
+- Input fields: New Password, Confirm Password
+- Password validation (min 6 characters, match)
+- Show/hide password toggles
+- Submit to `POST /api/auth/reset-password/:token`
+- Success → Redirect to /auth (login)
+- Error → Display error message (invalid/expired token)
+
+**UI Style:** Giống VerifyEmail.tsx (Liquid Glass theme, AnimatedBackground)
+
+---
+
+#### 5. [MODIFY] [App.tsx](file:///c:/Users/Adonis/Downloads/App/src/App.tsx)
+
+**Changes:**
+- Add route: `/reset-password` → `<ResetPassword />`
+- No auth required (public route)
+
+---
+
+### Environment Variables
+
+No new env vars needed - sử dụng existing:
+- `EMAIL_USER`, `EMAIL_PASS` (backend SMTP)
+- `CLIENT_URL` (reset link domain)
+- `VITE_API_URL` (frontend API calls)
+
+---
+
+## Verification Plan
+
+### Automated Tests
+
+**NO EXISTING TESTS** - Project không có test suite hiện tại.
+
+### Manual Testing
+
+**Test Script:** `test-password-reset.ps1`
+
+**Steps:**
+1. **Register a test user** (hoặc use existing user with known email)
+   ```powershell
+   # POST /api/auth/register
+   # Email: test@example.com, Password: oldpassword123
+   ```
+
+2. **Request password reset**
+   ```powershell
+   # POST /api/auth/forgot-password
+   # Body: { "email": "test@example.com" }
+   # Expected: 200 OK, "reset link sent" message
+   ```
+
+3. **Check backend console** for reset link (if no SMTP):
+   ```
+   http://localhost:8080/reset-password?token={32-char-token}
+   ```
+
+4. **Visit reset link** trong browser hoặc API test:
+   ```powershell
+   # On page: Enter new password
+   # POST /api/auth/reset-password/{token}
+   # Body: { "password": "newpassword123", "confirmPassword": "newpassword123" }
+   # Expected: 200 OK
+   ```
+
+5. **Login với new password**
+   ```powershell
+   # POST /api/auth/login
+   # Body: { "username": "testuser", "password": "newpassword123" }
+   # Expected: 200 OK với JWT token
+   ```
+
+6. **Test token expiration** (30 minutes):
+   ```powershell
+   # Wait 31 minutes OR manually update DB:
+   # db.users.updateOne(
+   #   { email: "test@example.com" },
+   #   { $set: { resetPasswordExpires: new Date(Date.now() - 1000) } }
+   # )
+   # Then try reset → Expected: 400 "Token expired"
+   ```
+
+7. **Test invalid token**:
+   ```powershell
+   # POST /api/auth/reset-password/invalid-token-12345
+   # Expected: 400 "Invalid or expired token"
+   ```
+
+**Full automated script:** `test-password-reset.ps1` sẽ test cases 1-5.
+
+---
+
+## Security Considerations
+
+1. **Token Hashing**: Token được hash trước khi save vào DB (prevent DB leak attack)
+2. **Email Enumeration Prevention**: Forgot-password always returns success (không reveal email exists hay không)
+3. **Token Expiration**: 30 minutes expiry (balance between UX và security)
+4. **HTTPS Required**: Production MUST use HTTPS (prevent token interception)
+5. **Rate Limiting**: Recommend add rate limit cho `/forgot-password` (5 requests/15 min per IP)
+
+---
+
+## File Summary
+
+**Modified:** 3 files
+- [server/models/User.js](file:///c:/Users/Adonis/Downloads/App/server/models/User.js) - Add reset token fields
+- [server/routes/auth.js](file:///c:/Users/Adonis/Downloads/App/server/routes/auth.js) - Add 2 endpoints + email template
+- [src/pages/Auth.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Auth.tsx) - Connect forgot mode to real API
+
+**Created:** 2 files
+- `src/pages/ResetPassword.tsx` - New password reset page
+- `test-password-reset.ps1` - Testing script
+
+**Total Code Changes:** ~200 lines

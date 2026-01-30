@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Migration plan documenting 35+ hardcoded URL instances that need replacement with centralized API config. Lists all affected files and provides recommendations for fix approach.",
+  "updatedAt": "2026-01-25T13:28:11.334817700Z"
+}

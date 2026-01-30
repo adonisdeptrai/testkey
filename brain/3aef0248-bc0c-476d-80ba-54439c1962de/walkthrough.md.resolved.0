@@ -1,0 +1,45 @@
+# Docker Integration Walkthrough
+
+I have successfully successfully integrated Docker into your Vite + React application.
+
+## Changes Created
+
+### 1. Dockerfile
+A multi-stage build process:
+- **Build Stage**: Uses `node:22-alpine` to install dependencies and build the application.
+- **Production Stage**: Uses `nginx:alpine` to serve the static files from the build stage.
+
+### 2. Nginx Configuration ([nginx.conf](file:///c:/Users/Adonis/Downloads/landing-page---v3/nginx.conf))
+- Configured to serve the built static files.
+- Includes a fallback to [index.html](file:///c:/Users/Adonis/Downloads/landing-page---v3/index.html) for client-side routing (SPA support).
+- Enabled Gzip compression for better performance.
+
+### 3. Docker Compose ([docker-compose.yml](file:///c:/Users/Adonis/Downloads/landing-page---v3/docker-compose.yml))
+- Defines a service named `app`.
+- Maps port `8080` on your host machine to port `80` in the container.
+- Sets `NODE_ENV=production`.
+
+### 4. .dockerignore
+- Excludes unnecessary files like `node_modules`, `.git`, and local log files from the build context to keep the image small and the build fast.
+
+## How to Run
+
+You can now build and run your application using Docker Compose:
+
+1.  **Build the image:**
+    ```bash
+    docker compose build
+    ```
+
+2.  **Start the container:**
+    ```bash
+    docker compose up -d
+    ```
+
+3.  **Access the application:**
+    Open your browser and navigate to [http://localhost:8080](http://localhost:8080).
+
+4.  **Stop the container:**
+    ```bash
+    docker compose down
+    ```

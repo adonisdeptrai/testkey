@@ -1,0 +1,390 @@
+# Analytics & Reporting System - Enhancement Plan
+
+## Goal
+
+Enhance existing analytics system với:
+1. **Time-series data** (revenue per day/week/month, user growth over time)
+2. **Product performance metrics** (best sellers, revenue by product type)
+3. **User analytics** (active users, retention, balance usage)
+4. **Ticket analytics** (resolution time, ticket volume by category)
+5. **Export capabilities** (CSV, PDF reports)
+6. **Date range filtering** (custom date ranges, presets: Today, Week, Month, Year)
+
+## Current Implementation Analysis
+
+**Existing:** `/api/stats` với basic metrics (totalRevenue, activeOrders, activeUsers)
+
+**Issues:**
+- No time-series data (can't see trends)
+- No product-level breakdown
+- No date filtering
+- No export functionality
+- Limited user insights
+
+## Proposed Changes
+
+### Backend Enhancements
+
+#### 1. [MODIFY] [stats.js](file:///c:/Users/Adonis/Downloads/App/server/routes/stats.js)
+
+**Add New Endpoints:**
+
+**a) GET /api/stats/revenue-over-time?startDate&endDate&groupBy=day**
+```javascript
+// Returns revenue aggregated by day/week/month
+// Response: [{ date: '2026-01-20', revenue: 1500, orders: 12 }, ...]
+```
+
+**b) GET /api/stats/user-growth?startDate&endDate**
+```javascript
+// Returns new users per day/week/month
+// Response: [{ date: '2026-01-20', newUsers: 5, totalUsers: 120 }, ...]
+```
+
+**c) GET /api/stats/product-performance?startDate&endDate**
+```javascript
+// Returns sales by product, sorted by revenue
+// Response: [{ product: 'GPM Login', sales: 50, revenue: 2500 }, ...]
+```
+
+**d) GET /api/stats/ticket-analytics?startDate&endDate**
+```javascript
+// Returns ticket metrics
+// Response: {
+//   totalTickets: 45,
+//   openTickets: 12,
+//   avgResolutionTime: 4.5, // hours
+//   byCategory: [{ category: 'Technical Issue', count: 20 }, ...],
+//   byPriority: [{ priority: 'High', count: 8 }, ...]
+// }
+```
+
+**e) GET /api/stats/balance-metrics?startDate&endDate**
+```javascript
+// Returns balance system metrics
+// Response: {
+//   totalTopups: 1000,
+//   totalSpent: 800,
+//   activeBalanceUsers: 45,
+//   avgBalance: 120
+// }
+```
+
+**f) GET /api/stats/export?type=revenue&format=csv&startDate&endDate**
+```javascript
+// Export data as CSV or PDF
+// Returns file download
+```
+
+---
+
+#### 2. [NEW] Helper Functions
+
+**Date Range Presets:**
+```javascript
+function getDateRange(preset) {
+    const now = new Date();
+    switch(preset) {
+        case 'today':
+            return { start: startOfDay(now), end: now };
+        case 'week':
+            return { start: subDays(now, 7), end: now };
+        case 'month':
+            return { start: subDays(now, 30), end: now };
+        case 'year':
+            return { start: subDays(now, 365), end: now };
+    }
+}
+```
+
+**Aggregation Helpers:**
+```javascript
+async function aggregateRevenue(startDate, endDate, groupBy = 'day') {
+    const orders = await Order.find({
+        createdAt: { $gte: startDate, $lte: endDate },
+        status: 'completed'
+    });
+    
+    // Group by day/week/month
+    const grouped = orders.reduce((acc, order) => {
+        const key = formatDate(order.createdAt, groupBy);
+        if (!acc[key]) acc[key] = { revenue: 0, count: 0 };
+        acc[key].revenue += order.amount;
+        acc[key].count += 1;
+        return acc;
+    }, {});
+    
+    return Object.entries(grouped).map(([date, data]) => ({
+        date,
+        revenue: data.revenue,
+        orders: data.count
+    }));
+}
+```
+
+---
+
+### Frontend Enhancements
+
+#### 3. [MODIFY] [AdminDashboard.tsx - AdminOverview](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+
+**Add Dashboard Components:**
+
+**A. Date Range Picker:**
+```typescript
+const DateRangePicker = ({ onRangeChange }) => {
+    const [preset, setPreset] = useState('month');
+    const [customStart, setCustomStart] = useState('');
+    const [customEnd, setCustomEnd] = useState('');
+    
+    // Presets: Today, Week, Month, Year, Custom
+    // Update parent on change
+};
+```
+
+**B. Revenue Chart (Line Chart):**
+```typescript
+const RevenueChart = ({ data }) => {
+    // Use recharts hoặc Chart.js
+    // X-axis: dates
+    // Y-axis: revenue
+    // Show trend line
+};
+```
+
+**C. User Growth Chart:**
+```typescript
+const UserGrowthChart = ({ data }) => {
+    // Line chart: new users over time
+};
+```
+
+**D. Product Performance Table:**
+```typescript
+const ProductPerformanceTable = ({ products }) => {
+    // Table: Product | Sales | Revenue | Avg Price
+    // Sortable columns
+};
+```
+
+**E. Export Button:**
+```typescript
+const ExportButton = ({ type, dateRange }) => {
+    const handleExport = async (format) => {
+        const url = `/api/stats/export?type=${type}&format=${format}&startDate=${dateRange.start}&endDate=${dateRange.end}`;
+        window.open(url);
+    };
+    
+    // Dropdown: CSV, PDF
+};
+```
+
+---
+
+#### 4. [NEW] Analytics Dashboard Layout
+
+**Replace current AdminOverview với structured layout:**
+
+```tsx
+<div className="analytics-dashboard">
+    {/* Header với Date Range Picker */}
+    <div className="header">
+        <h1>Analytics Dashboard</h1>
+        <DateRangePicker onChange={setDateRange} />
+        <ExportButton dateRange={dateRange} />
+    </div>
+    
+    {/* KPI Cards Row */}
+    <div className="kpi-row">
+        <KPICard title="Total Revenue" value={stats.revenue} change="+12%" />
+        <KPICard title="Orders" value={stats.orders} change="+8%" />
+        <KPICard title="New Users" value={stats.newUsers} change="+5%" />
+        <KPICard title="Avg Order Value" value={stats.avgOrderValue} />
+    </div>
+    
+    {/* Charts Row */}
+    <div className="charts-row">
+        <RevenueChart data={revenueData} />
+        <UserGrowthChart data={userGrowthData} />
+    </div>
+    
+    {/* Tables Row */}
+    <div className="tables-row">
+        <ProductPerformanceTable products={productStats} />
+        <TicketAnalyticsTable tickets={ticketStats} />
+    </div>
+</div>
+```
+
+---
+
+### Export Functionality
+
+#### 5. CSV Export Implementation
+
+```javascript
+// Backend
+router.get('/export', [auth, adminAuth], async (req, res) => {
+    const { type, format, startDate, endDate } = req.query;
+    
+    let data;
+    switch(type) {
+        case 'revenue':
+            data = await aggregateRevenue(startDate, endDate);
+            break;
+        case 'users':
+            data = await User.find({ createdAt: { $gte: startDate, $lte: endDate }});
+            break;
+        // ... other types
+    }
+    
+    if (format === 'csv') {
+        const csv = convertToCSV(data);
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="${type}-${Date.now()}.csv"`);
+        res.send(csv);
+    } else if (format === 'pdf') {
+        const pdf = await generatePDF(data);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.send(pdf);
+    }
+});
+
+function convertToCSV(data) {
+    const headers = Object.keys(data[0]).join(',');
+    const rows = data.map(row => Object.values(row).join(',')).join('\n');
+    return `${headers}\n${rows}`;
+}
+```
+
+---
+
+## Verification Plan
+
+### Manual Testing
+
+**Test Script:** `test-analytics.ps1`
+
+**Scenario 1: Time-Series Revenue**
+```powershell
+GET /api/stats/revenue-over-time?startDate=2026-01-01&endDate=2026-01-31&groupBy=day
+
+# Expected: Array of daily revenue data với dates và amounts
+```
+
+**Scenario 2: Date Range Filtering**
+```powershell
+# Test presets
+GET /api/stats/revenue-over-time?preset=week
+GET /api/stats/revenue-over-time?preset=month
+
+# Test custom range
+GET /api/stats/revenue-over-time?startDate=2025-12-01&endDate=2026-01-01
+```
+
+**Scenario 3: Product Performance**
+```powershell
+GET /api/stats/product-performance?startDate=2026-01-01&endDate=2026-01-31
+
+# Expected: List of products sorted by revenue
+```
+
+**Scenario 4: Export CSV**
+```powershell
+GET /api/stats/export?type=revenue&format=csv&startDate=2026-01-01&endDate=2026-01-31
+
+# Expected: CSV file download
+```
+
+**Scenario 5: Dashboard Load**
+```powershell
+# Admin visits /admin → Overview tab
+# Date range selector visible
+# Charts render với data
+# Export button functional
+```
+
+---
+
+## Implementation Order
+
+1. **Backend Analytics Endpoints** (Day 1)
+   - Revenue over time
+   - User growth
+   - Product performance
+   - Ticket analytics
+   - Balance metrics
+
+2. **Date Range Utilities** (Day 1)
+   - Preset helpers
+   - Aggregation functions
+   - Date formatting
+
+3. **Export Functionality** (Day 2)
+   - CSV export
+   - PDF export (optional - can use libraries like pdfkit)
+
+4. **Frontend Dashboard Components** (Day 2-3)
+   - Date range picker
+   - KPI cards upgrade
+   - Charts (recharts integration)
+   - Performance tables
+
+5. **Testing & Polish** (Day 3)
+   - Manual testing
+   - UI polish
+   - Performance optimization
+
+---
+
+## Dependencies
+
+**New Libraries:**
+- **Frontend:** `recharts` hoặc `chart.js` (charts)
+- **Backend:** `date-fns` (date utilities), `pdfkit` (PDF export - optional)
+
+**Install:**
+```bash
+cd src
+npm install recharts date-fns
+
+cd ../server
+npm install date-fns
+# npm install pdfkit (if PDF needed)
+```
+
+---
+
+## File Summary
+
+**Modified:** 2 files
+- [server/routes/stats.js](file:///c:/Users/Adonis/Downloads/App/server/routes/stats.js) - Add 5 new endpoints + export
+- [src/pages/AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx) - Enhance AdminOverview với charts và filters
+
+**Created:** 0 files (enhancements to existing)
+
+**Total Code Changes:** ~400-500 lines
+
+---
+
+## Known Limitations
+
+1. **No Real-time Updates**: Dashboard needs manual refresh
+2. **Basic Charts**: Simple line/bar charts only (no advanced visualizations)
+3. **PDF Export Limited**: Basic PDF generation (complex layouts need more work)
+4. **No Predictive Analytics**: Historical data only, no forecasting
+
+---
+
+## Future Enhancements
+
+- Real-time dashboard updates (WebSocket)
+- Advanced visualizations (heatmaps, funnels)
+- Predictive analytics (ML-based forecasting)
+- Custom report builder
+- Scheduled reports (email daily/weekly reports)
+- Comparison views (YoY, MoM growth)
+
+---
+
+*Plan created: 2026-01-25*

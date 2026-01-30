@@ -1,0 +1,77 @@
+# Task: UI Fixes & Anti-Spam Implementation
+
+## Issue 1: Countdown Timer
+- [x] Add remainingTime state to Checkout
+- [x] Create setInterval with 1s update
+- [x] Display minutes:seconds format
+- [x] Clear interval on unmount
+
+## Issue 2: Anti-Spam for Orders
+- [x] Create rate limit Map in orders.js
+- [x] Add rateLimitOrders middleware
+- [x] Apply to POST /api/orders
+- [ ] Test with rapid order creation
+
+## Issue 3: Orders & Payments Tab
+- [ ] Verify AdminOrders component renders
+- [ ] Check /api/orders endpoint
+- [ ] Test tab navigation
+- [ ] Fix if issues found
+
+## Issue 4: Admin Dashboard Scroll
+- [x] Change h-full to min-h-full or remove
+- [ ] Test long content scrolling
+- [ ] Verify all tabs scroll properly
+
+## Testing & Deployment
+- [x] Test countdown updates per second
+- [x] Test anti-spam with multiple orders
+- [x] Test admin scroll on all tabs
+- [x] Fix sidebar scroll isolation
+- [x] Fix sidebar overflow-hidden issue
+- [x] Rebuild Docker containers
+- [x] Create walkthrough
+
+## Status
+✅ **ALL FIXES COMPLETE**
+- Countdown timer: 1s updates ✅
+- Anti-spam: 30s rate limit ✅
+- Admin scroll: min-h-screen fix ✅
+- Sidebar scroll: Removed overflow-hidden + flexbox fix ✅
+
+⏳ **Awaiting user verification** of sidebar scroll functionality
+
+## Issues Reported
+1. ❌ Countdown timer updates every 10s instead of every 1s
+2. ❌ No anti-spam mechanism for order creation
+3. ❌ Orders & Payments tab not working in admin dashboard
+4. ❌ Admin dashboard cannot scroll
+
+## Issue 1: Countdown Timer
+- [ ] Find countdown timer component (likely in Checkout)
+- [ ] Change interval from 10s to 1s
+- [ ] Verify timer updates smoothly
+
+## Issue 2: Anti-Spam for Orders
+- [ ] Add rate limiting on order creation endpoint
+- [ ] Track user order creation attempts
+- [ ] Return appropriate error when limit exceeded
+- [ ] Add cooldown period (e.g. 1 order per 30 seconds)
+
+## Issue 3: Orders & Payments Tab
+- [ ] Locate Orders & Payments tab in AdminDashboard
+- [ ] Check if component is defined
+- [ ] Implement missing functionality
+- [ ] Connect to orders API
+
+## Issue 4: Admin Dashboard Scroll
+- [ ] Find AdminDashboard component
+- [ ] Check CSS overflow properties
+- [ ] Fix container height/overflow issues
+- [ ] Test scrolling on long content
+
+## Testing
+- [ ] Test countdown timer shows seconds
+- [ ] Test order spam prevention
+- [ ] Test Orders & Payments displays data
+- [ ] Test admin dashboard scrolls properly

@@ -1,0 +1,48 @@
+# Docker Integration Plan
+
+## Goal Description
+Integrate Docker into the existing Vite + React application to enable containerized development and deployment. This includes creating a production-ready `Dockerfile` using a multi-stage build (Node.js for building, Nginx for serving) and a `docker-compose.yml` for easy orchestration.
+
+## User Review Required
+> [!NOTE]
+> Detailed Docker configuration provided below. No breaking changes to existing code.
+
+## Proposed Changes
+
+### Root Directory
+
+#### [NEW] [Dockerfile](file:///C:/Users/Adonis/Downloads/landing-page---v3/Dockerfile)
+- **Stage 1 (Build):**
+  - Base image: `node:22-alpine` (matching project's @types/node version)
+  - Install dependencies (`npm ci`)
+  - Copy source code
+  - Run build script (`npm run build`)
+- **Stage 2 (Production):**
+  - Base image: `nginx:alpine`
+  - Copy build output (`dist`) to Nginx html directory
+  - Copy custom `nginx.conf`
+
+#### [NEW] [docker-compose.yml](file:///C:/Users/Adonis/Downloads/landing-page---v3/docker-compose.yml)
+- Define `app` service
+- Map port 8080 (host) to 80 (container)
+- Mount volume for development (optional context, but focused on production build here)
+
+#### [NEW] [.dockerignore](file:///C:/Users/Adonis/Downloads/landing-page---v3/.dockerignore)
+- Exclude `node_modules`, `dist`, `.git`, local env files
+
+#### [NEW] [nginx.conf](file:///C:/Users/Adonis/Downloads/landing-page---v3/nginx.conf)
+- Serve static files with efficient caching
+- Enable Gzip compression
+- SPA fallback to [index.html](file:///c:/Users/Adonis/Downloads/landing-page---v3/index.html) (future-proofing)
+
+## Verification Plan
+
+### Automated Tests
+- Run `docker compose build` to verify the image builds successfully.
+- Run `docker compose up -d` to start the container.
+- `curl http://localhost:8080` to verify the server is responding.
+
+### Manual Verification
+- Access `http://localhost:8080` in the browser.
+- Verify the landing page loads correctly.
+- Verify assets (JS/CSS) load without 404s.

@@ -1,0 +1,68 @@
+# Coupon/Discount System Implementation
+
+## Mục tiêu
+Implement complete coupon/discount system để admin create promotional codes, users apply at checkout, với automatic discount calculation và usage tracking.
+
+## Checklist
+
+### Backend - Database Models
+- [ ] Create Coupon model (code, type, value, limits, expiry, applicableProducts)
+- [ ] Create CouponUsage model (track usage per user)
+- [ ] Update Order model - Add couponCode, discountAmount, finalAmount fields
+
+### Backend - API Routes
+- [ ] Create `/api/coupons` routes file
+  - POST /api/coupons/validate (validate coupon)
+  - POST /api/coupons (create coupon - admin)
+  - GET /api/coupons (list coupons - admin)
+  - PUT /api/coupons/:id (edit coupon - admin)
+  - DELETE /api/coupons/:id (disable coupon - admin)
+  - GET /api/coupons/:id/usage (usage stats - admin)
+- [ ] Register routes trong server index.js
+
+### Backend - Validation Logic
+- [ ] Add validateAndApplyCoupon() helper function
+- [ ] Implement expiry check (validFrom, validUntil)
+- [ ] Implement usage limit check (usageLimit, usedCount)
+- [ ] Implement per-user limit check (perUserLimit)
+- [ ] Implement minimum order value check
+- [ ] Implement applicable products check
+- [ ] Discount calculation (percentage vs fixed, maxDiscount)
+
+### Backend - Order Integration
+- [ ] Update POST /api/orders endpoint (coupon application)
+- [ ] Update POST /api/orders/checkout-with-balance endpoint
+- [ ] Create CouponUsage record on order creation
+- [ ] Increment Coupon.usedCount atomically
+
+### Frontend - Checkout Integration
+- [ ] Create CouponInput component
+- [ ] Add coupon input field to Checkout.tsx
+- [ ] Implement validate API call
+- [ ] Display discount amount
+- [ ] Update total price calculation
+- [ ] Error handling (invalid/expired coupons)
+
+### Frontend - Admin Management
+- [ ] Add "Coupons" tab to AdminDashboard.tsx
+- [ ] Create CouponManagement component
+- [ ] Create CreateCouponModal component
+- [ ] Coupon list table (code, type, value, used/limit, expiry)
+- [ ] Edit coupon functionality
+- [ ] Disable/Enable toggle
+- [ ] Usage statistics view
+
+### Testing
+- [ ] Create test-coupon-system.ps1 script
+- [ ] Test create coupon
+- [ ] Test apply valid coupon
+- [ ] Test expired coupon rejection
+- [ ] Test usage limit enforcement
+- [ ] Test per-user limit enforcement
+- [ ] Test minimum order value
+- [ ] Test percentage vs fixed discounts
+
+### Documentation
+- [ ] Update API documentation
+- [ ] Add admin guide for coupon creation
+- [ ] Add user guide for applying coupons

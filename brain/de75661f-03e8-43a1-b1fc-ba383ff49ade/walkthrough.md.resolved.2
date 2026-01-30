@@ -1,0 +1,24 @@
+# Walkthrough - Implement Order Flow Logic
+
+I have implemented the logic to ensure the Order Success page is only shown after a successful checkout, as requested.
+
+## Changes Made
+- **Route Protection**: [OrderSuccess.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/OrderSuccess.tsx) now checks for the presence of `location.state`. If missing (direct access), it automatically redirects the user to the `/shop` page.
+- **State Passing**: Modified [Checkout.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Checkout.tsx) to pass dynamic order details (Order ID, Date, Total, Payment Method) via navigation state upon successful "payment".
+- **Dynamic Data**: [OrderSuccess.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/OrderSuccess.tsx) no longer uses hardcoded mock data for the displayed values; it consumes the data passed from the checkout process.
+
+## Verification
+I verified the entire flow using an automated browser test:
+1.  **Direct Access Blocked**: Visiting `/order-success` directly redirected to `/shop`.
+2.  **Order Flow**:
+    -   Added item to cart.
+    -   Proceeded to Checkout.
+    -   Confirmed Payment.
+    -   Successfully landed on `/order-success`.
+3.  **Data Integrity**: Verified that the Order Success page displayed the correct total and payment method from the checkout session.
+
+### Screenshot (Order Success with Dynamic Data)
+![Order Success Page](/order_success_page_1769180236114.png)
+
+## Next Steps
+- The logic is compliant with the requirement: "khi chưa mua hàng, chọn hàng, thanh toán thành công mới hiện" (Only show when checking out successfully).

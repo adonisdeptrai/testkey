@@ -1,0 +1,39 @@
+# Walkthrough - Customers Section Refactor
+
+I have successfully refactored the "Customers" section in the Admin Dashboard to display real user data instead of placeholders.
+
+## Changes
+
+### [Backend](file:///c:/Users/Adonis/Downloads/App/server)
+
+#### [NEW] [routes/users.js](file:///c:/Users/Adonis/Downloads/App/server/routes/users.js)
+- Implemented `GET /api/users` endpoint.
+- Protected with `auth` and `adminAuth` middleware.
+- Returns list of users sorted by creation date, excluding sensitive password data.
+
+#### [MODIFY] [index.js](file:///c:/Users/Adonis/Downloads/App/server/index.js)
+- Registered `/api/users` route.
+
+### [Frontend](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+
+#### [MODIFY] [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+- Added `users` state.
+- Fetched user data in `useEffect` when component mounts.
+- Updated [AdminCustomers](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#311-338) component to receive `users` prop and render dynamic data.
+
+```typescript
+// AdminCustomers component usage
+{activeTab === 'customers' && <AdminCustomers users={users} />}
+```
+
+## Verification
+
+### Manual Verification Steps
+1.  **Restart Server**: The backend needs to be restarted (or automatically reloaded) to register the new route.
+2.  **Login as Admin**: Access the Admin Dashboard.
+3.  **Navigate to Customers**: Click the "Customers" tab in the sidebar.
+4.  **Verify Data**: You should now see the actual users registered in your database (e.g., matching the [User](file:///c:/Users/Adonis/Downloads/App/src/types.ts#60-69) model structure).
+
+### Notes
+- The initial placeholders (User_1, User_2...) have been removed.
+- If no users exist other than the admin, you might only see your own account or other registered test accounts.

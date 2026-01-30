@@ -1,0 +1,31 @@
+# Dockerization and Deployment Setup
+
+This plan addresses the user's request to "read file and push code to docker" by optimizing the Docker artifacts and providing a script to build and push images.
+
+## User Review Required
+
+> [!IMPORTANT]
+> I will add a `docker-manage.ps1` script to help you build and push images. You will need to be logged in to Docker Hub (`docker login`) for the push commands to work.
+
+## Proposed Changes
+
+### Root Directory
+#### [NEW] [docker-manage.ps1](file:///c:/Users/Adonis/Downloads/App/docker-manage.ps1)
+- A PowerShell script to:
+    - Build Docker images for `app` and `server`.
+    - Tag images with a specified version or `latest`.
+    - Push images to a registry (configurable).
+
+### Server Directory
+#### [NEW] [server/.dockerignore](file:///c:/Users/Adonis/Downloads/App/server/.dockerignore)
+- Add [.dockerignore](file:///c:/Users/Adonis/Downloads/App/.dockerignore) for the server to exclude `node_modules` and logs, improving build speed and context size.
+
+## Verification Plan
+
+### Automated Tests
+- I will run the `docker-manage.ps1` script with a "dry run" or "build only" flag to verify it constructs the commands correctly and builds the images locally.
+- Since I cannot authenticate to your Docker registry, I will verify the *build* step succeeds.
+
+### Manual Verification
+- User can run `.\docker-manage.ps1 -Action Build` to build locally.
+- User can run `.\docker-manage.ps1 -Action Push -Registry "your-username"` to push.

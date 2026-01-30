@@ -1,0 +1,45 @@
+# Product & Order System Walkthrough
+
+I have migrated the application to a dynamic, database-driven architecture using MongoDB.
+
+## 1. Product System
+- **Models**: Created [Product](file:///c:/Users/Adonis/Downloads/App/src/types.ts#10-29) schema with fields for features, stock, and pricing.
+- **API**: Full CRUD endpoints at `/api/products`.
+- **Frontend**: 
+    - [Shop.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Shop.tsx) fetches live products.
+    - [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx) allows creating, updating, and deleting products.
+    - Resolved type mismatches (Tags vs Features).
+
+## 2. Order System (New Feature)
+- **Models**: Created [Order](file:///c:/Users/Adonis/Downloads/App/src/types.ts#48-57) schema to track user purchases.
+- **API**: implemented `/api/orders` to list and manage orders.
+- **Frontend**: 
+    - [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx) now fetches **real-time orders** from the database instead of using mock data.
+    - Order statuses ([Pending](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#27-38), `Completed`, `Paid`) are now tracked in the DB.
+
+## 3. Database "Auto-Fix" (Seeding)
+- **Script**: [server/seed.js](file:///c:/Users/Adonis/Downloads/App/server/seed.js)
+- **Action**: Populated the database with:
+    - **6 Premium Products** (GenLogin, GPM Manager, etc.)
+    - **3 Mock Orders** for demonstration.
+- **Result**: The website is fully populated on startup.
+
+## Verification
+
+### Build Status
+The Docker build is **SUCCESSFUL**.
+```
+Image app-server Built
+Image app-app Built
+Container app-server-1 Started
+Container app-app-1 Started
+```
+
+### API Check
+- `GET /api/products`: Active (Returns 6 items)
+- `GET /api/orders`: Active (Returns 3 items)
+
+## Next Steps
+- The application is ready for use.
+- You can extend the [Order](file:///c:/Users/Adonis/Downloads/App/src/types.ts#48-57) system to integrate with a real payment gateway.
+- You can add user authentication middleware to protect the `/api/orders` POST route.

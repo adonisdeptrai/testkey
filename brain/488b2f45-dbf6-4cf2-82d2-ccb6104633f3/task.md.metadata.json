@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_TASK",
+  "summary": "Task breakdown cho performance optimization implementation bao gồm critical database indexes, stats route aggregation optimization, query optimization với .lean() và .select(), pagination implementation, và connection pooling configuration",
+  "updatedAt": "2026-01-25T12:47:54.798945900Z",
+  "version": "16"
+}

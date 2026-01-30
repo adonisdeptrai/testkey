@@ -1,0 +1,19 @@
+# Task List: QA Testing Admin Panel
+
+- [ ] CRUD & Data Validation Testing <!-- id: 1 -->
+    - [ ] Test Create with missing required fields <!-- id: 2 -->
+    - [ ] Test Update functionality <!-- id: 3 -->
+    - [ ] Test Delete with dependencies <!-- id: 4 -->
+- [ ] User Management Testing <!-- id: 5 -->
+    - [ ] Test Ban/Unban user functionality <!-- id: 6 -->
+    - [ ] Test balance modification <!-- id: 7 -->
+    - [ ] Test self-deletion prevention <!-- id: 8 -->
+- [ ] Search & Filter Testing <!-- id: 9 -->
+    - [ ] Test pagination <!-- id: 10 -->
+    - [ ] Test combined filters <!-- id: 11 -->
+- [ ] Dashboard & Analytics Testing <!-- id: 12 -->
+    - [ ] Verify data consistency <!-- id: 13 -->
+- [ ] Upload & Media Testing <!-- id: 14 -->
+    - [ ] Test file type validation <!-- id: 15 -->
+    - [ ] Test large file handling <!-- id: 16 -->
+- [ ] Generate QA Report <!-- id: 17 -->

@@ -1,0 +1,666 @@
+# 📊 BÁO CÁO ĐÁNH GIÁ TOÀN DIỆN HỆ THỐNG
+
+> **Dự án:** MMO Shop/Platform - E-commerce Application  
+> **Ngày đánh giá:** 2026-01-25  
+> **Phạm vi:** Full-stack Analysis (Backend + Frontend + Infrastructure)
+
+---
+
+## 📋 TÓM TẮT TỔNG QUAN
+
+Hệ thống là một **nền tảng thương mại điện tử** (E-commerce) chuyên bán các sản phẩm MMO Tools, Automation Scripts, Courses, và License Keys. Kiến trúc **MERN Stack** với tích hợp thanh toán qua **TPBank** (bank transfer) và **Binance** (crypto USDT).
+
+### Kiến trúc Tổng thể
+
+```mermaid
+graph TB
+    subgraph "Frontend - React + Vite"
+        UI[User Interface]
+        Shop[Shop Page]
+        Checkout[Checkout Flow]
+        Admin[Admin Dashboard]
+    end
+    
+    subgraph "Backend - Express.js"
+        API[REST API]
+        Auth[Auth System]
+        Worker[TPBank Worker<br/>60s interval]
+    end
+    
+    subgraph "Database"
+        MongoDB[(MongoDB)]
+    end
+    
+    subgraph "External Services"
+        TPBank[TPBank API]
+        Binance[Binance API]
+        BinancePay[Binance Pay]
+    end
+    
+    UI --> API
+    Shop --> API
+    Checkout --> API
+    Admin --> API
+    
+    API --> MongoDB
+    Worker --> MongoDB
+    Worker --> TPBank
+    API --> TPBank
+    API --> Binance
+    API --> BinancePay
+```
+
+---
+
+## ✅ CHỨC NĂNG HIỆN CÓ
+
+### 🔐 Authentication & Authorization
+- [x] JWT-based authentication
+- [x] Role-based access control (User/Admin)
+- [x] Protected routes (frontend + backend)
+- [x] Email verification system (có model nhưng chưa verify flow hoàn chỉnh)
+- [x] User ban functionality
+
+### 🛍️ E-commerce Core
+- [x] Product management (CRUD - Admin only)
+- [x] Product categories (Automation Script, MMO Tool, Course, License Key)
+- [x] Shopping cart system (Context-based)
+- [x] Order management
+- [x] Order status tracking (pending, completed, processing, paid, refunded, pending_verification, failed)
+
+### 💳 Payment Integration
+- [x] **TPBank Integration**
+  - Manual QR code display
+  - Transaction history fetching
+  - Automatic verification via background worker (60s interval)
+  - Strict validation (Order code in description + exact amount + CRDT indicator)
+- [x] **Binance Integration**
+  - Spot transaction history
+  - Deposit/Withdraw history
+  - Network fee fetching
+- [x] **Binance Pay**
+  - Dynamic QR code generation
+  - Payment status polling
+- [x] **Crypto Payments (USDT)**
+  - Multi-network support (TRC20, BEP20, etc.)
+  - Manual QR upload per network
+  - Wallet address management
+
+### 👨‍💼 Admin Dashboard
+- [x] **Overview Dashboard**
+  - Real-time stats (từ `/api/stats`)
+  - Revenue charts (using Recharts)
+  - Order distribution visualization
+- [x] **Product Management**
+  - Add/Edit/Delete products
+  - Stock management (unlimited or limited)
+  - Image upload
+  - Live preview khi edit
+- [x] **Order Management**
+  - View all orders
+  - Manual payment verification
+  - Status updates
+  - Transaction code display
+  - Search functionality (by order ID, transaction code, username)
+- [x] **Payment Verification Views**
+  - TPBank transaction history monitor
+  - Binance transaction monitor
+  - Manual verification dashboard
+- [x] **Settings Management**
+  - Bank configuration (VietQR)
+  - TPBank credentials
+  - Binance API keys
+  - Crypto network configuration
+  - Exchange rate settings
+  - Auto-check toggle (enable/disable worker)
+- [x] **User Management**
+  - View users
+  - Ban/Unban users
+
+### 🌐 User Features
+- [x] Landing page
+- [x] Product browsing with filters
+- [x] Product detail modal
+- [x] Add to cart with toast notification
+- [x] Checkout flow
+- [x] Order history
+- [x] User dashboard
+- [x] Profile management
+
+### 🔧 Infrastructure
+- [x] Docker support (Dockerfile, docker-compose)
+- [x] Nginx configuration
+- [x] Environment variables (.env, .env.production)
+- [x] Background worker (TPBank verification)
+- [x] System logging (SystemLog model)
+- [x] Anti-spam rate limiting (1 order per 30 seconds)
+
+---
+
+## ⚠️ CHỨC NĂNG THIẾU / CHƯA HOÀN THIỆN
+
+### 🔴 Critical (Ưu tiên cao)
+
+#### 1. **Email Verification Flow Chưa Hoàn Chỉnh**
+**Hiện trạng:**
+- Model [User](file:///c:/Users/Adonis/Downloads/App/src/types.ts#72-81) có field `isVerified`, `verificationToken`
+- Route `/verify-email` tồn tại trong frontend
+- **NHƯNG:** Backend không có endpoint xử lý verification
+
+**Đề xuất:**
+```javascript
+// Backend: server/routes/auth.js
+router.get('/verify-email/:token', async (req, res) => {
+  const user = await User.findOne({ verificationToken: req.params.token });
+  if (!user) return res.status(400).json({ message: 'Invalid token' });
+  
+  user.isVerified = true;
+  user.verificationToken = undefined;
+  await user.save();
+  
+  res.json({ success: true, message: 'Email verified!' });
+});
+```
+
+#### 2. **Forgot Password / Reset Password**
+**Hiện trạng:** Hoàn toàn không có
+
+**Đề xuất:** 
+- API endpoint `/api/auth/forgot-password` (gửi email reset)
+- API endpoint `/api/auth/reset-password/:token`
+- Frontend page для reset password flow
+
+#### 3. **Product Delivery System (Key Distribution)**
+**Hiện trạng:**
+- Có [KeyManagementView](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#432-482) component (admin)
+- Có [PendingKeyOrder](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#41-52) type
+- **NHƯNG:** Không có backend logic để:
+  - Store product keys
+  - Auto-assign keys sau khi order completed
+  - Send keys via email hoặc hiển thị trên dashboard
+
+**Đề xuất:**
+```javascript
+// Model: ProductKey.js
+const ProductKeySchema = new mongoose.Schema({
+  productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+  key: { type: String, required: true, unique: true },
+  status: { type: String, enum: ['available', 'sold'], default: 'available' },
+  orderId: { type: String }, // Assigned order
+  assignedAt: { type: Date }
+});
+
+// Logic: Sau khi order completed, tự động assign key
+```
+
+#### 4. **User Balance System Chưa Được Sử Dụng**
+**Hiện trạng:**
+- Model [User](file:///c:/Users/Adonis/Downloads/App/src/types.ts#72-81) có field `balance`
+- Frontend hiển thị balance
+- **NHƯNG:** Không có chức năng:
+  - Top-up balance
+  - Pay bằng balance
+  - Deduct balance khi mua hàng
+
+**Đề xuất:**
+- API `/api/users/top-up` (tạo order top-up)
+- Checkout cho phép chọn "Pay with Balance"
+- Deduct logic khi order completed
+
+#### 5. **Binance Pay Integration Chưa Hoàn Chỉnh**
+**Hiện trạng:**
+- Code có route `/api/payment/binance/create` và `/api/payment/binance/query`
+- **NHƯNG:** Frontend [Checkout.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Checkout.tsx) chỉ dùng static QR code (không call Binance Pay API)
+
+**Đề xuất:** Integrate dynamic Binance Pay QR vào checkout flow
+
+---
+
+### 🟡 Medium Priority (Quan trọng)
+
+#### 6. **Review & Rating System**
+**Hiện trạng:** Frontend có [Review](file:///c:/Users/Adonis/Downloads/App/src/types.ts#30-40) type, nhưng không có backend model/routes
+
+**Đề xuất:**
+```javascript
+// Model: Review.js
+const ReviewSchema = new mongoose.Schema({
+  productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  rating: { type: Number, min: 1, max: 5 },
+  comment: { type: String },
+  createdAt: { type: Date, default: Date.now }
+});
+```
+
+#### 7. **Refund System**
+**Hiện trạng:** Order có status `refunded`, nhưng không có:
+- Admin UI để process refund
+- Refund policy
+- Refund history tracking
+
+#### 8. **Notification System**
+**Hiện trạng:** Chỉ có Toast notifications (temporary)
+
+**Đề xuất:**
+- Persistent notifications (in-app)
+- Email notifications (order confirmation, payment verified, etc.)
+- Admin notifications (new orders, failed payments)
+
+#### 9. **Ticket/Support System**
+**Hiện trạng:** Admin dashboard có `MOCK_TICKETS` data, nhưng không có real backend
+
+**Đề xuất:**
+- Ticket model + CRUD routes
+- User có thể tạo ticket
+- Admin có thể reply và update status
+
+#### 10. **Product Search & Advanced Filters**
+**Hiện trạng:** 
+- Có search input UI
+- **NHƯNG:** Chỉ filter local (không query backend)
+- Không có advanced filter (price range, rating, etc.)
+
+**Đề xuất:**
+- Backend API `/api/products/search?q=...&minPrice=...&maxPrice=...`
+- Debounced search input
+- Filter by tags, features
+
+---
+
+### 🟢 Low Priority (Nice to Have)
+
+#### 11. **Analytics & Reporting**
+- Sales report export (CSV/Excel)
+- Customer analytics
+- Product performance metrics
+- Revenue trends (monthly/yearly)
+
+#### 12. **Coupon/Discount System**
+- Coupon code model
+- Apply discount at checkout
+- Usage limit tracking
+
+#### 13. **Wishlist**
+- User wishlist feature
+- Save products for later
+
+#### 14. **Multi-language Support (i18n)**
+- English/Vietnamese language toggle
+
+#### 15. **Product Variants**
+- Different tiers/packages for same product (e.g., Basic, Pro, Enterprise)
+
+#### 16. **Inventory Alerts**
+- Low stock alerts for admin
+- Out of stock email notifications
+
+---
+
+## 🔒 SECURITY ISSUES
+
+### ⚠️ Cần Khắc Phục Ngay
+
+1. **Sensitive Data Exposure**
+   ```javascript
+   // ❌ WRONG: settings.js line 21
+   res.json(settings); // Trả về TOÀN BỘ settings (bao gồm passwords!)
+   ```
+   **Đề xuất:**
+   ```javascript
+   // ✅ CORRECT: Filter sensitive fields
+   const safeSettings = {
+     bank: {
+       bankId: settings.bank.bankId,
+       accountNo: settings.bank.accountNo,
+       accountName: settings.bank.accountName,
+       // NO password, username, deviceId
+     },
+     crypto: settings.crypto,
+     exchangeRate: settings.exchangeRate
+   };
+   res.json(safeSettings);
+   ```
+
+2. **Password Storage**
+   - TPBank password lưu plaintext trong DB (Settings.bank.password)
+   - Binance Secret Key lưu plaintext
+   - **Đề xuất:** Encrypt sensitive credentials (using `crypto` module)
+
+3. **CORS Configuration**
+   ```javascript
+   // server/index.js line 10
+   app.use(cors()); // ❌ Allow ALL origins
+   ```
+   **Đề xuất:**
+   ```javascript
+   app.use(cors({
+     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+     credentials: true
+   }));
+   ```
+
+4. **Rate Limiting Chỉ Có Cho Order Creation**
+   - API khác (login, products, etc.) không có rate limit
+   - **Đề xuất:** Add `express-rate-limit` globally
+
+5. **JWT Secret Hardcoded?**
+   - Cần kiểm tra [.env](file:///c:/Users/Adonis/Downloads/App/.env) có `JWT_SECRET` không
+   - Nếu không có, cần add
+
+---
+
+## 🎨 UX/UI ISSUES
+
+### Consistency Issues
+
+1. **Order ID Format Inconsistent**
+   - Backend: `#ORD-1234` (human-readable)
+   - Frontend đôi khi dùng `_id`, đôi khi dùng `orderId`
+   - **Đề xuất:** Standardize to always use `orderId`
+
+2. **Payment Method String Variation**
+   ```javascript
+   // Order model: 'Crypto (USDT)'
+   // Frontend: 'Crypto' | 'Bank Transfer'
+   // Backend stats filter: regex /bank/i
+   ```
+   **Đề xuất:** Enum hoặc constants file
+
+3. **Dark Mode Implementation**
+   - Code có dark mode styles
+   - **NHƯNG:** Không có toggle switch để user chọn
+   - **Đề xuất:** Add theme toggle in user settings
+
+4. **Mobile Responsiveness**
+   - Admin Dashboard có thể không responsive tốt (2139 lines code, nhiều table)
+   - Cần test kỹ trên mobile
+
+---
+
+## ⚡ PERFORMANCE CONCERNS
+
+### Database Optimization
+
+1. **Missing Indexes**
+   ```javascript
+   // Order.js
+   orderId: { type: String, unique: true } // ✅ Has index
+   
+   // MISSING:
+   // - Order.user (thường query by user)
+   // - Order.status (filter pending orders)
+   // - Order.date (sort by date)
+   ```
+
+2. **N+1 Query Issues**
+   - Admin dashboard fetch all orders, products, users separately
+   - **Đề xuất:** Combine vào 1 endpoint `/api/admin/dashboard` với aggregation
+
+3. **No Pagination**
+   - `/api/products` - Trả về ALL products
+   - `/api/orders` - Trả về ALL orders
+   - **Đề xuất:**
+   ```javascript
+   router.get('/products', async (req, res) => {
+     const { page = 1, limit = 20 } = req.query;
+     const products = await Product.find()
+       .limit(limit)
+       .skip((page - 1) * limit);
+     const total = await Product.countDocuments();
+     res.json({ products, total, page, totalPages: Math.ceil(total / limit) });
+   });
+   ```
+
+4. **TPBank Worker Polling (60s)**
+   - Có thể gây rate limit nếu traffic cao
+   - **Đề xuất:** Implement exponential backoff hoặc tăng interval lên 120s
+
+---
+
+## 🏗️ BEST PRACTICES VIOLATIONS
+
+### Code Quality
+
+1. **Magic Numbers/Strings**
+   ```javascript
+   // ❌ WRONG
+   if (now - lastAttempt) < 30000) { ... }
+   orderId: '#ORD-' + Math.floor(1000 + Math.random() * 9000);
+   
+   // ✅ BETTER
+   const RATE_LIMIT_WINDOW = 30 * 1000; // 30 seconds
+   const ORDER_ID_PREFIX = 'ORD';
+   const ORDER_ID_MIN = 1000;
+   const ORDER_ID_MAX = 9999;
+   ```
+
+2. **Error Handling Inconsistent**
+   - Một số route có detailed error messages
+   - Một số chỉ trả về generic "Server Error"
+   - **Đề xuất:** Centralized error handler middleware
+
+3. **No Input Validation**
+   - `express-validator` đã install nhưng KHÔNG SỬ DỤNG
+   - **Đề xuất:**
+   ```javascript
+   router.post('/orders', [
+     body('user').notEmpty(),
+     body('amount').isNumeric().isFloat({ min: 0 }),
+     // ...
+   ], handleValidation, async (req, res) => { ... });
+   ```
+
+4. **No API Versioning**
+   - `/api/products` không có version (e.g., `/api/v1/products`)
+   - **Đề xuất:** Plan for future breaking changes
+
+5. **Environment Variables**
+   - [.env](file:///c:/Users/Adonis/Downloads/App/.env) có sensitive data (TPBank credentials)
+   - **Đề xuất:** Add [.env](file:///c:/Users/Adonis/Downloads/App/.env) to [.gitignore](file:///c:/Users/Adonis/Downloads/App/.gitignore) (đã có), nhưng cần [.env.example](file:///c:/Users/Adonis/Downloads/App/.env.example) đầy đủ hơn
+
+---
+
+## 📊 DATABASE SCHEMA ANALYSIS
+
+### Current Models
+
+| Model | Fields | Missing | Notes |
+|-------|--------|---------|-------|
+| **User** | username, email, password, role, balance, avatar, isVerified, verificationToken, isBanned | `lastLogin`, `resetPasswordToken`, `resetPasswordExpires` | Balance không được sử dụng |
+| **Product** | title, type, price, originalPrice, description, image, features, stock, unlimitedStock, platformId, rating | `soldCount`, `tags`, `reviews[]` (ref), `keys[]` (ref) | Rating hardcoded, không có review system |
+| **Order** | user, product, amount, status, method, date, orderId, verifiedAt, manualVerify | `items[]` (multiple products), `shippingInfo`, `refundReason` | Chỉ support 1 product/order |
+| **Settings** | bank, binance, crypto, exchangeRate, isAutoCheckEnabled | `smtp` (email config), `maintenance` (site maintenance mode) | Passwords lưu plaintext |
+| **SystemLog** | type, message, details, timestamp | - | ✅ OK |
+
+### Thiếu Models
+
+1. **ProductKey** - Quản lý license keys
+2. **Review** - Product reviews
+3. **Ticket** - Support tickets
+4. **Notification** - User notifications
+5. **Coupon** - Discount codes
+6. **Transaction** - Payment transaction log (riêng biệt với Order)
+
+---
+
+## 🚀 ĐỀ XUẤT CẢI TIẾN
+
+### Phase 1: Critical Fixes (1-2 tuần)
+
+1. ✅ **Fix Security Issues**
+   - Encrypt sensitive credentials
+   - Filter sensitive data in API responses
+   - Add CORS whitelist
+   - Implement global rate limiting
+
+2. ✅ **Complete Email Verification**
+   - Backend endpoint `/api/auth/verify-email/:token`
+   - Email sending service (Nodemailer đã có)
+
+3. ✅ **Forgot Password Flow**
+   - Reset password endpoints
+   - Email templates
+
+4. ✅ **Input Validation**
+   - Use `express-validator` cho tất cả routes
+   - Validate frontend inputs
+
+### Phase 2: Feature Completion (2-4 tuần)
+
+5. ✅ **Product Key Distribution System**
+   - ProductKey model
+   - Auto-assignment logic
+   - Email delivery hoặc dashboard display
+
+6. ✅ **User Balance System**
+   - Top-up flow
+   - Pay with balance option
+   - Transaction history
+
+7. ✅ **Review & Rating**
+   - Review model + CRUD routes
+   - Frontend review submission
+   - Average rating calculation
+
+8. ✅ **Support Ticket System**
+   - Ticket model + routes
+   - User ticket creation form
+   - Admin ticket management UI
+
+### Phase 3: Optimization (1-2 tuần)
+
+9. ✅ **Database Optimization**
+   - Add indexes
+   - Implement pagination
+   - Query optimization
+
+10. ✅ **Performance Improvements**
+    - Frontend code splitting
+    - Image optimization
+    - Caching strategy (Redis?)
+
+### Phase 4: Advanced Features (4+ tuần)
+
+11. ✅ **Analytics Dashboard**
+    - Sales reports
+    - Revenue charts
+    - Customer insights
+
+12. ✅ **Notification System**
+    - In-app notifications
+    - Email notifications
+    - Push notifications (optional)
+
+13. ✅ **Advanced Product Features**
+    - Search với Elasticsearch (optional)
+    - Product variants
+    - Coupon system
+
+---
+
+## 📈 TECH STACK RECOMMENDATION
+
+### Hiện tại (2026-01-25)
+
+**Frontend:**
+- ✅ React 19.2.3
+- ✅ Vite 6.2.0
+- ✅ TypeScript 5.8.2
+- ✅ TailwindCSS 3.4.17
+- ✅ Framer Motion 12.27.5 (animations)
+- ✅ React Router DOM 7.12.0
+- ✅ Recharts 2.10.3 (charts)
+
+**Backend:**
+- ✅ Express.js 4.18.2
+- ✅ MongoDB + Mongoose 8.0.3
+- ✅ JWT (jsonwebtoken 9.0.2)
+- ✅ bcryptjs 2.4.3
+- ✅ Axios 1.6.2
+- ✅ Moment-timezone 0.5.43
+
+**Infrastructure:**
+- ✅ Docker
+- ✅ Nginx
+- ✅ Node.js
+
+### Đề xuất Thêm
+
+1. **Redis** - Caching & Session storage
+2. **Bull** hoặc **Agenda** - Job queue (thay thế setInterval cho worker)
+3. **Winston** - Logging (thay console.log)
+4. **Helmet** - Security headers
+5. **Morgan** - HTTP request logging
+6. **Joi** hoặc **Zod** - Schema validation (alternative to express-validator)
+7. **Socket.io** - Real-time notifications (optional)
+8. **AWS S3** hoặc **Cloudinary** - Image storage (thay local uploads)
+
+---
+
+## ✅ ĐIỂM MẠNH CỦA HỆ THỐNG
+
+1. ✨ **Clean Architecture**
+   - Separation of concerns (models, routes, utils)
+   - Middleware pattern
+   - Context-based state management (frontend)
+
+2. 🔄 **Automatic Payment Verification**
+   - TPBank worker với strict validation
+   - Error logging to database
+   - Retry mechanism
+
+3. 🎨 **Modern UI/UX**
+   - Liquid Glass design
+   - Smooth animations (Framer Motion)
+   - Responsive layout
+   - Dark mode ready
+
+4. 🐳 **Docker Support**
+   - Easy deployment
+   - Consistent environments
+
+5. 🔐 **RBAC Implementation**
+   - Admin/User roles
+   - Protected routes
+   - Middleware-based auth
+
+---
+
+## ⚡ TÓM TẮT ƯU TIÊN
+
+### 🔴 URGENT (Làm ngay)
+1. Fix security: Filter sensitive data, encrypt credentials
+2. Add input validation (express-validator)
+3. Implement email verification endpoint
+4. Add forgot password flow
+
+### 🟠 HIGH PRIORITY (1-2 tuần)
+5. Product key distribution system
+6. User balance top-up & payment
+7. Database indexing
+8. Pagination cho products/orders
+
+### 🟡 MEDIUM PRIORITY (2-4 tuần)
+9. Review & rating system
+10. Support ticket system
+11. Notification system
+12. Refund management
+
+### 🟢 LOW PRIORITY (Nice to have)
+13. Analytics dashboard
+14. Coupon system
+15. Multi-language support
+16. Wishlist feature
+
+---
+
+## 📞 KẾT LUẬN
+
+Hệ thống đã có **foundation vững chắc** với kiến trúc MERN stack hiện đại và tích hợp payment automation. Tuy nhiên, cần khắc phục **các vấn đề bảo mật nghiêm trọng** (sensitive data exposure, plaintext passwords) và hoàn thiện **các chức năng core** (email verification, password reset, product delivery) trước khi mở rộng thêm features.
+
+**Roadmap đề xuất:** Security Fixes → Core Features → Optimization → Advanced Features
+
+---
+
+*Báo cáo này được tạo bởi Gemini AI Analysis System*

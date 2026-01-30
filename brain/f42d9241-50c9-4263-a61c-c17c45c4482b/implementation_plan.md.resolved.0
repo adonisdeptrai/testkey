@@ -1,0 +1,46 @@
+# Implementation Plan - Crypto Transfer Configuration
+
+Enable administrators to configure a Crypto Wallet for receiving manual payments.
+
+## User Review Required
+> [!NOTE]
+> I will add a "Crypto Transfer Configuration" section to the Admin Dashboard. This will be for *manual* text display to users (instructional), not an automated crypto gateway (unless specified otherwise).
+
+## Proposed Changes
+
+### Backend
+
+#### [MODIFY] [Settings.js](file:///c:/Users/Adonis/Downloads/App/server/models/Settings.js)
+- Add `crypto` object to schema:
+  ```javascript
+  crypto: {
+      enabled: { type: Boolean, default: false },
+      walletAddress: { type: String, default: '' },
+      network: { type: String, default: 'TRC20' }, // e.g., TRC20, ERC20
+      currency: { type: String, default: 'USDT' },
+      qrCodeUrl: { type: String, default: '' } // Optional: For future QR image
+  }
+  ```
+
+#### [MODIFY] [settings.js](file:///c:/Users/Adonis/Downloads/App/server/routes/settings.js)
+- Update `PUT /api/settings` to handle `req.body.crypto`.
+
+### Frontend
+
+#### [MODIFY] [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+- Update `settings` state to include `crypto`.
+- Add "Crypto Transfer Settings" UI card:
+  - Toggle for "Enable Crypto Payment".
+  - Input for "Wallet Address".
+  - Select/Input for "Network" (TRC20, BEP20, etc.).
+  - Input for "Currency" (USDT).
+
+## Verification Plan
+
+### Manual Verification
+1. Open Admin Dashboard.
+2. Scroll to "Crypto Transfer Configuration".
+3. Toggle "Enable", enter a Wallet Address (e.g., `T9yD14Nj9j7...`), and set Network to `TRC20`.
+4. Click **Save Changes**.
+5. Refresh the page to confirm data persistence.
+6. Check `settings` API response in Network tab to verify JSON structure.

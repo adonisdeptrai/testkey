@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Comprehensive performance audit report identifying 10 performance issues bao gồm missing database indexes, N+1 query problems, inefficient aggregations, large payload responses, no caching strategy, synchronous file operations, missing pagination, unoptimized populate calls, no query result limits, và lack of connection pooling. Includes detailed remediation steps với code examples.",
+  "updatedAt": "2026-01-25T12:46:01.073438500Z"
+}

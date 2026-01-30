@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Postman collection documentation for testing TPBank API endpoints. Includes authentication setup, settings management, and transaction history retrieval with example payloads and response formats.",
+  "updatedAt": "2026-01-24T04:35:48.650011600Z"
+}

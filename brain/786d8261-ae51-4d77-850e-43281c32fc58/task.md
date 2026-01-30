@@ -1,0 +1,19 @@
+- [x] Analyze existing Docker artifacts (`Dockerfile`, `docker-compose.yml`) <!-- id: 0 -->
+- [x] Verify project structure and dependencies (`package.json`) <!-- id: 1 -->
+- [x] Create `docker-manage.ps1` script <!-- id: 5 -->
+- [x] Create `server/.dockerignore` <!-- id: 6 -->
+- [x] Verify build process <!-- id: 4 -->
+- [x] Verify deployment with `docker-compose` <!-- id: 7 -->
+- [x] Analyze "Current Web" style (`LandingPage`) <!-- id: 8 -->
+- [x] Update `AdminDashboard` to match style <!-- id: 9 -->
+- [x] Update `Dashboard` wrapper layout if needed <!-- id: 10 -->
+- [x] Fix remaining light styles in `AdminDashboard` components (`VerifyOrderModal`, `PreviewCard`) <!-- id: 11 -->
+- [x] Redesign `ManageProductModal` for premium UX/UI <!-- id: 12 -->
+- [x] Create `Product` Mongoose model <!-- id: 13 -->
+- [x] Implement Product API routes in `server.js` <!-- id: 14 -->
+- [ ] Integrate Product API in `AdminDashboard.tsx` <!-- id: 15 -->
+- [x] Seed MongoDB with initial product data <!-- id: 17 -->
+- [x] Verify persistence with MongoDB <!-- id: 16 -->
+- [x] Create `Order` Mongoose model <!-- id: 18 -->
+- [x] Implement Order API routes in `server.js` <!-- id: 19 -->
+- [x] Integrate Real Orders in `AdminDashboard.tsx` <!-- id: 20 -->

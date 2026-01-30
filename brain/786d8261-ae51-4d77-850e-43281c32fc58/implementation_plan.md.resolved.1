@@ -1,0 +1,30 @@
+# UI Synchronization Plan
+
+The goal is to align the Admin Dashboard ([Dashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Dashboard.tsx) and [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)) with the "Cream Cyan" and "Liquid Glass" dark theme present in [LandingPage.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/LandingPage.tsx).
+
+## User Review Required
+
+> [!IMPORTANT]
+> This change will permanently switch the Dashboard (both User and Admin views) to **Dark Mode** to match the landing page.
+
+## Proposed Changes
+
+### Styling & Layout
+#### [MODIFY] [Dashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Dashboard.tsx)
+- Change main background from `#FDFBF7` (Light Cream) to `#020617` (Dark Slate/Black).
+- Apply "Liquid Glass" styles to the Sidebar and Header:
+    - Use `bg-[#0b1121]/80` or `glass-panel` class instead of white.
+    - Update text colors from `text-brand-dark` to `text-white`.
+    - Update shadows to use `brand-cyan` or `black` glows.
+- Update Sidebar navigation active states to use `brand-cyan` gradients.
+
+#### [MODIFY] [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+- Ensure all cards and modals use dark-mode friendly backgrounds (e.g., `bg-[#0b1121]` or `bg-white/5`).
+- Fix hardcoded light colors (e.g., `bg-gray-50`) to dark alternatives (e.g., `bg-white/5` or `bg-[#0f172a]`).
+- Update tables and inputs to look good on dark backgrounds.
+
+## Verification Plan
+
+### Manual Verification
+- I will perform a visual check using [docker-manage.ps1](file:///c:/Users/Adonis/Downloads/App/docker-manage.ps1) to rebuild (if needed) or just rely on the existing hot-reloading if I can run it locally.
+- Since I cannot see the UI, I will rely on code analysis to ensure all classes are consistent with the "Liquid Glass" theme (lots of `backdrop-blur`, `bg-white/5`, `border-white/10`).

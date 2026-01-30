@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_TASK",
+  "summary": "Comprehensive debugging task breakdown with 4 phases: Information Gathering, Automated Testing & Scanning, Manual Code Review, and Issue Resolution & Prevention. Covers security, dependencies, linting, schema validation, backend/frontend code review, and configuration files.",
+  "updatedAt": "2026-01-25T03:40:29.215705800Z"
+}

@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Documentation cho Supabase Auth migration. Frontend đã migrate hoàn toàn từ custom JWT sang Supabase Auth built-in. Bao gồm changes trong AuthContext, Auth page, AuthCallback, và next steps cho backend migration.",
+  "updatedAt": "2026-01-30T01:58:35.142286400Z",
+  "version": "1"
+}

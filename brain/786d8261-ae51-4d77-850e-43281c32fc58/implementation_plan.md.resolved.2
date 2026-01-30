@@ -1,0 +1,36 @@
+# Add/Edit Product UI Redesign Plan
+
+The goal is to elevate the "Add/Edit Product" modal in [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx) to a premium "Liquid Glass" experience, matching the high standard of the Landing Page.
+
+## User Review Required
+
+> [!NOTE]
+> This redesign replaces the standard form with a more immersive, polished interface.
+
+## Proposed Changes
+
+### [MODIFY] [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+
+#### 1. Enhanced Modal Container
+- **Backdrop**: Deepen the blur and add a subtle noise texture or gradient overlay.
+- **Container**: Use a double-border effect (glass) and a more profound shadow.
+
+#### 2. Layout Overhaul
+- **Two-Column Layout (Refined)**:
+    - **Left (Form)**: Clean, spacious fields. Group related fields (Basic Info, Pricing, Media) into "Glass Cards" within the form.
+    - **Right (Preview)**: Make the "Live Preview" sticky and more prominent.
+
+#### 3. Component Styling
+- **Inputs**: Remove standard borders; use bottom-border only or "filled" glass style that glows on focus.
+- **Image Upload**: Create a drag-and-drop style zone with an instant preview background.
+- **"Features" Input**: Replace the textarea with a "Tag Input" style (Type + Enter to add feature chips).
+
+#### 4. Micro-Interactions
+- Add `framer-motion` animations for input focus (scale up slightly).
+- Add specific validation animations (shake on error).
+
+## Verification Plan
+
+### Manual Verification
+- Visual inspection via `docker-compose up`.
+- Verify responsive behavior (mobile stack vs desktop split).

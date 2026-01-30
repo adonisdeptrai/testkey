@@ -1,0 +1,33 @@
+# Task List: QA Testing Admin Panel
+
+- [x] CRUD & Data Validation Testing <!-- id: 1 -->
+    - [x] Test Create with missing required fields <!-- id: 2 -->
+    - [x] Test Update functionality <!-- id: 3 -->
+    - [x] Test Delete with dependencies <!-- id: 4 -->
+- [x] User Management Testing <!-- id: 5 -->
+    - [x] Test Ban/Unban user functionality (Backend Implemented) <!-- id: 6 -->
+    - [x] Test balance modification (Backend Implemented) <!-- id: 7 -->
+    - [x] Test self-deletion prevention (Backend Implemented) <!-- id: 8 -->
+- [x] Search & Filter Testing <!-- id: 9 -->
+    - [x] Test pagination <!-- id: 10 -->
+    - [x] Test combined filters <!-- id: 11 -->
+- [x] Dashboard & Analytics Testing <!-- id: 12 -->
+    - [x] Verify data consistency <!-- id: 13 -->
+- [x] Upload & Media Testing <!-- id: 14 -->
+    - [x] Test file type validation <!-- id: 15 -->
+    - [x] Test large file handling <!-- id: 16 -->
+- [x] Generate QA Report <!-- id: 17 -->
+- [x] Transfer History UI Refinement <!-- id: 18 -->
+    - [x] Rename 'Bank Monitor' to 'Transfer History' in Sidebar <!-- id: 19 -->
+    - [x] Update TPBankMonitor component with Dashboard UI <!-- id: 20 -->
+    - [x] Implement Stats Cards (Revenue, Status, Count) <!-- id: 21 -->
+    - [x] Separate 'Raw Data' and 'Matched Data' views <!-- id: 22 -->
+    - [x] Verify functionality <!-- id: 23 -->
+- [x] Add Enable/Disable Toggle for TPBank Worker <!-- id: 24 -->
+- [x] Integrate Antigravity Kit <!-- id: 25 -->
+    - [x] Install .agent directory <!-- id: 26 -->
+- [x] Integrate TPBank Transaction History API <!-- id: 27 -->
+    - [x] Review GitHub API implementation <!-- id: 28 -->
+    - [x] Update tpbank.js utility <!-- id: 29 -->
+    - [x] Debug API connection issues <!-- id: 30 -->
+    - [x] Enhanced auth middleware for dual header support <!-- id: 31 -->

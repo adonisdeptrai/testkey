@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Comprehensive implementation plan for Binance API integration. Covers backend changes (Binance client utility, Settings model update, API routes), frontend changes (BinanceMonitor component, AdminDashboard integration), security considerations (API key storage, read-only permissions), verification steps (API testing, UI validation), and required dependencies.",
+  "updatedAt": "2026-01-24T17:40:36.133224900Z"
+}

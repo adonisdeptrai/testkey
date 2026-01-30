@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Kế hoạch migrate từ custom JWT authentication sang Supabase Auth built-in system. Bao gồm backend simplification (loại bỏ JWT, dùng Supabase session), frontend refactor (use Supabase hooks), và unified authentication flow cho cả email/password và Google OAuth.",
+  "updatedAt": "2026-01-30T01:54:53.502345700Z",
+  "version": "1"
+}

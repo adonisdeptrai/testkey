@@ -1,0 +1,222 @@
+# Google OAuth Integration - Setup & Testing Guide
+
+Tích hợp Google OAuth với Supabase đã hoàn thành. Dưới đây là hướng dẫn setup và testing.
+
+---
+
+## ✅ Đã Hoàn Thành
+
+### Backend Changes
+
+- [supabase.js](file:///c:/Users/Adonis/Downloads/App/server/config/supabase.js) - Thêm anon client cho OAuth
+- [oauth.js](file:///c:/Users/Adonis/Downloads/App/server/routes/oauth.js) - **NEW** OAuth callback routes
+- [010_add_google_oauth_support.sql](file:///c:/Users/Adonis/Downloads/App/server/supabase/migrations/010_add_google_oauth_support.sql) - **NEW** Database migration
+- Updated 11 route files để sử dụng destructured import
+
+### Frontend Changes
+
+- [supabase.ts](file:///c:/Users/Adonis/Downloads/App/src/config/supabase.ts) - **NEW** Frontend Supabase client
+- [AuthContext.tsx](file:///c:/Users/Adonis/Downloads/App/src/contexts/AuthContext.tsx) - Thêm [loginWithGoogle()](file:///c:/Users/Adonis/Downloads/App/src/contexts/AuthContext.tsx#74-96) method
+- [Auth.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Auth.tsx) - Kết nối Google button với OAuth flow
+- [AuthCallback.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AuthCallback.tsx) - **NEW** Callback handler page
+- [App.tsx](file:///c:/Users/Adonis/Downloads/App/src/App.tsx) - Thêm `/auth/callback` route
+
+### Configuration
+
+- [.env](file:///c:/Users/Adonis/Downloads/App/.env) - Added `SUPABASE_ANON_KEY`
+- [.env.local](file:///c:/Users/Adonis/Downloads/App/.env.local) - **NEW** Frontend environment variables
+
+---
+
+## 🚀 Setup Guide (Cần User Thực Hiện)
+
+### Phase 1: Supabase Dashboard Configuration
+
+1. **Vào Supabase Dashboard**  
+   URL: https://supabase.com/dashboard/project/okalizcwyzpwaffrkbey
+
+2. **Enable Google Provider**
+   - Authentication → Providers → Google
+   - Toggle **Enable Sign in with Google**
+   
+3. **Lấy Redirect URL từ Supabase**
+   - Copy callback URL: `https://<project-ref>.supabase.co/auth/v1/callback`
+   - Ví dụ: `https://okalizcwyzpwaffrkbey.supabase.co/auth/v1/callback`
+
+---
+
+### Phase 2: Google Cloud Console Setup
+
+> [!IMPORTANT]
+> Bạn cần Google Cloud Project để tạo OAuth credentials.
+
+1. **Tạo Google Cloud Project** (nếu chưa có)
+   - URL: https://console.cloud.google.com
+   - Click "New Project" → Đặt tên → Create
+
+2. **Enable Google+ API**
+   - APIs & Services → Library
+   - Search "Google+ API" → Enable
+
+3. **Tạo OAuth Credentials**
+   - APIs & Services → Credentials
+   - Click "Create Credentials" → OAuth 2.0 Client ID
+   - Application type: **Web application**
+   - Name: `R4B OAuth`
+
+4. **Configure Authorized URLs**
+   
+   **Authorized JavaScript origins:**
+   ```
+   http://localhost:8080
+   http://localhost:5173
+   ```
+
+   **Authorized redirect URIs:**
+   ```
+   https://okalizcwyzpwaffrkbey.supabase.co/auth/v1/callback
+   http://localhost:8080/auth/callback
+   ```
+
+5. **Save Credentials**
+   - Copy **Client ID** và **Client Secret**
+
+---
+
+### Phase 3: Update Supabase với Google Credentials
+
+1. **Quay lại Supabase Dashboard**
+   - Authentication → Providers → Google
+
+2. **Paste Credentials**
+   - Client ID: `<paste-your-client-id>.apps.googleusercontent.com`
+   - Client Secret: `<paste-your-client-secret>`
+
+3. **Save**
+
+---
+
+## 🧪 Testing Guide
+
+### Run Application
+
+```powershell
+# Terminal 1: Backend
+cd server
+npm start
+
+# Terminal 2: Frontend
+npm run dev
+```
+
+### Test Scenarios
+
+#### ✅ Scenario 1: First-time Google Login (Happy Path)
+
+1. Navigate to `http://localhost:8080/auth`
+2. Click **"Sign in with Google"** button
+3. **Expected**: Redirect to Google consent screen
+4. Select Google account
+5. **Expected**: Redirect to `http://localhost:8080/auth/callback`
+6. **Expected**: See "Login successful! Redirecting..." message
+7. **Expected**: Auto-redirect to Shop page
+8. **Verify**: User logged in, username displayed in header
+
+#### ✅ Scenario 2: Database Verification
+
+Sau khi login thành công:
+
+```sql
+-- Kiểm tra trong Supabase Table Editor
+SELECT * FROM users WHERE google_id IS NOT NULL;
+```
+
+**Expected fields:**
+- `google_id`: có giá trị (Google User ID)
+- `is_verified`: `true`
+- `password`: `null`
+- `email`: khớp với Google account
+
+#### ✅ Scenario 3: Return User Login
+
+1. Logout
+2. Click "Sign in with Google" again
+3. **Expected**: Google might skip consent (depends on account settings)
+4. **Expected**: Faster redirect, same user data
+
+#### ❌ Scenario 4: User Cancels OAuth
+
+1. Click "Sign in with Google"
+2. **Cancel** on Google consent screen
+3. **Expected**: Redirect back to `/auth` with error message
+4. **Verify**: No user created in database
+
+#### ✅ Scenario 5: Session Persistence
+
+1. Login with Google
+2. Refresh page
+3. **Expected**: Still logged in
+4. Close browser
+5. Re-open `http://localhost:8080`
+6. **Expected**: Still logged in (JWT valid for 7 days)
+
+---
+
+## 🐛 Troubleshooting
+
+### Issue: "Supabase anon client not configured"
+
+**Fix:**  
+Check frontend [.env.local](file:///c:/Users/Adonis/Downloads/App/.env.local):
+```bash
+VITE_SUPABASE_URL=https://okalizcwyzpwaffrkbey.supabase.co
+VITE_SUPABASE_ANON_KEY=<your-anon-key>
+```
+
+### Issue: "Invalid session token" 
+
+**Possible causes:**
+- Google credentials chưa được config trong Supabase Dashboard
+- Redirect URL không match trong Google Cloud Console
+
+**Fix:**  
+- Verify Google Client ID + Secret trong Supabase
+- Double-check Authorized redirect URIs
+
+### Issue: Database error "column google_id does not exist"
+
+**Fix:**  
+Run migration:
+```bash
+cd server
+# Apply migration manually trong Supabase SQL Editor
+```
+
+---
+
+## 📊 Success Criteria
+
+- [x] Backend routes hoạt động
+- [x] Frontend components render correctly
+- [ ] Google OAuth flow hoàn thành không lỗi
+- [ ] User được tạo/update trong database với `google_id`
+- [ ] Auto-verify users (is_verified = true)
+- [ ] Session persistence across refreshes
+- [ ] Logout clears both JWT và Supabase session
+
+---
+
+## 📝 Next Steps (Optional)
+
+1. **Production deployment**:
+   - Update authorized URLs trong Google Cloud Console với production domain
+   - Update [.env](file:///c:/Users/Adonis/Downloads/App/.env) với production `CLIENT_URL`
+
+2. **Enhanced features**:
+   - Avatar sync từ Google profile picture
+   - Display name override option
+   - Link existing email/password account với Google
+
+3. **Security**:
+   - Implement CSRF protection
+   - Add rate limiting cho OAuth endpoints

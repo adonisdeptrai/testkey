@@ -1,0 +1,643 @@
+# Walkthrough: Bổ Sung Auth Middleware Backend
+
+## Tóm tắt
+Đã triển khai thành công authentication và authorization middleware để bảo vệ các API endpoints nhạy cảm.
+
+---
+
+## Thay đổi đã thực hiện
+
+### File mới
+| File | Mô tả |
+|------|-------|
+| [adminAuth.js](file:///c:/Users/Adonis/Downloads/App/server/middleware/adminAuth.js) | Middleware kiểm tra role admin, trả về 403 nếu không phải admin |
+
+### File đã sửa
+
+#### [products.js](file:///c:/Users/Adonis/Downloads/App/server/routes/products.js)
+```diff:products.js
+const express = require('express');
+const router = express.Router();
+const Product = require('../models/Product');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Configure Multer
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadDir = 'uploads/';
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir);
+        }
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+const upload = multer({ storage: storage });
+
+// Helper to parse body fields that might be strings/JSON
+const parseBody = (body) => {
+    const data = { ...body };
+    if (typeof data.features === 'string') {
+        try {
+            data.features = JSON.parse(data.features);
+        } catch (e) {
+            data.features = data.features.split(',').map(f => f.trim()).filter(f => f);
+        }
+    }
+    if (data.price) data.price = Number(data.price);
+    if (data.originalPrice) data.originalPrice = Number(data.originalPrice);
+    if (data.stock) data.stock = Number(data.stock);
+    if (data.rating) data.rating = Number(data.rating);
+    if (data.unlimitedStock === 'true' || data.unlimitedStock === true) data.unlimitedStock = true;
+    else if (data.unlimitedStock === 'false' || data.unlimitedStock === false) data.unlimitedStock = false;
+
+    return data;
+};
+
+// GET All Products
+router.get('/', async (req, res) => {
+    try {
+        const products = await Product.find().sort({ createdAt: -1 });
+        // Map _id to id for frontend compatibility if needed, or handle in frontend
+        const mappedProducts = products.map(p => ({
+            ...p.toObject(),
+            id: p._id.toString()
+        }));
+        res.json(mappedProducts);
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+});
+
+// GET Single Product
+router.get('/:id', async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+        res.json({ ...product.toObject(), id: product._id.toString() });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+});
+
+// CREATE Product
+router.post('/', upload.single('image'), async (req, res) => {
+    try {
+        const productData = parseBody(req.body);
+        if (req.file) {
+            productData.image = `/uploads/${req.file.filename}`;
+        }
+
+        const newProduct = new Product(productData);
+        const savedProduct = await newProduct.save();
+        res.status(201).json({ ...savedProduct.toObject(), id: savedProduct._id.toString() });
+    } catch (err) {
+        console.error("Create Error:", err);
+        res.status(400).json({ message: 'Error creating product', error: err.message });
+    }
+});
+
+// UPDATE Product
+router.put('/:id', upload.single('image'), async (req, res) => {
+    try {
+        const productData = parseBody(req.body);
+        if (req.file) {
+            productData.image = `/uploads/${req.file.filename}`;
+        }
+
+        const updatedProduct = await Product.findByIdAndUpdate(
+            req.params.id,
+            { $set: productData },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedProduct) return res.status(404).json({ message: 'Product not found' });
+        res.json({ ...updatedProduct.toObject(), id: updatedProduct._id.toString() });
+    } catch (err) {
+        console.error("Update Error:", err);
+        res.status(400).json({ message: 'Error updating product', error: err.message });
+    }
+});
+
+// DELETE Product
+router.delete('/:id', async (req, res) => {
+    try {
+        const product = await Product.findByIdAndDelete(req.params.id);
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+        res.json({ message: 'Product deleted successfully', id: req.params.id });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+});
+
+module.exports = router;
+===
+const express = require('express');
+const router = express.Router();
+const Product = require('../models/Product');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Auth Middleware
+const auth = require('../middleware/auth');
+const adminAuth = require('../middleware/adminAuth');
+
+// Configure Multer
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadDir = 'uploads/';
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir);
+        }
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+const upload = multer({ storage: storage });
+
+// Helper to parse body fields that might be strings/JSON
+const parseBody = (body) => {
+    const data = { ...body };
+    if (typeof data.features === 'string') {
+        try {
+            data.features = JSON.parse(data.features);
+        } catch (e) {
+            data.features = data.features.split(',').map(f => f.trim()).filter(f => f);
+        }
+    }
+    if (data.price) data.price = Number(data.price);
+    if (data.originalPrice) data.originalPrice = Number(data.originalPrice);
+    if (data.stock) data.stock = Number(data.stock);
+    if (data.rating) data.rating = Number(data.rating);
+    if (data.unlimitedStock === 'true' || data.unlimitedStock === true) data.unlimitedStock = true;
+    else if (data.unlimitedStock === 'false' || data.unlimitedStock === false) data.unlimitedStock = false;
+
+    return data;
+};
+
+// GET All Products (Public)
+router.get('/', async (req, res) => {
+    try {
+        const products = await Product.find().sort({ createdAt: -1 });
+        // Map _id to id for frontend compatibility if needed, or handle in frontend
+        const mappedProducts = products.map(p => ({
+            ...p.toObject(),
+            id: p._id.toString()
+        }));
+        res.json(mappedProducts);
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+});
+
+// GET Single Product (Public)
+router.get('/:id', async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+        res.json({ ...product.toObject(), id: product._id.toString() });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+});
+
+// CREATE Product (Admin Only)
+router.post('/', auth, adminAuth, upload.single('image'), async (req, res) => {
+    try {
+        const productData = parseBody(req.body);
+        if (req.file) {
+            productData.image = `/uploads/${req.file.filename}`;
+        }
+
+        const newProduct = new Product(productData);
+        const savedProduct = await newProduct.save();
+        res.status(201).json({ ...savedProduct.toObject(), id: savedProduct._id.toString() });
+    } catch (err) {
+        console.error("Create Error:", err);
+        res.status(400).json({ message: 'Error creating product', error: err.message });
+    }
+});
+
+// UPDATE Product (Admin Only)
+router.put('/:id', auth, adminAuth, upload.single('image'), async (req, res) => {
+    try {
+        const productData = parseBody(req.body);
+        if (req.file) {
+            productData.image = `/uploads/${req.file.filename}`;
+        }
+
+        const updatedProduct = await Product.findByIdAndUpdate(
+            req.params.id,
+            { $set: productData },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedProduct) return res.status(404).json({ message: 'Product not found' });
+        res.json({ ...updatedProduct.toObject(), id: updatedProduct._id.toString() });
+    } catch (err) {
+        console.error("Update Error:", err);
+        res.status(400).json({ message: 'Error updating product', error: err.message });
+    }
+});
+
+// DELETE Product (Admin Only)
+router.delete('/:id', auth, adminAuth, async (req, res) => {
+    try {
+        const product = await Product.findByIdAndDelete(req.params.id);
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+        res.json({ message: 'Product deleted successfully', id: req.params.id });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+});
+
+module.exports = router;
+```
+
+#### [orders.js](file:///c:/Users/Adonis/Downloads/App/server/routes/orders.js)
+```diff:orders.js
+const express = require('express');
+const router = express.Router();
+const Order = require('../models/Order');
+
+const auth = require('../middleware/auth');
+const User = require('../models/User');
+
+// GET My Orders (Protected)
+router.get('/my-orders', auth, async (req, res) => {
+    try {
+        // Find user to get username (since Order uses username)
+        // Ideally Order should use ObjectId, but sticking to existing schema for now
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const orders = await Order.find({ user: user.username }).sort({ date: -1 });
+
+        const mappedOrders = orders.map(o => ({
+            ...o.toObject(),
+            id: o.orderId || o._id.toString(),
+            mongoId: o._id
+        }));
+        res.json(mappedOrders);
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+});
+
+// GET All Orders
+router.get('/', async (req, res) => {
+    try {
+        const orders = await Order.find().sort({ date: -1 });
+        // Map _id to id for frontend
+        const mappedOrders = orders.map(o => ({
+            ...o.toObject(),
+            id: o.orderId || o._id.toString(), // Use human readable ID if available
+            mongoId: o._id // Keep actual ID for updates
+        }));
+        res.json(mappedOrders);
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+});
+
+// CREATE Order
+router.post('/', async (req, res) => {
+    try {
+        const newOrder = new Order(req.body);
+        const savedOrder = await newOrder.save();
+        res.status(201).json(savedOrder);
+    } catch (err) {
+        res.status(400).json({ message: 'Error creating order', error: err.message });
+    }
+});
+
+// UPDATE Order Status
+// UPDATE Order Status (General)
+router.put('/:id', async (req, res) => {
+    try {
+        const { status } = req.body;
+        let order = await Order.findById(req.params.id);
+        if (!order) {
+            order = await Order.findOne({ orderId: req.params.id });
+        }
+
+        if (!order) return res.status(404).json({ message: 'Order not found' });
+
+        if (status) order.status = status;
+
+        const updatedOrder = await order.save();
+        res.json({ ...updatedOrder.toObject(), id: updatedOrder.orderId || updatedOrder._id.toString() });
+    } catch (err) {
+        res.status(400).json({ message: 'Error updating order', error: err.message });
+    }
+});
+
+// VERIFY Order (Custom Action)
+router.put('/:id/verify', async (req, res) => {
+    try {
+        let order = await Order.findById(req.params.id);
+        if (!order) {
+            order = await Order.findOne({ orderId: req.params.id });
+        }
+
+        if (!order) return res.status(404).json({ message: 'Order not found' });
+
+        order.status = 'Completed';
+        const updatedOrder = await order.save();
+        res.json({ ...updatedOrder.toObject(), id: updatedOrder.orderId || updatedOrder._id.toString() });
+    } catch (err) {
+        res.status(400).json({ message: 'Error verifying order', error: err.message });
+    }
+});
+
+module.exports = router;
+===
+const express = require('express');
+const router = express.Router();
+const Order = require('../models/Order');
+
+const auth = require('../middleware/auth');
+const adminAuth = require('../middleware/adminAuth');
+const User = require('../models/User');
+
+// GET My Orders (Protected)
+router.get('/my-orders', auth, async (req, res) => {
+    try {
+        // Find user to get username (since Order uses username)
+        // Ideally Order should use ObjectId, but sticking to existing schema for now
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const orders = await Order.find({ user: user.username }).sort({ date: -1 });
+
+        const mappedOrders = orders.map(o => ({
+            ...o.toObject(),
+            id: o.orderId || o._id.toString(),
+            mongoId: o._id
+        }));
+        res.json(mappedOrders);
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+});
+
+// GET All Orders (Admin Only)
+router.get('/', auth, adminAuth, async (req, res) => {
+    try {
+        const orders = await Order.find().sort({ date: -1 });
+        // Map _id to id for frontend
+        const mappedOrders = orders.map(o => ({
+            ...o.toObject(),
+            id: o.orderId || o._id.toString(), // Use human readable ID if available
+            mongoId: o._id // Keep actual ID for updates
+        }));
+        res.json(mappedOrders);
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+});
+
+// CREATE Order
+router.post('/', async (req, res) => {
+    try {
+        const newOrder = new Order(req.body);
+        const savedOrder = await newOrder.save();
+        res.status(201).json(savedOrder);
+    } catch (err) {
+        res.status(400).json({ message: 'Error creating order', error: err.message });
+    }
+});
+
+// UPDATE Order Status
+// UPDATE Order Status (Admin Only)
+router.put('/:id', auth, adminAuth, async (req, res) => {
+    try {
+        const { status } = req.body;
+        let order = await Order.findById(req.params.id);
+        if (!order) {
+            order = await Order.findOne({ orderId: req.params.id });
+        }
+
+        if (!order) return res.status(404).json({ message: 'Order not found' });
+
+        if (status) order.status = status;
+
+        const updatedOrder = await order.save();
+        res.json({ ...updatedOrder.toObject(), id: updatedOrder.orderId || updatedOrder._id.toString() });
+    } catch (err) {
+        res.status(400).json({ message: 'Error updating order', error: err.message });
+    }
+});
+
+// VERIFY Order (Admin Only)
+router.put('/:id/verify', auth, adminAuth, async (req, res) => {
+    try {
+        let order = await Order.findById(req.params.id);
+        if (!order) {
+            order = await Order.findOne({ orderId: req.params.id });
+        }
+
+        if (!order) return res.status(404).json({ message: 'Order not found' });
+
+        order.status = 'Completed';
+        const updatedOrder = await order.save();
+        res.json({ ...updatedOrder.toObject(), id: updatedOrder.orderId || updatedOrder._id.toString() });
+    } catch (err) {
+        res.status(400).json({ message: 'Error verifying order', error: err.message });
+    }
+});
+
+module.exports = router;
+```
+
+#### [settings.js](file:///c:/Users/Adonis/Downloads/App/server/routes/settings.js)
+```diff:settings.js
+const express = require('express');
+const router = express.Router();
+const Settings = require('../models/Settings');
+const tpbankClient = require('../utils/tpbank');
+// const auth = require('../middleware/auth'); // Optional: Add auth middleware if needed
+
+// @route   GET api/settings
+// @desc    Get system settings
+// @access  Public (or Protected depending on needs, currently Public for Checkout)
+router.get('/', async (req, res) => {
+    try {
+        let settings = await Settings.findOne();
+        if (!settings) {
+            settings = new Settings();
+            await settings.save();
+        }
+        res.json(settings);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   PUT api/settings
+// @desc    Update system settings
+// @access  Public (Should be Admin only in real app)
+router.put('/', async (req, res) => {
+    const { bank, exchangeRate } = req.body;
+
+    try {
+        let settings = await Settings.findOne();
+        if (!settings) {
+            settings = new Settings();
+        }
+
+        if (bank) settings.bank = bank;
+        if (exchangeRate) settings.exchangeRate = exchangeRate;
+
+        settings.updatedAt = Date.now();
+        await settings.save();
+
+        res.json(settings);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   POST api/settings/test-tpbank
+// @desc    Test TPBank Connection
+// @access  Public (Should be Admin only)
+router.post('/test-tpbank', async (req, res) => {
+    const { username, password, deviceId } = req.body;
+
+    try {
+        if (!username || !password || !deviceId) {
+            return res.status(400).json({ success: false, message: 'Missing credentials' });
+        }
+
+        // Attempt login
+        await tpbankClient.login(username, password, deviceId);
+
+        res.json({ success: true, message: 'Connection Successful! Authenticated with TPBank.' });
+    } catch (err) {
+        console.error('TPBank Test Error:', err.message);
+        const msg = err.response?.data?.message || err.message || 'Connection failed';
+        res.status(400).json({ success: false, message: msg });
+    }
+});
+
+module.exports = router;
+===
+const express = require('express');
+const router = express.Router();
+const Settings = require('../models/Settings');
+const tpbankClient = require('../utils/tpbank');
+const auth = require('../middleware/auth');
+const adminAuth = require('../middleware/adminAuth');
+
+// @route   GET api/settings
+// @desc    Get system settings
+// @access  Public (or Protected depending on needs, currently Public for Checkout)
+router.get('/', async (req, res) => {
+    try {
+        let settings = await Settings.findOne();
+        if (!settings) {
+            settings = new Settings();
+            await settings.save();
+        }
+        res.json(settings);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   PUT api/settings
+// @desc    Update system settings
+// @access  Admin Only
+router.put('/', auth, adminAuth, async (req, res) => {
+    const { bank, exchangeRate } = req.body;
+
+    try {
+        let settings = await Settings.findOne();
+        if (!settings) {
+            settings = new Settings();
+        }
+
+        if (bank) settings.bank = bank;
+        if (exchangeRate) settings.exchangeRate = exchangeRate;
+
+        settings.updatedAt = Date.now();
+        await settings.save();
+
+        res.json(settings);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   POST api/settings/test-tpbank
+// @desc    Test TPBank Connection
+// @access  Admin Only
+router.post('/test-tpbank', auth, adminAuth, async (req, res) => {
+    const { username, password, deviceId } = req.body;
+
+    try {
+        if (!username || !password || !deviceId) {
+            return res.status(400).json({ success: false, message: 'Missing credentials' });
+        }
+
+        // Attempt login
+        await tpbankClient.login(username, password, deviceId);
+
+        res.json({ success: true, message: 'Connection Successful! Authenticated with TPBank.' });
+    } catch (err) {
+        console.error('TPBank Test Error:', err.message);
+        const msg = err.response?.data?.message || err.message || 'Connection failed';
+        res.status(400).json({ success: false, message: msg });
+    }
+});
+
+module.exports = router;
+```
+
+---
+
+## Endpoint Protection Matrix
+
+| Endpoint | Method | Trước | Sau |
+|----------|--------|-------|-----|
+| `/api/products` | POST | Public | Admin only |
+| `/api/products/:id` | PUT | Public | Admin only |
+| `/api/products/:id` | DELETE | Public | Admin only |
+| `/api/orders` | GET | Public | Admin only |
+| `/api/orders/:id` | PUT | Public | Admin only |
+| `/api/orders/:id/verify` | PUT | Public | Admin only |
+| `/api/settings` | PUT | Public | Admin only |
+| `/api/settings/test-tpbank` | POST | Public | Admin only |
+
+---
+
+## Kết quả kiểm thử
+
+### Protected endpoints (không có token)
+```
+POST /api/products → 401 "No token, authorization denied"
+PUT /api/settings → 401 "No token, authorization denied"  
+GET /api/orders → 401 "No token, authorization denied"
+```
+
+### Public endpoints
+```
+GET /api/products → ✅ 200 OK (danh sách sản phẩm)
+GET /api/settings → ✅ 200 OK (settings cho checkout)
+```
+
+### Admin access (có token)
+```
+GET /api/orders → ✅ 200 OK (danh sách orders đầy đủ)
+```

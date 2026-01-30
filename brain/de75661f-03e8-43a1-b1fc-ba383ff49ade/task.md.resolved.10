@@ -1,0 +1,7 @@
+# Task: Restrict Admin Dashboard
+
+- [ ] Implement `AdminRoute` in [App.tsx](file:///c:/Users/Adonis/Downloads/App/src/App.tsx) <!-- id: 0 -->
+    - [ ] Create wrapper checking `user.role === 'admin'` <!-- id: 1 -->
+    - [ ] Apply wrapper to `/admin`, `/dashboard`, `/add-product` <!-- id: 2 -->
+- [ ] Verify `AuthContext` provides role <!-- id: 3 -->
+- [ ] Verification <!-- id: 4 -->

@@ -1,0 +1,34 @@
+# Task: Payment Verification Admin Interface
+
+## Requirements
+- [x] Admin UI để check transaction history
+- [x] Search by order code
+- [x] Hiển thị matching vs mismatching transactions
+- [x] Manual verify option khi user chuyển sai
+
+## Backend API
+- [ ] Create endpoint `/api/orders/verify-payment` (manual)
+- [ ] Enhance `/api/settings/tpbank-history` with search filter
+- [ ] Add endpoint `/api/orders/pending` to list pending orders
+
+## Frontend Components
+- [ ] Create `PaymentVerification.tsx` page
+- [ ] Add to Admin routes
+- [ ] Search box for order code
+- [ ] Transaction list with status indicators
+- [ ] Manual verify button/modal
+- [ ] Alert for mismatches
+
+## Features
+- [ ] Show order details vs transaction details side-by-side
+- [ ] Highlight differences (amount, code)
+- [ ] Allow admin to manually verify with note
+- [ ] Show verification history/audit log
+- [ ] Filter by status (all/matched/mismatched/manual)
+
+## Testing
+- [ ] Test search functionality
+- [ ] Test manual verification
+- [ ] Test with correct payment
+- [ ] Test with wrong amount
+- [ ] Test with missing order code

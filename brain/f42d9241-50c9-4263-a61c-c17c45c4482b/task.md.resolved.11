@@ -1,0 +1,12 @@
+# Task: Implement Binance Pay API (Dynamic QR)
+
+- [ ] Backend Implementation <!-- id: 0 -->
+    - [ ] Create `server/utils/binancePay.js`: Handle signature and `POST /binancepay/openapi/v2/order` <!-- id: 1 -->
+    - [ ] Update [server/routes/settings.js](file:///c:/Users/Adonis/Downloads/App/server/routes/settings.js) (or new route): Add `POST /api/settings/binance-qr` <!-- id: 2 -->
+- [ ] Frontend Implementation <!-- id: 3 -->
+    - [ ] Update [Checkout.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Checkout.tsx): Call `binance-qr` API to get dynamic QR code <!-- id: 4 -->
+    - [ ] Display the returned QR code image (or render URL) <!-- id: 5 -->
+    - [ ] Handle fallback if API fails (show static address) <!-- id: 6 -->
+- [ ] Verification <!-- id: 7 -->
+    - [ ] Verify API request/response log <!-- id: 8 -->
+    - [ ] Verify QR code display <!-- id: 9 -->

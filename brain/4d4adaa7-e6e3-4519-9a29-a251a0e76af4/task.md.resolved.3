@@ -1,0 +1,29 @@
+# Task: Fix Payment Verification Logic
+
+## Problem
+- [x] User reported: Order 2500 VND, paid 2000 VND → accepted ❌
+- [x] Current system not validating exact amount match
+- [x] Current system not validating order code in description
+
+## Analysis
+- [ ] Review current verification logic in tpbankWorker.js
+- [ ] Check Order model structure
+- [ ] Identify where amount validation is missing
+
+## Implementation
+- [ ] Add strict amount matching (exact match)
+- [ ] Add order code validation in transaction description
+- [ ] Update verification logic to require BOTH conditions
+- [ ] Add logging for failed verification attempts
+
+## Testing
+- [ ] Create test order
+- [ ] Test with correct amount + correct code → PASS
+- [ ] Test with wrong amount + correct code → FAIL
+- [ ] Test with correct amount + wrong code → FAIL
+- [ ] Test with wrong amount + wrong code → FAIL
+
+## Security
+- [ ] Ensure no false positives
+- [ ] Add detailed logs for audit trail
+- [ ] Document verification requirements

@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_TASK",
+  "summary": "Detailed task breakdown for integrating Binance API to track crypto transaction history, following the existing TPBank pattern. Includes backend implementation (Binance client, Settings model update, API endpoints), frontend implementation (BinanceMonitor component, Admin Dashboard integration), testing, and documentation steps.",
+  "updatedAt": "2026-01-24T17:40:36.125180Z"
+}

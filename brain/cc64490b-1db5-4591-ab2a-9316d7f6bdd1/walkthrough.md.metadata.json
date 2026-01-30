@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Báo cáo kiểm thử chi tiết ứng dụng R4B bao gồm: 15 lỗi được phát hiện (4 Critical, 7 Major, 4 Minor), audit của Admin Dashboard, User features, Checkout flow, Authorization testing. Kèm theo recordings browser và danh sách priority fixes.",
+  "updatedAt": "2026-01-24T01:35:12.266258400Z"
+}

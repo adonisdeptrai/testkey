@@ -1,0 +1,36 @@
+# Debug All Code - Comprehensive Codebase Audit
+
+## Phase 1: Information Gathering
+- [ ] Explore project structure
+- [ ] Identify technology stack
+- [ ] List all major components (Frontend, Backend, Docker)
+
+## Phase 2: Automated Testing & Scanning
+- [ ] Run security scan (`security_scan.py`)
+- [ ] Run dependency analyzer (`dependency_analyzer.py`)
+- [ ] Run lint checks (`lint_runner.py`)
+- [ ] Check schema validation (`schema_validator.py`)
+- [ ] Run test suite (`test_runner.py`)
+
+## Phase 3: Manual Code Review
+- [ ] Backend code review
+  - [ ] API endpoints validation
+  - [ ] Database models consistency
+  - [ ] Authentication/Authorization
+  - [ ] Error handling
+- [ ] Frontend code review
+  - [ ] TypeScript errors
+  - [ ] Component structure
+  - [ ] API integration
+  - [ ] State management
+- [ ] Configuration files
+  - [ ] Docker setup
+  - [ ] Environment variables
+  - [ ] Build scripts
+
+## Phase 4: Issue Resolution & Prevention
+- [ ] Document all findings
+- [ ] Fix critical issues (P0)
+- [ ] Fix high-priority issues (P1)
+- [ ] Create prevention checklist
+- [ ] Update documentation

@@ -1,0 +1,32 @@
+# Walkthrough - Sidebar Product Filtering Fix
+
+I have fixed the issue where "Tools", "Courses", and "License Keys" tabs were empty in the Admin Dashboard.
+
+## Changes
+
+### [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+1.  **Added Missing Tabs**: Added conditional rendering for `tools` and `courses`.
+2.  **Fixed "License Keys"**:
+    - Identified that [KeyManagementView](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#219-265) was not receiving the `products` list.
+    - Updated [KeyManagementView](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#219-265) to accept and pass the `products` prop to the internal [AdminProducts](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#167-218) component.
+    - Updated filtering to strictly use `ProductType` enum.
+
+```diff
+// KeyManagementView now accepts products
+- const KeyManagementView = ({ onEdit, onAdd, onSendKey, pendingKeys }: any) => (
++ const KeyManagementView = ({ onEdit, onAdd, onSendKey, pendingKeys, products }: any) => (
+  // ...
+- <AdminProducts onEdit={onEdit} onAdd={onAdd} filterType={ProductType.KEY} />
++ <AdminProducts onEdit={onEdit} onAdd={onAdd} filterType={ProductType.KEY} products={products} />
+```
+
+## Verification Results
+
+### Automated Checks
+- **Database Data**: I ran a debug script and confirmed that products with types `MMO Tool`, `Course`, and `License Key` exist in the database.
+- **Build**: Successfully built and deployed with Docker.
+
+### Manual Verification Steps
+1.  **Refresh App**: Refresh the Admin Dashboard.
+2.  **Check License Keys**: Click "License Keys" -> It should now display the "GPM Login License" product.
+3.  **Check Others**: "Tools" and "Courses" should also display their respective products.

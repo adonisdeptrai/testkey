@@ -1,0 +1,28 @@
+# Task: Thêm Đăng Nhập Google OAuth với Supabase
+
+## Phase 1: Supabase Configuration
+- [/] Cấu hình Google OAuth Provider trong Supabase Dashboard
+- [ ] Lấy Google Client ID và Secret từ Google Cloud Console
+- [ ] Cập nhật Redirect URLs trong Google Cloud Console
+
+## Phase 2: Backend Implementation
+- [ ] Tạo route `/api/auth/google/callback` để xử lý callback
+- [ ] Cấu hình Supabase client cho OAuth authentication
+- [ ] Xử lý user data từ Google và tạo/cập nhật user trong database
+- [ ] Generate JWT token cho session management
+
+## Phase 3: Frontend Implementation
+- [ ] Cập nhật [AuthContext.tsx](file:///c:/Users/Adonis/Downloads/App/src/contexts/AuthContext.tsx) - thêm `loginWithGoogle()` method
+- [ ] Cập nhật [Auth.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Auth.tsx) - kết nối button "Sign in with Google" với OAuth flow
+- [ ] Xử lý callback từ Google và redirect về dashboard
+- [ ] Error handling và loading states
+
+## Phase 4: Environment Configuration
+- [ ] Cập nhật [.env](file:///c:/Users/Adonis/Downloads/App/.env) với Google OAuth credentials
+- [ ] Cập nhật [.env.example](file:///c:/Users/Adonis/Downloads/App/.env.example) với template mới
+
+## Phase 5: Testing & Verification
+- [ ] Test OAuth flow end-to-end bằng browser
+- [ ] Verify user được tạo đúng trong database
+- [ ] Test error cases (cancel, invalid credentials)
+- [ ] Verify session persistence và logout

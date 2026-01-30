@@ -1,0 +1,10 @@
+# Task: Complete Admin Dashboard
+
+- [ ] Backend: Update [orders.js](file:///c:/Users/Adonis/Downloads/App/server/routes/orders.js) <!-- id: 0 -->
+    - [ ] Add `PUT /:id/verify` route <!-- id: 1 -->
+    - [ ] Ensure `GET /` returns all orders (or add `GET /all` for admin) <!-- id: 2 -->
+- [ ] Backend: Verify [products.js](file:///c:/Users/Adonis/Downloads/App/server/routes/products.js) (Done previously, just quick check) <!-- id: 3 -->
+- [ ] Frontend: Update [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx) <!-- id: 4 -->
+    - [ ] Implement `handleVerifyOrder` <!-- id: 5 -->
+    - [ ] Ensure [handleDeleteProduct](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#1278-1292) is connected <!-- id: 6 -->
+- [ ] Integration Verification <!-- id: 7 -->

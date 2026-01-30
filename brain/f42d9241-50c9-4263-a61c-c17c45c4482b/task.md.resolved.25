@@ -1,0 +1,30 @@
+# Task List: Binance Pay Auto-Payment Integration
+
+- [x] Plan & Requirements
+    - [x] Confirm Requirements (Redirect vs QR, Coexistence, Environment) 
+    - [x] Create Implementation Plan
+- [x] Backend Implementation
+    - [x] Update [binancePay.js](file:///c:/Users/Adonis/Downloads/App/server/utils/binancePay.js) utils (Add Webhook Verification, Query Order)
+    - [x] Create API Endpoint: Create Order (`POST /api/payment/binance/create`)
+    - [x] Create API Endpoint: Query Order (`GET /api/payment/binance/query/:orderId`)
+    - [x] Create API Endpoint: Webhook Handler (`POST /api/payment/binance/webhook`) (Prepare for Prod)
+- [x] Frontend Implementation
+    - [x] Update [Checkout.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Checkout.tsx) to add "Binance Pay" method
+    - [x] Implement Payment Flow (Call API -> Get QR/Url -> Display -> Poll Status)
+    - [x] Add Success/Failure handling
+- [x] Verification
+    - [x] Test Create Order (Generate QR)
+    - [x] Test Polling/Status Check
+    - [x] Verify Order Status Update in Database
+- [x] Check TPBank API
+    - [x] Review Backend Utility ([tpbank.js](file:///c:/Users/Adonis/Downloads/App/server/utils/tpbank.js))
+    - [x] Review Frontend Monitor ([TPBankMonitor.tsx](file:///c:/Users/Adonis/Downloads/App/src/components/admin/TPBankMonitor.tsx))
+    - [x] Verify Background Worker (Auto-Check Logic)
+- [x] Debug Checkout Flow
+    - [x] Fix Order Status Validation (Paid -> completed)
+    - [x] Remove Duplicate Polling Logic in Checkout.tsx
+    - [x] Verify 429 Errors Resolved
+- [x] Deployment Preparation
+    - [x] Create [docker-compose.prod.yml](file:///c:/Users/Adonis/Downloads/App/docker-compose.prod.yml)
+    - [x] Create [.env.production](file:///c:/Users/Adonis/Downloads/App/.env.production)
+    - [x] Create [deploy.sh](file:///c:/Users/Adonis/Downloads/App/deploy.sh) helper script

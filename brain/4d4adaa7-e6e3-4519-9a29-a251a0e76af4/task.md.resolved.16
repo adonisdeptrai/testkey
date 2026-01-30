@@ -1,0 +1,31 @@
+# Task: Professional Admin Overview Dashboard
+
+## Backend - Stats API
+- [x] Create `/api/stats/overview` endpoint
+- [x] Fetch total revenue from completed orders
+- [x] Fetch total orders count by status
+- [x] Fetch user count and growth
+- [x] Fetch recent orders (last 7 days)
+- [x] Calculate revenue trends (daily/weekly)
+- [x] Mount stats routes in server
+
+## Frontend - Charts & Visuals
+- [/] Install chart library (recharts)
+- [ ] Create revenue chart (line/area chart)
+- [ ] Create orders by status (pie/donut chart)
+- [ ] Create sales trend chart
+- [ ] Add stat cards with real data
+- [ ] Add loading states
+
+## UI/UX Enhancement
+- [ ] Professional card layouts
+- [ ] Gradient backgrounds
+- [ ] Animated counters
+- [ ] Responsive grid layout
+- [ ] Color-coded metrics
+
+## Testing & Deployment
+- [ ] Test with real database data
+- [ ] Verify chart responsiveness
+- [ ] Check loading states
+- [ ] Build and deploy Docker

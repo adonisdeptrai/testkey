@@ -1,0 +1,32 @@
+# Docker Integration & Shop Design Walkthrough
+
+I have successfully integrated Docker and synchronized the Shop design with the Landing page.
+
+## Changes Overview
+
+### 1. Docker Integration
+- **Containerized App**: Custom [Dockerfile](file:///c:/Users/Adonis/Downloads/landing-page---v3/Dockerfile) with multi-stage build (Node.js -> Nginx).
+- **Orchestration**: [docker-compose.yml](file:///c:/Users/Adonis/Downloads/landing-page---v3/docker-compose.yml) mapping port 8080:80.
+- **Optimization**: [.dockerignore](file:///c:/Users/Adonis/Downloads/landing-page---v3/.dockerignore) and Nginx Gzip compression.
+
+### 2. Shop Design Overhaul
+- **Dark Theme**: Switched [Shop.tsx](file:///c:/Users/Adonis/Downloads/landing-page---v3/Shop.tsx) from Light Mode to Dark Mode (`#020617`) to match [Landing.tsx](file:///c:/Users/Adonis/Downloads/landing-page---v3/Landing.tsx).
+- **Liquid Glass Aesthetic**: Implemented glassmorphism on the Navbar and Product Cards.
+- **Animation**: Added the same background animations (floating blobs, scanning beam) as the Landing page.
+- **Consistency**: Unified color palette ("Cream Cyan") and typography.
+
+## How to Run
+
+1.  **Build and Start:**
+    ```bash
+    docker compose up -d --build
+    ```
+
+2.  **Access the Application:**
+    - Local: [http://localhost:8080](http://localhost:8080)
+    - Mobile/Network: **[http://192.168.1.165:8080](http://192.168.1.165:8080)**
+
+3.  **Stop:**
+    ```bash
+    docker compose down
+    ```

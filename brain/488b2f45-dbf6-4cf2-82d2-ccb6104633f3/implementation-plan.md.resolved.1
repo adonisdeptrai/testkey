@@ -1,0 +1,453 @@
+# Product Key Distribution System - Implementation Plan
+
+## Goal
+
+Implement complete **License Key / Product Key Distribution** system để automatically assign keys cho users sau khi order được completed, manage key inventory cho admin, và hiển thị purchased keys cho users.
+
+## User Review Required
+
+> [!WARNING]
+> **Multiple Products per Order NOT Supported**: Current Order model only supports 1 product per order. Multi-product cart sẽ cần Order model redesign.
+
+> [!IMPORTANT]
+> **Manual Key Entry**: Admin phải manually add keys vào inventory trước. System không auto-generate keys.
+
+## Proposed Changes
+
+### Backend Changes
+
+#### 1. [NEW] [ProductKey.js](file:///c:/Users/Adonis/Downloads/App/server/models/ProductKey.js)
+
+**Create New Model:**
+```javascript
+const ProductKeySchema = new mongoose.Schema({
+    productId: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Product', 
+        required: true,
+        index: true 
+    },
+    key: { 
+        type: String, 
+        required: true, 
+        unique: true  // Prevent duplicate keys
+    },
+    status: { 
+        type: String, 
+        enum: ['available', 'sold', 'reserved'], 
+        default: 'available',
+        index: true 
+    },
+    orderId: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Order' 
+    },
+    userId: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User' 
+    },
+    assignedAt: { type: Date },
+    createdAt: { type: Date, default: Date.now }
+});
+```
+
+**Indexes:**
+- `productId` - Fast lookup keys by product
+- `status` - Fast filtering available keys
+- `key` - Unique constraint
+
+---
+
+#### 2. [MODIFY] [Order.js](file:///c:/Users/Adonis/Downloads/App/server/models/Order.js)
+
+**Add Field:**
+```javascript
+assignedKeys: [{ 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'ProductKey' 
+}]
+```
+
+**Purpose:** Track which keys were assigned to this order.
+
+---
+
+#### 3. [NEW] [keys.js](file:///c:/Users/Adonis/Downloads/App/server/routes/keys.js)
+
+**Create CRUD Routes:**
+
+**a) GET /api/keys?productId=xxx&status=available** (Admin)
+- List keys with filters
+- Pagination support
+
+**b) POST /api/keys** (Admin)
+- Bulk add keys from textarea input
+- Format: One key per line
+- Auto-detect product from request
+- Validate uniqueness
+
+**c) DELETE /api/keys/:id** (Admin)
+- Delete key (only if status=available)
+- Cannot delete sold keys
+
+**d) GET /api/keys/assigned/:orderId** (User + Admin)
+- Get keys assigned to specific order
+- Used by user dashboard to display purchased keys
+
+**e) POST /api/keys/assign** (Admin - Manual Assignment)
+- Manually assign key to order
+- Used by SendKeyModal
+
+---
+
+#### 4. [MODIFY] [orders.js](file:///c:/Users/Adonis/Downloads/App/server/routes/orders.js)
+
+**Add Auto-Assignment Logic:**
+
+**When Order status changes to 'Completed':**
+```javascript
+// In order update endpoint (PUT /api/orders/:id)
+if (req.body.status === 'Completed' && oldStatus !== 'Completed') {
+    // Auto-assign key
+    await autoAssignKeys(orderId, order.product, order.user);
+}
+
+async function autoAssignKeys(orderId, productId, userId) {
+    // 1. Check if product type requires key (ProductType.KEY)
+    const product = await Product.findById(productId);
+    if (product.type !== 'License Key') return; // Only for key products
+    
+    // 2. Find available key
+    const availableKey = await ProductKey.findOne({
+        productId,
+        status: 'available'
+    }).sort({ createdAt: 1 }); // FIFO
+    
+    if (!availableKey) {
+        throw new Error('No keys available for this product');
+    }
+    
+    // 3. Assign key
+    availableKey.status = 'sold';
+    availableKey.orderId = orderId;
+    availableKey.userId = userId;
+    availableKey.assignedAt = new Date();
+    await availableKey.save();
+    
+    // 4. Update order
+    order.assignedKeys.push(availableKey._id);
+    await order.save();
+    
+    // 5. Send email notification (optional)
+    sendKeyEmail(user.email, product.title, availableKey.key);
+}
+```
+
+**Error Handling:**
+- If no keys available → Order stays in "Processing" với error message
+- Admin gets notification to add keys
+
+---
+
+### Frontend Changes
+
+#### 5. [MODIFY] [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+
+**Update KeyManagementView (lines 432-481):**
+- Replace `INITIAL_PENDING_KEYS` mock data với real API call
+- Fetch pending keys: `GET /api/orders?status=Processing&productType=License Key`
+- Fetch key inventory: `GET /api/keys?productId=xxx`
+
+**Update SendKeyModal (lines 1251-1318):**
+- Change `onConfirm` to call `POST /api/keys/assign`
+- Add error handling (no keys available)
+- Auto-refresh list after assignment
+
+**New Feature: Bulk Key Upload Modal**
+```typescript
+const BulkKeyUploadModal = ({ productId, onClose, onSuccess }) => {
+    const [keysText, setKeysText] = useState('');
+    
+    const handleUpload = async () => {
+        const keys = keysText.split('\n').filter(k => k.trim());
+        await fetch('/api/keys', {
+            method: 'POST',
+            body: JSON.stringify({ productId, keys })
+        });
+        onSuccess();
+    };
+    
+    // UI similar to SendKeyModal
+};
+```
+
+**Integration in ManageProductModal:**
+- Add "Manage Keys" tab for ProductType.KEY
+- Show current inventory count
+- Button to open BulkKeyUploadModal
+
+---
+
+#### 6. [MODIFY] [Dashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Dashboard.tsx)
+
+**Update "Orders" Tab:**
+
+**Show Assigned Keys:**
+```typescript
+{order.assignedKeys?.length > 0 && (
+    <div className="mt-3 p-3 bg-emerald-50 rounded-lg">
+        <div className="flex items-center gap-2 text-emerald-700 font-medium mb-2">
+            <Key size={16} />
+            Your License Keys
+        </div>
+        {order.assignedKeys.map(key => (
+            <div key={key._id} className="font-mono text-sm bg-white p-2 rounded border">
+                {key.key}
+                <button onClick={() => copyToClipboard(key.key)}>Copy</button>
+            </div>
+        ))}
+    </div>
+)}
+```
+
+**Fetch Keys:**
+```typescript
+// When fetching orders
+const ordersWithKeys = await Promise.all(
+    orders.map(async order => {
+        if (order.status === 'Completed') {
+            const keys = await fetch(`/api/keys/assigned/${order._id}`);
+            return { ...order, assignedKeys: keys };
+        }
+        return order;
+    })
+);
+```
+
+---
+
+### Email Notification (Optional)
+
+#### 7. [MODIFY] [orders.js](file:///c:/Users/Adonis/Downloads/App/server/routes/orders.js)
+
+**Send Email After Key Assignment:**
+```javascript
+async function sendKeyEmail(email, productName, key) {
+    if (!process.env.EMAIL_USER) return;
+    
+    const transporter = nodemailer.createTransport({...});
+    
+    const mailOptions = {
+        to: email,
+        subject: `Your License Key for ${productName}`,
+        html: `
+            <h1>Order Completed!</h1>
+            <p>Your license key for <strong>${productName}</strong>:</p>
+            <div style="background: #f0f0f0; padding: 15px; font-family: monospace; font-size: 16px; letter-spacing: 2px;">
+                ${key}
+            </div>
+            <p>You can also view this key in your dashboard.</p>
+        `
+    };
+    
+    transporter.sendMail(mailOptions);
+}
+```
+
+---
+
+## Verification Plan
+
+### Manual Testing
+
+**Test Script:** `test-key-distribution.ps1`
+
+**Scenario Steps:**
+
+**1. Admin - Add Keys to Inventory**
+```powershell
+# Login as admin
+$token = (Login with admin credentials)
+
+# Add keys for a product
+POST /api/keys
+Body: {
+  "productId": "abc123",
+  "keys": ["KEY-001", "KEY-002", "KEY-003"]
+}
+
+# Verify keys added
+GET /api/keys?productId=abc123
+# Expected: 3 keys with status=available
+```
+
+**2. User - Purchase Product**
+```powershell
+# Login as user
+# Add product (type=License Key) to cart
+# Complete checkout → Order created with status=Pending
+
+# Admin verifies payment
+PUT /api/orders/:id
+Body: { "status": "Completed" }
+
+# Expected: 
+# - Order shows assignedKeys array with 1 key
+# - ProductKey status changed to 'sold'
+# - User receives email (if SMTP configured)
+```
+
+**3. User - View Purchased Key**
+```powershell
+# User visits /dashboard → Orders tab
+# Expected: See order with "Your License Keys" section showing KEY-001
+
+# Click copy button
+# Expected: Key copied to clipboard
+```
+
+**4. Admin - View Key Status**
+```powershell
+# Admin visits /admin → Key Management tab
+# Expected:
+# - Pending Fulfillment: 0 orders (already auto-assigned)
+# - Inventory: 2 available keys, 1 sold key
+```
+
+**5. Edge Case - No Keys Available**
+```powershell
+# Repeat purchase 3 times (exhaust inventory)
+# 4th purchase:
+# Admin marks order as Completed
+# Expected: Error "No keys available for this product"
+# Order stays in Processing status
+# Admin sees alert to add more keys
+```
+
+---
+
+### Automated Tests
+
+**NO EXISTING TESTS** - Project doesn't have test suite.
+
+**Recommended (Future):**
+```javascript
+// test/keys.test.js
+describe('Key Assignment', () => {
+    it('should auto-assign key when order completed');
+    it('should throw error if no keys available');
+    it('should not assign duplicate keys');
+    it('should only assign for ProductType.KEY');
+});
+```
+
+---
+
+## Database Migration
+
+**No Migration Script Needed** - Mongoose will auto-create collections.
+
+**Manual DB Check (Optional):**
+```javascript
+// Add sample keys for testing
+db.productkeys.insertMany([
+  { 
+    productId: ObjectId("..."), 
+    key: "TEST-KEY-001", 
+    status: "available" 
+  },
+  { 
+    productId: ObjectId("..."), 
+    key: "TEST-KEY-002", 
+    status: "available" 
+  }
+]);
+```
+
+---
+
+## Implementation Order
+
+1. **Backend Foundation** (Day 1)
+   - Create ProductKey model
+   - Create /api/keys routes (CRUD)
+   - Test with Postman/PowerShell
+
+2. **Auto-Assignment Logic** (Day 1-2)
+   - Modify Order model
+   - Add autoAssignKeys() function
+   - Test edge cases (no keys, wrong product type)
+
+3. **Admin UI Integration** (Day 2)
+   - Connect KeyManagementView to real API
+   - Implement BulkKeyUploadModal
+   - Update ManageProductModal with "Manage Keys" tab
+
+4. **User Dashboard** (Day 2-3)
+   - Fetch and display assigned keys
+   - Copy-to-clipboard functionality
+   - Responsive design
+
+5. **Email Notification** (Day 3 - Optional)
+   - Implement sendKeyEmail()
+   - Test delivery
+
+6. **Testing & Polish** (Day 3)
+   - Run manual test script
+   - Fix bugs
+   - Documentation updates
+
+---
+
+## Security Considerations
+
+1. **Key Visibility**: Only show keys to:
+   - Order owner (user who purchased)
+   - Admin
+   
+2. **Key Uniqueness**: Enforce unique constraint in DB
+
+3. **Assignment Integrity**: Use transactions (optional but recommended)
+   ```javascript
+   const session = await mongoose.startSession();
+   session.startTransaction();
+   try {
+       // Assign key
+       // Update order
+       await session.commitTransaction();
+   } catch (err) {
+       await session.abortTransaction();
+       throw err;
+   }
+   ```
+
+4. **Rate Limiting**: Bulk key upload should have rate limit (prevent spam)
+
+---
+
+## File Summary
+
+**Created:** 2 files
+- `server/models/ProductKey.js` - New model
+- `server/routes/keys.js` - CRUD routes
+
+**Modified:** 4 files  
+- [server/models/Order.js](file:///c:/Users/Adonis/Downloads/App/server/models/Order.js) - Add assignedKeys field
+- [server/routes/orders.js](file:///c:/Users/Adonis/Downloads/App/server/routes/orders.js) - Add auto-assignment logic
+- [src/pages/AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx) - Connect KeyManagementView to API, add BulkKeyUploadModal
+- [src/pages/Dashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Dashboard.tsx) - Display assigned keys in orders tab
+
+**Total Code Changes:** ~400-500 lines
+
+---
+
+## Known Limitations
+
+1. **Quantity Support**: Current implementation assumes quantity=1. Multi-quantity orders need loop logic.
+2. **Key Expiration**: No expiration mechanism (keys valid forever).
+3. **Key Revocation**: Cannot revoke/deactivate sold keys.
+4. **Audit Trail**: No logging when keys are assigned (consider adding to SystemLog).
+
+---
+
+*Plan created: 2026-01-25*

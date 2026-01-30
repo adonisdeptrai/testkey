@@ -1,0 +1,35 @@
+# MMO Liquid Glass Frontend Implementation Plan
+
+Goal: Create a modern, visually stunning Frontend for an MMO App featuring a "Liquid Glass" (Glassmorphism) theme and demo products.
+
+## Proposed Changes
+
+### Project Structure
+- Initialize Vite + React project at `C:\Users\Adonis\.gemini\antigravity\scratch\mmo-liquid-glass`
+- **Framework**: React (via Vite) for component modularity.
+- **Styling**: Vanilla CSS (CSS Modules or global CSS) to implement custom Glassmorphism without framework constraints.
+
+### Design System: "Liquid Glass"
+- **Background**: Dynamic, moving multi-color gradients (Mesh Gradients) to provide the "liquid" feel behind the glass.
+- **Glass Cards**:
+    - `background: rgba(255, 255, 255, 0.1)`
+    - `backdrop-filter: blur(12px)`
+    - `border: 1px solid rgba(255, 255, 255, 0.2)`
+    - `box-shadow`: Soft glowing shadows.
+- **Typography**: 'Inter' or 'Outfit' from Google Fonts for a gaming/modern aesthetic.
+
+### Content Structure (Demo Product)
+1.  **Navigation Bar**: Glass strip with logo and user status.
+2.  **Hero Section**: Featured "New Expansion" or "Event" with 3D-like text or floating elements.
+3.  **Marketplace Grid**:
+    - Demo items: "Void Walker Armor", "Crystal Staff", "Ancient Potion".
+    - Each item in a glass card with hover interactions (glow/lift).
+
+## Verification Plan
+
+### Automated
+- `npm run build` to verify production build.
+
+### Manual
+- Run `npm run dev`.
+- Visual inspection of Glassmorphism rendering (blur, transparency) and responsiveness.

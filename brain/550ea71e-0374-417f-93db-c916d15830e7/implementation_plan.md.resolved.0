@@ -1,0 +1,41 @@
+# Fix Sidebar Product Filtering and Empty States
+
+The "Tools", "Courses", and "License Keys" tabs in the Admin Dashboard sidebar are showing empty states or not rendering at all. This is due to missing render logic for 'tools' and 'courses' tabs in the [AdminDashboard](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#1303-1514) component, and potential string mismatches in filtering.
+
+## User Review Required
+> [!NOTE]
+> I will be using the strict `ProductType` enum values for filtering to ensure consistency with the backend data.
+
+## Proposed Changes
+
+### Frontend
+
+#### [MODIFY] [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+- Import `ProductType` enum.
+- Add conditional rendering blocks for `activeTab === 'tools'` and `activeTab === 'courses'`.
+- Pass the correct `filterType` (using `ProductType` enum) to [AdminProducts](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#167-218) for these tabs.
+- Ensure `activeTab === 'keys'` uses `ProductType.KEY` instead of hardcoded string for consistency.
+
+```typescript
+// Example change
+{activeTab === 'tools' && (
+    <AdminProducts
+        onEdit={setEditingProduct}
+        onAdd={() => setIsAddingProduct(true)}
+        onDelete={handleDeleteProduct}
+        products={products}
+        filterType={ProductType.TOOL}
+    />
+)}
+```
+
+## Verification Plan
+
+### Manual Verification
+1.  **Start the app**: Ensure the development server is running.
+2.  **Login as Admin**: Use admin credentials.
+3.  **Navigate to Sidebar Tabs**:
+    - Click "Tools" -> Verify items with type "MMO Tool" appear.
+    - Click "Courses" -> Verify items with type "Course" appear.
+    - Click "License Keys" -> Verify items with type "License Key" appear.
+4.  **Verify Empty State**: If no items of a certain type exist, ensure the empty state is handled gracefully (which [AdminProducts](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#167-218) table likely does by showing just headers or empty rows).

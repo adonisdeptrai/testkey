@@ -1,0 +1,29 @@
+# Implementation Plan - Synchronize UI Theme (Liquid Glass)
+
+## Goal Description
+The current [OrderSuccess.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/OrderSuccess.tsx) implements a light theme which clashes with the global "Liquid Glass" dark theme (`#020617` background, glass panels, cyan accents) used in [Checkout.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Checkout.tsx) and other pages.
+The goal is to adapt the **layout and structure** of the APPROVED [OrderSuccess](file:///c:/Users/Adonis/Downloads/App/src/pages/OrderSuccess.tsx#11-102) design (centered card, checkmark, order details, specific buttons) to the **Liquid Glass Theme**.
+
+## User Review Required
+> [!NOTE]
+> I am proceeding with the assumption that "đồng bộ giao diện" means reconciling the clash between the new light page and the existing dark app. I will keep the *layout* of the mockup but use the *colors/effects* of the app.
+> If the user wanted the WHOLE APP to be light, this would be a much larger task. Given the history of "Liquid Glass" requests, the Dark adaptation is the safest and most consistent path.
+
+## Proposed Changes
+
+### Pages
+#### [MODIFY] [OrderSuccess.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/OrderSuccess.tsx)
+- **Background**: Change from `#f8fafc` (Light Slate) to `#020617` (Dark Blue) with `AnimatedBackground`.
+- **Card Container**: Change from White to `bg-[#0b1121]/80 backdrop-blur-2xl` (Glass Panel).
+- **Typography**: Change from Slate-900 (Black) to White/Slate-200.
+- **Icons**: Ensure the Green Checkmark is adapted or kept if it fits; implied "Cream Cyan" might be better (`text-brand-cyan`).
+- **Buttons**:
+    - Primary: `bg-brand-cyan text-black` (Standard Brand Button).
+    - Secondary: `bg-white/5 text-white border-white/10` (Glass Secondary).
+    - Floating Action: `bg-brand-cyan` or `bg-white/10`.
+
+## Verification Plan
+
+### Manual Verification
+- Render `/order-success` in browser.
+- Verify it looks "consistent" with [Checkout](file:///c:/Users/Adonis/Downloads/App/src/pages/Checkout.tsx#15-334) (Dark, Glassy) but retains the "Payment Successful" layout.

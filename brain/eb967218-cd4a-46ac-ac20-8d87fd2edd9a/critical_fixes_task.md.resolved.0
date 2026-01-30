@@ -1,0 +1,24 @@
+# Critical Security Fixes
+
+## Objective
+Fix 3 critical security issues discovered in audit
+
+## Task Breakdown
+
+### [/] CRIT-001: Remove Exposed Credentials
+- [/] Remove [.env](file:///c:/Users/Adonis/Downloads/App/.env) and [.env.production](file:///c:/Users/Adonis/Downloads/App/.env.production) from git tracking
+- [ ] Update [.gitignore](file:///c:/Users/Adonis/Downloads/App/.gitignore)
+- [ ] Regenerate JWT_SECRET
+- [ ] Document credential rotation steps
+
+### [ ] CRIT-002: Encrypt Sensitive Database Fields
+- [ ] Create encryption utility
+- [ ] Add encryption key to environment
+- [ ] Update Settings model with encryption
+- [ ] Add pre-save hooks for auto-encryption
+
+### [ ] CRIT-003: Fix Hardcoded URLs
+- [ ] Create API config file
+- [ ] Add VITE_API_URL to environment files
+- [ ] Replace hardcoded URLs in frontend (35+ instances)
+- [ ] Verify all API calls work

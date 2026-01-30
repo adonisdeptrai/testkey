@@ -1,0 +1,52 @@
+# Implementation Plan - Email Verification
+
+## Goal
+Implement a secure email verification flow for new user registrations. Users must verify their email before accessing the full platform (or at least be marked as verified).
+
+## Proposed Changes
+
+### Backend
+1.  **User Model (`server/models/User.js`)**:
+    *   Add `isVerified` (boolean, default `false`).
+    *   Add `verificationToken` (string).
+2.  **Auth Routes (`server/routes/auth.js`)**:
+    *   **Registration**:
+        *   Generate a unique token (`crypto.randomBytes`).
+        *   Save user with `isVerified: false` and the token.
+        *   **Email Sending Strategy**:
+            *   Install `nodemailer`.
+            *   Check for `EMAIL_USER` and `EMAIL_PASS` in env.
+            *   **Case A (Credentials Exist)**: Send real email via Gmail SMTP (Free).
+            *   **Case B (Missing Credentials)**: Fallback to logging the link to server console.
+    *   **Verification Endpoint (`POST /api/auth/verify`)**:
+        *   Accept `token` in body.
+        *   Find user by `verificationToken`.
+        *   Update `isVerified: true`, clear `verificationToken`.
+        *   Return success.
+
+### Frontend
+1.  **Auth Component (`src/pages/Auth.tsx`)**:
+    *   Update `handleRegister`:
+        *   Show "Check your email" success message after registration (already exists, but refine it).
+2.  **New Page: `VerifyEmail.tsx`** (`src/pages/VerifyEmail.tsx`):
+    *   Route: `/verify-email`.
+    *   Read `token` from URL query params.
+    *   Call `POST /api/auth/verify`.
+    *   Show "Success" or "Error" state.
+    *   Redirect to login on success.
+3.  **App Routing (`src/App.tsx`)** (Need to check if it exists or main.tsx):
+    *   Add route for `/verify-email`.
+
+## Verification Plan
+
+### Automated
+1.  **Browser Flow**:
+    *   Register a new user `verify_test`.
+    *   **Capture Token**: Read server logs (via `read_terminal` or `docker logs`?) -> *Constraint*: Hard to automate reading docker logs for the token in this environment effectively.
+    *   *Workaround*: I will make the backend return the token in the `register` response ONLY for development/test mode (or just logging it). For true verification, I'll manually check the console output in the terminal to get the link.
+    *   Navigate to `http://localhost:8080/verify-email?token=<TOKEN>`.
+    *   Verify "Email Verified" message.
+    *   Login and check `isVerified` status (api/auth/me?).
+
+### Manual
+1.  Refers to the process above. I will perform the registration, find the link in the "server" terminal output, and click it.

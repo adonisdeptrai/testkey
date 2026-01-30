@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_TASK",
+  "summary": "Task breakdown for MongoDB to Supabase migration. Phase 1-4 complete (database schema, backend refactoring, cleanup, Docker config). Phase 5 testing pending.",
+  "updatedAt": "2026-01-30T00:57:17.253772500Z",
+  "version": "6"
+}

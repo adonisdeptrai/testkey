@@ -1,0 +1,29 @@
+# Implementation Plan - User Management APIs
+
+## Goal
+Implement missing critical user management API endpoints in the backend to allow Admins to manage users effectively.
+
+## User Review Required
+- **Schema Change**: Adding `isBanned` field to [User](file:///c:/Users/Adonis/Downloads/App/src/types.ts#60-69) model.
+- **Security**: `DELETE` will prevent self-deletion. `ban` will toggle the status.
+
+## Proposed Changes
+
+### Backend
+
+#### [MODIFY] [User.js](file:///c:/Users/Adonis/Downloads/App/server/models/User.js)
+- Add `isBanned` field (Boolean, default: `false`).
+
+#### [MODIFY] [users.js](file:///c:/Users/Adonis/Downloads/App/server/routes/users.js)
+- Implement `PUT /:id` - Generic update (username, email, role).
+- Implement `PUT /:id/ban` - Toggle `isBanned` status.
+- Implement `PUT /:id/balance` - Update user balance (increment/decrement/set).
+- Implement `DELETE /:id` - Delete user (with self-deletion check).
+
+## Verification Plan
+### Automated Information
+- Verify routes are registered in [server/index.js](file:///c:/Users/Adonis/Downloads/App/server/index.js) (already registered).
+- Verify schema update.
+
+### Manual Verification
+- Use Admin Panel (once FE is connected) to test Ban, Edit, and Delete.

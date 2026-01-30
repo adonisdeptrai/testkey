@@ -1,0 +1,34 @@
+# Email Verification Flow Implementation
+
+## Mục tiêu
+Implement complete email verification system với backend endpoint, email sending, và frontend integration.
+
+## Checklist
+
+### Backend Implementation
+- [ ] Add verification endpoint `GET /api/auth/verify-email/:token`
+- [ ] Update registration endpoint để generate token và send email
+- [ ] Create email template cho verification
+- [ ] Add email utility function (using existing nodemailer)
+- [ ] Add error handling cho expired/invalid tokens
+
+### Frontend Integration
+- [ ] Review và update VerifyEmail page component
+- [ ] Add loading states và error handling
+- [ ] Add success/failure UI feedback
+
+### Configuration
+- [ ] Check SMTP settings trong .env
+- [ ] Add email template variables
+- [ ] Document email configuration
+
+### Testing
+- [ ] Test registration flow (email sending)
+- [ ] Test verification endpoint (valid token)
+- [ ] Test expired token handling
+- [ ] Test invalid token handling
+- [ ] Test already verified user
+
+### Documentation
+- [ ] Update API documentation
+- [ ] Add setup guide cho email configuration

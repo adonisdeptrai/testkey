@@ -1,0 +1,18 @@
+# Task List: Binance Pay Auto-Payment Integration
+
+- [ ] Plan & Requirements
+    - [ ] Confirm Requirements (Redirect vs QR, Coexistence, Environment) 
+    - [ ] Create Implementation Plan
+- [ ] Backend Implementation
+    - [ ] Update [binancePay.js](file:///c:/Users/Adonis/Downloads/App/server/utils/binancePay.js) utils (Add Webhook Verification, Query Order)
+    - [ ] Create API Endpoint: Create Order (`POST /api/payment/binance/create`)
+    - [ ] Create API Endpoint: Query Order (`GET /api/payment/binance/query/:orderId`)
+    - [ ] Create API Endpoint: Webhook Handler (`POST /api/payment/binance/webhook`) (Prepare for Prod)
+- [ ] Frontend Implementation
+    - [ ] Update [Checkout.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Checkout.tsx) to add "Binance Pay" method
+    - [ ] Implement Payment Flow (Call API -> Get QR/Url -> Display -> Poll Status)
+    - [ ] Add Success/Failure handling
+- [ ] Verification
+    - [ ] Test Create Order (Generate QR)
+    - [ ] Test Polling/Status Check
+    - [ ] Verify Order Status Update in Database

@@ -1,0 +1,47 @@
+# Implementation Plan - VietQR Integration
+
+## Goal Description
+Integrate automatic VietQR code generation for Bank Transfer payments. This involves calculating the VND amount from USD using a configurable exchange rate and generating a QR code with the VietQR API. Admin can configure the Bank Account and Exchange Rate.
+
+## User Review Required
+> [!NOTE]
+> I will be creating a new [Settings](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#360-405) model in the database to store the global configuration.
+
+## Proposed Changes
+
+### Backend
+#### [NEW] [server/models/Settings.js](file:///c:/Users/Adonis/Downloads/App/server/models/Settings.js)
+- Schema for storing `bank` details (id, number, name) and `exchangeRate`.
+
+#### [NEW] [server/routes/settings.js](file:///c:/Users/Adonis/Downloads/App/server/routes/settings.js)
+- `GET /`: Retrieve current settings.
+- `PUT /`: Update settings.
+
+#### [MODIFY] [server/index.js](file:///c:/Users/Adonis/Downloads/App/server/index.js)
+- Register `/api/settings` route.
+
+### Frontend
+#### [MODIFY] [src/pages/AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+- Update [AdminSettings](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#360-405) component.
+- Add "Bank Transfer Configuration" section.
+- Fetch bank list from VietQR API.
+- Inputs for Bank, Account Number, Account Name, Exchange Rate.
+- Save functionality.
+
+#### [MODIFY] [src/pages/Checkout.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Checkout.tsx)
+- Fetch settings on mount.
+- When "Bank Transfer" is selected:
+    - Calculate VND amount (`total * exchangeRate`).
+    - Generate QR URL using: `https://img.vietqr.io/image/<BANK_ID>-<ACCOUNT_NO>-compact2.png?amount=<VND>&addInfo=<ORDER_ID>&accountName=<NAME>`.
+    - Display QR code instead of the generic credit card UI.
+
+## Verification Plan
+### Automated Tests
+- None planned as this requires external API interaction.
+
+### Manual Verification
+- **Admin**: Go to Settings, set valid Bank (e.g., MBBank), Account No, Name, and distinct Exchange Rate (e.g., 25500). Save. Refresh to verify persistence.
+- **Checkout**: Add item ($10). Go to checkout. Select Bank Transfer.
+    - Check calculated VND amount (should be 255,000 VND).
+    - Check QR code loads.
+    - Scan QR with mobile app (optional/simulated) or verify URL parameters.

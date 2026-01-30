@@ -1,0 +1,38 @@
+# Implement Quick Toast Notification
+
+## Goal Description
+Implement a "Quick Notification" (Toast) system that appears when a user adds an item to the cart, replacing the default behavior (which was previously auto-opening the cart).
+
+## User Review Required
+> [!NOTE]
+> I will creating a new `ToastContext` and `Toast` component to handle global notifications.
+
+## Proposed Changes
+
+### Frontend (Client)
+#### [NEW] [ToastContext.tsx](file:///c:/Users/Adonis/Downloads/App/src/contexts/ToastContext.tsx)
+- Create a context to manage toast state (message, type, visible).
+- Provide a `showToast(message, type)` function.
+
+#### [NEW] [Toast.tsx](file:///c:/Users/Adonis/Downloads/App/src/components/common/Toast.tsx)
+- Create a visual component for the toast.
+- Style it to match the "Liquid Glass" theme (glassmorphism, animations).
+- Position it at the bottom-center or top-center (User requested "Quick Noti", usually interpreted as a snackbar).
+
+#### [MODIFY] [App.tsx](file:///c:/Users/Adonis/Downloads/App/src/App.tsx)
+- Wrap the app with `ToastProvider`.
+
+#### [MODIFY] [CartContext.tsx](file:///c:/Users/Adonis/Downloads/App/src/contexts/CartContext.tsx)
+- Consume `useToast`.
+- Trigger `showToast` inside [addItem](file:///c:/Users/Adonis/Downloads/App/src/contexts/CartContext.tsx#24-36).
+
+## Verification Plan
+
+### Manual Verification
+1.  **Add to Cart**:
+    - Go to Shop.
+    - Click "Add to Cart" on a product.
+    - **Expectation**:
+        - Cart drawer **DOES NOT** open.
+        - A Toast notification appears (e.g., "Added [Product] to cart").
+        - Toast disappears automatically after a few seconds.

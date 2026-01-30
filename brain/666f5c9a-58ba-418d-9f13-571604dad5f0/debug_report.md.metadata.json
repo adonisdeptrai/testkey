@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Comprehensive debug report categorizing all issues found during codebase analysis. Includes security vulnerabilities, logic errors, configuration issues, code quality problems, and missing features with priority ratings and actionable fixes.",
+  "updatedAt": "2026-01-25T03:43:11.694855500Z"
+}

@@ -1,0 +1,38 @@
+# Task: Tích Hợp Binance Crypto Transaction History API
+
+## Objective
+Tích hợp Binance API để theo dõi lịch sử giao dịch crypto theo pattern TPBank hiện có.
+
+## Checklist
+
+### Backend Implementation
+- [x] Cài đặt `binance` package (official Node.js SDK)
+- [x] Tạo [server/utils/binance.js](file:///c:/Users/Adonis/Downloads/App/server/utils/binance.js) - Binance client wrapper
+  - [x] Implement [getSpotTransactionHistory()](file:///c:/Users/Adonis/Downloads/App/server/utils/binance.js#21-58) method
+  - [x] Implement [getDepositHistory()](file:///c:/Users/Adonis/Downloads/App/server/utils/binance.js#59-87) method
+  - [x] Implement [getWithdrawHistory()](file:///c:/Users/Adonis/Downloads/App/server/utils/binance.js#88-116) method
+  - [x] Error handling và retry logic
+- [x] Cập nhật [server/models/Settings.js](file:///c:/Users/Adonis/Downloads/App/server/models/Settings.js)
+  - [x] Thêm `binance` object với `apiKey` và `secretKey`
+- [x] Cập nhật [server/routes/settings.js](file:///c:/Users/Adonis/Downloads/App/server/routes/settings.js)
+  - [x] Thêm endpoint `POST /api/settings/test-binance` để test connection
+  - [x] Thêm endpoint `POST /api/settings/binance-history` để fetch transactions
+
+### Frontend Implementation
+- [ ] Tạo `src/components/admin/BinanceMonitor.tsx`
+  - [ ] Dashboard tab với stats (Total transactions, Volume, Latest activity)
+  - [ ] Raw Data tab để xem lịch sử giao dịch
+  - [ ] System Logs tab (optional, có thể reuse TPBank logs)
+  - [ ] Refresh button và auto-refresh toggle
+- [ ] Tích hợp vào [src/pages/AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+  - [ ] Thêm tab "Crypto History" bên cạnh "Transfer History"
+  - [ ] Thêm Settings section cho Binance API credentials
+
+### Testing & Verification
+- [ ] Test Binance API connection với credentials
+- [ ] Test fetch transaction history
+- [ ] Verify UI hiển thị đúng dữ liệu
+- [ ] Test error handling (invalid credentials, network issues)
+
+### Documentation
+- [ ] Tạo `docs/API-BINANCE-HISTORY.md` với hướng dẫn setup

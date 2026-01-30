@@ -1,0 +1,211 @@
+# BÁO CÁO KIỂM THỬ ADMIN PANEL
+**QA Lead:** AI Assistant  
+**Ngày kiểm thử:** 24/01/2026  
+**Phương pháp:** Code Review & Static Analysis
+**Lý do:** Browser testing không khả dụng do lỗi môi trường ($HOME variable missing)
+
+---
+
+## TÓM TẮT EXECUTIVE
+
+**Tổng số lỗi phát hiện:** 12 issues  
+- **Critical:** 3 issues
+- **High:** 5 issues  
+- **Medium:** 4 issues
+
+**Đánh giá chung:** ⚠️ **KHÔNG ĐỦ TIÊU CHUẨN PRODUCTION**
+
+Admin Panel hiện tại có nhiều lỗ hổng nghiêm trọng về bảo mật và chất lượng code. Cần fix tất cả Critical & High issues trước khi deploy production.
+
+---
+
+## CHI TIẾT CÁC VẤN ĐỀ
+
+| Mức độ | Khu vực | Hành động của Admin | Kết quả thực tế | Kết quả mong đợi | ID |
+|:---|:---|:---|:---|:---|:---|
+| **Critical** | Quản lý User | Admin tự xóa chính mình | **Chưa có API endpoint DELETE user** - Chưa test được | Hệ thống phải báo lỗi "Không thể xóa tài khoản đang đăng nhập" | QA-001 |
+| **Critical** | Quản lý User | Ban/Unban user | **Chưa có API endpoint** để ban user | Phải có route `PUT /api/users/:id/ban` với middleware kiểm tra | QA-002 |
+| **Critical** | Quản lý User | Chỉnh sửa balance user | **Chưa có API endpoint** để sửa balance | Phải có route `PUT /api/users/:id/balance` + audit log | QA-003 |
+| **High** | CRUD Product | Nhập giá âm (e.g. -50) | **Frontend KHÔNG VALIDATE**, backend có `min: 0` nhưng chỉ trả lỗi 400 | FE phải block input âm + hiển thị error message rõ ràng | QA-004 |
+| **High** | CRUD Product | Bỏ trống title khi tạo product | **Frontend KHÔNG VALIDATE**, backend trả lỗi 400 nhưng UI không highlight trường lỗi | Form phải có validation UI: highlight red + "Title is required" | QA-005 |
+| **High** | CRUD Product | Submit form với NaN trong price | **parseFloat() return NaN** nếu input rỗng, backend reject | FE phải validate `!isNaN(price) && price >= 0` trước submit | QA-006 |
+| **High** | Upload Media | Upload file .exe / .pdf vào image | **Backend KHÔNG VALIDATE file type** (line 25 products.js) | Phải check mimetype: `image/jpeg, image/png, image/webp` only | QA-007 |
+| **High** | Upload Media | Upload ảnh >10MB | **Không có limit size** trong multer config | Phải set `limits: { fileSize: 10 * 1024 * 1024 }` | QA-008 |
+| **Medium** | Dashboard Stats | So sánh số liệu tổng quan | **AdminOverview chưa được implement**, dùng mock data | Dashboard cần fetch real data từ API aggregation | QA-009 |
+| **Medium** | Search & Filter | Lọc kết hợp (status + date) | **Chưa có UI filter**, chỉ có tabs cơ bản | Cần implement FilterBar component với multi-select | QA-010 |
+| **Medium** | Pagination | Click trang 2 trong danh sách dài | **Chưa có pagination** trên FE và BE | Cần implement với limit/skip hoặc cursor-based | QA-011 |
+| **Medium** | Order Delete | Xóa order đang có status Completed | **Orders route KHÔNG CÓ DELETE endpoint** | Nên chặn xóa order hoặc chỉ cho phép soft delete | QA-012 |
+
+---
+
+## PHÂN TÍCH CHI TIẾT
+
+### 1. QUẢN LÝ USER (Critical Issues)
+
+**Vấn đề:** [/server/routes/users.js](file:///c:/Users/Adonis/Downloads/App/server/routes/users.js) chỉ có 1 route duy nhất:
+```javascript
+router.get('/', auth, adminAuth, async (req, res) => {
+    // Chỉ GET, không có UPDATE/DELETE/BAN
+});
+```
+
+**Thiếu các endpoint quan trọng:**
+- `PUT /api/users/:id` - Update user info
+- `PUT /api/users/:id/ban` - Ban/unban user
+- `PUT /api/users/:id/balance` - Modify balance
+- `DELETE /api/users/:id` - Delete user (với check)
+
+**Hậu quả:** Admin không thể quản lý users thực tế, chỉ xem được list.
+
+---
+
+### 2. CRUD PRODUCT (High Issues)
+
+**Vấn đề validation frontend:**
+File [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx) line 1393 có [handleDeleteProduct](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#1393-1407):
+```typescript
+const handleDeleteProduct = async (id: string) => {
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`http://localhost:5000/api/products/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        // GỌI THẲNG API mà KHÔNG CÓ confirm modal!
+    }
+}
+```
+
+**Thiếu:**
+- Confirm dialog trước khi xóa
+- Validation form khi tạo/sửa (có thể nhập giá âm, title rỗng)
+- Error message rõ ràng cho user
+
+---
+
+### 3. UPLOAD MEDIA (High Security Risk)
+
+**File:** [server/routes/products.js](file:///c:/Users/Adonis/Downloads/App/server/routes/products.js) line 13-25
+
+```javascript
+const storage = multer.diskStorage({
+    destination: 'uploads/',
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + path.extname(file.originalname));
+        // KHÔNG CHECK FILE TYPE!
+    }
+});
+const upload = multer({ storage: storage });
+// KHÔNG CÓ fileFilter, limits
+```
+
+**Nguy hiểm:** 
+- Có thể upload `.exe`, `.php`, `.sh` script lên server
+- Không giới hạn dung lượng → DoS attack
+- Không sanitize filename → path traversal
+
+**Fix cần thiết:**
+```javascript
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = /jpeg|jpg|png|webp/;
+        const mimetype = allowedTypes.test(file.mimetype);
+        const extname = allowedTypes.test(path.extname(file.originalname));
+        if (mimetype && extname) return cb(null, true);
+        cb(new Error('Only images allowed (jpeg, png, webp)'));
+    }
+});
+```
+
+---
+
+### 4. DASHBOARD & ANALYTICS (Medium)
+
+**Vấn đề:** Frontend [AdminOverview](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#143-166) component dùng **hardcoded mock data**, không fetch real stats từ DB.
+
+**Cần implement:**
+```javascript
+// Backend: GET /api/admin/stats
+router.get('/stats', auth, adminAuth, async (req, res) => {
+    const totalUsers = await User.countDocuments();
+    const totalProducts = await Product.countDocuments();
+    const totalRevenue = await Order.aggregate([
+        { $match: { status: 'Completed' } },
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]);
+    res.json({ totalUsers, totalProducts, totalRevenue: totalRevenue[0]?.total || 0 });
+});
+```
+
+---
+
+### 5. PAGINATION & SEARCH (Medium)
+
+**Hiện tại:** 
+- Backend `Product.find()` trả về **TẤT CẢ** products cùng lúc
+- Frontend không có pagination UI
+- Không có search/filter nâng cao
+
+**Vấn đề performance:** Khi có 1000+ products, page sẽ load chậm và crash browser.
+
+**Fix:**
+```javascript
+// Backend: GET /api/products?page=1&limit=20&search=keyword
+router.get('/', async (req, res) => {
+    const { page = 1, limit = 20, search = '' } = req.query;
+    const query = search ? { title: { $regex: search, $options: 'i' } } : {};
+    const products = await Product.find(query)
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        .sort({ createdAt: -1 });
+    const count = await Product.countDocuments(query);
+    res.json({ products, totalPages: Math.ceil(count / limit), currentPage: page });
+});
+```
+
+---
+
+## ĐÁNH GIÁ TỔNG QUAN ADMIN PANEL
+
+### ✅ Điểm Mạnh:
+1. **UI/UX đẹp:** Giao diện sử dụng Framer Motion, smooth animations
+2. **Cấu trúc rõ ràng:** Phân chia components tốt (AdminProducts, AdminOrders, etc.)
+3. **Auth đầy đủ:** Có middleware `auth` và `adminAuth` kiểm tra quyền
+
+### ❌ Điểm Yếu:
+1. **Thiếu validation:** Cả FE và BE đều yếu về validation
+2. **Chưa production-ready:** Nhiều feature chưa implement (user management, ban, balance)
+3. **Security gaps:** Upload không check file type, no rate limiting
+4. **Performance:** Không có pagination, load toàn bộ data
+5. **UX:** Thiếu confirm modals, error handling kém
+
+### 🎯 Tốc độ & Trải nghiệm:
+- **Loading:** Nhanh với dữ liệu nhỏ (<100 items), **chưa test với big data**
+- **Responsive:** UI responsive tốt (dựa vào Tailwind CSS)
+- **Accessibility:** Chưa có ARIA labels, keyboard navigation
+
+---
+
+## KHUYẾN NGHỊ ƯU TIÊN
+
+### Phase 1 - Bắt buộc (Critical & High):
+1. ✅ Implement user management APIs (ban, balance, delete với safeguard)
+2. ✅ Thêm file validation cho upload (type + size)
+3. ✅ Thêm confirm modal cho delete operations
+4. ✅ Frontend form validation với error messages rõ ràng
+
+### Phase 2 - Quan trọng (Medium):
+5. ⚠️ Implement pagination cho tất cả danh sách
+6. ⚠️ Dashboard stats fetch real data
+7. ⚠️ Advanced search & filter UI
+
+### Phase 3 - Nâng cao (Nice to have):
+8. 📊 Audit log cho admin actions (ai xóa gì, khi nào)
+9. 📊 Export data (CSV/Excel)
+10. 📊 Bulk operations (delete nhiều items cùng lúc)
+
+---
+
+**Kết quả kiểm thử:** ⚠️ **CẦN FIX NGAY** trước khi cho user thực tế sử dụng Admin Panel.

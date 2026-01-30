@@ -1,0 +1,20 @@
+# Task: Refactor Crypto Config (Manual QR & Multi-Network)
+
+- [x] Backend Implementation <!-- id: 0 -->
+    - [x] Create [server/routes/upload.js](file:///c:/Users/Adonis/Downloads/App/server/routes/upload.js): Endpoint for uploading QR images <!-- id: 1 -->
+    - [x] Update [server/index.js](file:///c:/Users/Adonis/Downloads/App/server/index.js) (or `server.js`): Mount upload route and static folder <!-- id: 2 -->
+    - [x] Update [server/models/Settings.js](file:///c:/Users/Adonis/Downloads/App/server/models/Settings.js): Refactor `crypto` schema to support `networks` array <!-- id: 3 -->
+        - [x] Structure: `[{ network: String, currency: String, walletAddress: String, qrCodeUrl: String, enabled: Boolean }]` <!-- id: 4 -->
+- [ ] Frontend Admin Implementation <!-- id: 5 -->
+    - [ ] Update [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx): <!-- id: 6 -->
+        - [ ] Remove Network Fee input <!-- id: 7 -->
+        - [ ] Create UI to manage Networks (Add/Remove/Edit) <!-- id: 8 -->
+        - [ ] Add Image Upload for QR Code <!-- id: 9 -->
+- [ ] Frontend User Implementation <!-- id: 10 -->
+    - [ ] Update [Checkout.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Checkout.tsx): <!-- id: 11 -->
+        - [ ] Allow selecting Network <!-- id: 12 -->
+        - [ ] Display Manual QR Image (from DB) for selected network <!-- id: 13 -->
+- [ ] Verification <!-- id: 14 -->
+    - [ ] Verify Upload API <!-- id: 15 -->
+    - [ ] Verify Admin Saving <!-- id: 16 -->
+    - [ ] Verify Checkout Display <!-- id: 17 -->

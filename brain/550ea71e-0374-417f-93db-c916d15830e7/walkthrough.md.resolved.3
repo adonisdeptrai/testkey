@@ -1,0 +1,24 @@
+# Walkthrough - UI Stability and Customer Data
+
+I have addressed the reported issues regarding UI crashes and placeholder data.
+
+## 1. UI Crash Fix
+Fixed the black screen crash that occurred during rapid sidebar navigation.
+
+### Changes
+- **Prop Safety**: Added defensive coding to [AdminProducts](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#167-219), [AdminOrders](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#271-316), and [KeyManagementView](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#220-270) to handle `undefined` or `null` data props gracefully.
+- **Default Values**: Ensuring all list components default to empty arrays `[]` while data is loading.
+
+## 2. Customer Section
+Refactored the "Customers" tab to display real user data.
+
+### Changes
+- **Backend**: New `/api/users` endpoint to fetch registered users.
+- **Frontend**: Connected [AdminDashboard](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#1312-1553) to the new API and populated the user list.
+
+## 3. Sidebar Filtering
+Restored functionality for "Tools", "Courses", and "License Keys" tabs.
+
+## Verification
+- **Stress Test**: Rapidly switching between tabs such as "Overview" -> "Products" -> "Tools" no longer causes a crash.
+- **Data Check**: The "Customers" tab now lists real users from the database.

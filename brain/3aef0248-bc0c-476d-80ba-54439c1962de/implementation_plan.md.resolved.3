@@ -1,0 +1,35 @@
+# Hero Layout Redesign Plan
+
+## Goal Description
+Change the Hero section layout from a centered single-column stack to a two-column layout on desktop:
+- **Left Column**: Title, description, and CTA buttons.
+- **Right Column**: The `HeroTerminal` component.
+- **Mobile**: Remain stacked (Text top, Terminal bottom).
+
+## User Review Required
+> [!NOTE]
+> This changes the visual hierarchy significantly on big screens.
+
+## Proposed Changes
+
+### [MODIFY] [Landing.tsx](file:///c:/Users/Adonis/Downloads/landing-page---v3/Landing.tsx)
+- Update [Hero](file:///c:/Users/Adonis/Downloads/landing-page---v3/Landing.tsx#105-165) section container:
+  - Change `flex-col items-center` to `lg:flex-row lg:items-center lg:justify-between`.
+  - Add `gap-12` or similar spacing.
+- Update Text Container:
+  - Change `text-center mx-auto` to `lg:text-left lg:mx-0`.
+  - Adjust max-width.
+- Update `HeroTerminal` wrapper:
+  - Ensure it fits within the right column (flex-1).
+  - Remove top margin (`mt-20`) on desktop.
+
+### [MODIFY] [components/HeroTerminal.tsx](file:///c:/Users/Adonis/Downloads/landing-page---v3/components/HeroTerminal.tsx)
+- Remove the hardcoded `mt-20` and `max-w-5xl` from the root element to make it more flexible in the new layout container.
+- Let the parent container control positioning and width.
+
+## Verification Plan
+
+### Manual Verification
+- **Desktop**: Verify text is on the left and terminal is on the right.
+- **Mobile**: Verify elements stack correctly (text on top).
+- **Responsiveness**: Check resizing behavior to ensure no overlap.

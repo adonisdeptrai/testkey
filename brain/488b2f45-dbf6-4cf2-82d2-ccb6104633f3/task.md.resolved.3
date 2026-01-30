@@ -1,0 +1,37 @@
+# Email Verification Flow Implementation
+
+## Mục tiêu
+Implement complete email verification system với backend endpoint, email sending, và frontend integration.
+
+## Checklist
+
+### Backend Implementation
+- [x] Add verification endpoint `GET /api/auth/verify-email/:token`
+- [x] Update registration endpoint để generate token và send email (đã có sẵn)
+- [x] Create email template cho verification (đã có sẵn)
+- [x] Add email utility function (using existing nodemailer)
+- [x] Add error handling cho expired/invalid tokens
+
+### Frontend Integration
+- [x] Review và update VerifyEmail page component
+- [x] Add loading states và error handling (đã có sẵn)
+- [x] Add success/failure UI feedback (đã có sẵn)
+- [x] Fix TypeScript error với import.meta.env
+- [x] Add dynamic API URL support
+
+### Configuration
+- [x] Check SMTP settings trong .env (đã có EMAIL_USER và EMAIL_PASS)
+- [x] Add VITE_API_URL environment variable
+- [x] Create vite-env.d.ts type definitions
+
+### Testing
+- [ ] Test registration flow (email sending)
+- [ ] Test verification endpoint (valid token)
+- [ ] Test expired token handling
+- [ ] Test invalid token handling
+- [ ] Test already verified user
+
+### Documentation
+- [ ] Update API documentation
+- [ ] Add setup guide cho email configuration
+

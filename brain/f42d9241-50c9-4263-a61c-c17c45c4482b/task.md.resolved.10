@@ -1,0 +1,19 @@
+# Task: Crypto Payment UI & QR Code
+
+- [x] Prerequisites <!-- id: 0 -->
+    - [x] Locate Checkout component ([src/pages/Checkout.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Checkout.tsx) or similar) <!-- id: 1 -->
+    - [x] Ensure `crypto` settings are exposed in `GET /api/settings` (publicly) <!-- id: 2 -->
+    - [x] Install `qrcode.react` if missing <!-- id: 3 -->
+- [x] Frontend Implementation <!-- id: 4 -->
+    - [x] Update Checkout UI to match design <!-- id: 5 -->
+        - [x] Add Payment Method selection (Crypto/Bank) <!-- id: 6 -->
+        - [x] Add QR Code generation for Wallet Address <!-- id: 7 -->
+        - [x] Display Wallet Address + Copy button <!-- id: 8 -->
+        - [x] Display Network Fee (fetched from settings) <!-- id: 9 -->
+    - [x] Logic for "Total Amount" calculation (Price + Fee) <!-- id: 10 -->
+- [x] Backend Updates (if needed) <!-- id: 11 -->
+    - [x] Ensure `networkFee` is included in public settings response <!-- id: 12 -->
+- [x] Verification <!-- id: 13 -->
+    - [x] Verify UI rendering <!-- id: 14 -->
+    - [x] Verify QR code scanning (visually) <!-- id: 15 -->
+    - [x] Verify total amount logic <!-- id: 16 -->

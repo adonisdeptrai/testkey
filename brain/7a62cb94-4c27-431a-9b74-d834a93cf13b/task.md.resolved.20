@@ -1,0 +1,25 @@
+# Tasks
+
+- [ ] Project Exploration <!-- id: 0 -->
+    - [x] Explore project structure <!-- id: 1 -->
+    - [x] Review configuration and open active files <!-- id: 2 -->
+- [ ] Code Review <!-- id: 3 -->
+    - [x] Backend analysis <!-- id: 4 -->
+    - [x] Frontend analysis <!-- id: 5 -->
+- [/] Refactor & Fix <!-- id: 6 -->
+    - [x] Externalize Config <!-- id: 7 -->
+    - [x] Migrate to React Router <!-- id: 8 -->
+    - [x] Fix Auth.tsx Compilation <!-- id: 9 -->
+- [x] Build & Deploy <!-- id: 10 -->
+    - [x] Run Docker Build <!-- id: 11 -->
+- [x] Feature: Quick Notification <!-- id: 12 -->
+    - [x] Analyze Cart Logic <!-- id: 13 -->
+    - [x] Implement Toast Notification <!-- id: 14 -->
+    - [x] Update Add to Cart Behavior <!-- id: 15 -->
+- [x] Fix Compilation Errors <!-- id: 16 -->
+    - [x] Exclude backups from TS <!-- id: 17 -->
+    - [x] Fix JSX Namespace Error <!-- id: 18 -->
+- [ ] Feature: Advanced Notifications <!-- id: 19 -->
+    - [ ] Update Toast Context for Stacking <!-- id: 20 -->
+    - [ ] Implement Progress Bar & Styling <!-- id: 21 -->
+    - [ ] Update Cart Integration <!-- id: 22 -->

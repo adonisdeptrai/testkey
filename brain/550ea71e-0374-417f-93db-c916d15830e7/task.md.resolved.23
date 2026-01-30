@@ -1,0 +1,41 @@
+# Task List: Debug Product Filtering
+
+- [x] Analyze codebase to understand product filtering logic
+    - [x] Explore [server/routes/products.js](file:///c:/Users/Adonis/Downloads/App/server/routes/products.js)
+    - [x] Find frontend component for Sidebar and Product List
+    - [x] Identify the discrepancy in product type/category mapping
+- [x] Create Implementation Plan
+- [x] Fix the filtering logic
+    - [x] Update backend query if needed
+    - [x] Update frontend filtering/API call if needed
+- [x] Verify the fix
+    - [x] Check if items appear in "Tools", "Courses", "License Keys"
+- [x] Build and Deploy with Docker
+- [x] Debug Data Mismatch
+    - [x] Inspect actual product `type` values in the database <!-- id: 11 -->
+    - [x] Correct database data if needed <!-- id: 12 -->
+- [x] Fix KeyManagementView Props <!-- id: 13 -->
+- [x] Fix Customers Section (Placeholder Data) <!-- id: 14 -->
+    - [x] Analyze [AdminCustomers](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#320-347) component <!-- id: 15 -->
+    - [x] Check/Create backend route for fetching users <!-- id: 16 -->
+    - [x] Connect Frontend to Backend API <!-- id: 17 -->
+    - [x] Verify real user data display <!-- id: 18 -->
+- [x] Investigate UI Crash on Navigation <!-- id: 19 -->
+    - [x] Review `AnimatePresence` and `activeTab` rendering logic <!-- id: 20 -->
+    - [x] Check for prop safety in [AdminProducts](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#167-219) and other views <!-- id: 21 -->
+    - [x] Add Error Boundary component to prevent full app crash <!-- id: 22 -->
+    - [x] Verify fix by rapid navigation testing <!-- id: 23 -->
+- [x] Build and Deploy with Docker <!-- id: 24 -->
+- [ ] Fix User Menu Navigation <!-- id: 25 -->
+    - [x] Locate and Analyze [UserMenu](file:///c:/Users/Adonis/Downloads/App/src/components/layout/UserMenu.tsx#15-175) component <!-- id: 26 -->
+    - [x] Fix dead links (Dashboard, Profile, Subscription, Settings, Help) <!-- id: 27 -->
+    - [x] Hide "Dashboard" link for non-admin users <!-- id: 28 -->
+- [x] Verify navigation fixes <!-- id: 29 -->
+- [ ] Implement User Features (Dead Ends) <!-- id: 30 -->
+    - [x] Analyze [UserDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/UserDashboard.tsx) <!-- id: 31 -->
+    - [ ] Refactor Routing for `/profile`, `/orders`, `/settings` <!-- id: 32 -->
+    - [ ] Implement [UserProfile](file:///c:/Users/Adonis/Downloads/App/src/pages/UserDashboard.tsx#315-382) component <!-- id: 33 -->
+    - [ ] Implement [UserOrders](file:///c:/Users/Adonis/Downloads/App/src/pages/UserDashboard.tsx#259-314) (Library) component <!-- id: 34 -->
+    - [ ] Implement `UserSettings` component <!-- id: 35 -->
+    - [ ] Refactor [Dashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Dashboard.tsx) to support distinct routes/tabs <!-- id: 36 -->
+    - [ ] Update [UserMenu](file:///c:/Users/Adonis/Downloads/App/src/components/layout/UserMenu.tsx#15-175) navigation <!-- id: 37 -->

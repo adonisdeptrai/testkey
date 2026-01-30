@@ -1,0 +1,33 @@
+# Đánh giá & Kiểm tra Toàn diện Hệ thống
+
+## Mục tiêu
+- [x] Khảo sát cấu trúc codebase (Backend + Frontend)
+- [x] Phân tích luồng nghiệp vụ chính
+- [/] Tìm chức năng thiếu hoặc chưa hoàn thiện
+- [/] Đưa ra đề xuất cải tiến
+- [ ] Tạo báo cáo chi tiết
+
+## Tiến trình
+
+### Backend Analysis
+- [x] Models (Order, Product, Settings, User, SystemLog)
+- [x] API Routes (8 routes: auth, products, orders, stats, settings, users, upload, payment)
+- [x] Utility Modules (tpbank, binance, binancePay)
+- [x] Background Worker (tpbankWorker - 60s interval)
+- [x] Middleware (auth, adminAuth)
+
+### Frontend Analysis
+- [x] Routing structure (App.tsx - 15+ routes)
+- [x] Admin components (BinanceMonitor, TPBankMonitor, PaymentVerificationView)
+- [x] User-facing pages (Shop, Checkout, AdminDashboard, Auth, Dashboard, etc.)
+- [x] Context/State management (AuthContext, CartContext, ToastContext)
+- [x] Integration flows (Payment verification, Order management)
+
+### Đánh giá & Tổng hợp
+- [/] Security analysis
+- [/] UX/UI consistency
+- [/] Missing features
+- [/] Performance concerns
+- [/] Best practices violations
+- [/] Viết báo cáo chi tiết
+

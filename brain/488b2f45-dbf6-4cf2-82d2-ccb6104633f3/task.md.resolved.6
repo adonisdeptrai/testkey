@@ -1,0 +1,47 @@
+# Password Reset Flow Implementation
+
+## Mục tiêu
+Implement complete forgot password / reset password system với email-based token verification.
+
+## Checklist
+
+### Database Schema Updates
+- [x] Add `resetPasswordToken` field to User model
+- [x] Add `resetPasswordExpires` field to User model (30 minutes expiration)
+
+### Backend Implementation
+- [x] Create `POST /api/auth/forgot-password` endpoint
+  - Generate secure reset token (crypto.randomBytes)
+  - Save token + expiry to user document
+  - Send reset email with link
+  - Handle non-existent email gracefully (security)
+- [x] Create `POST /api/auth/reset-password/:token` endpoint
+  - Validate token existence
+  - Check token expiration
+  - Hash new password
+  - Clear reset token fields
+  - Send confirmation email (optional)
+- [x] Add email template cho password reset
+- [ ] Add rate limiting (prevent abuse) - RECOMMENDED
+
+### Frontend Implementation
+- [x] Update Auth.tsx forgot mode với real API call
+- [x] Create ResetPassword page component
+  - New password input (with confirmation)
+  - Password strength validation
+  - Success/error messages
+  - Auto-redirect to login after success
+- [x] Add routes trong App.tsx
+- [x] "Forgot Password?" link đã có sẵn trong Auth.tsx
+
+### Testing
+- [ ] Test forgot-password endpoint (valid email)
+- [ ] Test forgot-password endpoint (invalid email)
+- [ ] Test reset-password với valid token
+- [ ] Test reset-password với expired token
+- [ ] Test reset-password với invalid token
+- [ ] Test rate limiting (if implemented)
+
+### Documentation
+- [ ] Create comprehensive documentation
+- [ ] Create test script

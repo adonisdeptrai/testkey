@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Complete deployment guide for running the app on Ubuntu 22.04 with Cloudflare Tunnel, PM2 for backend, and nginx for frontend. Includes installation steps, configuration files, and systemd services.",
+  "updatedAt": "2026-01-30T01:05:26.885731400Z"
+}

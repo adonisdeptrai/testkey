@@ -1,0 +1,39 @@
+# Implement User Features and Refactor Dashboard
+
+The goal is to implement missing user features (Profile, Orders, Settings) and refactor the generic "User Dashboard" into a focused "My Profile" experience as requested.
+
+## Proposed Changes
+
+### 1. Routing & Navigation
+Refector [Dashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Dashboard.tsx) to handle URL parameters or specific routes for tabs, allowing deep linking from the User Menu.
+
+#### [MODIFY] [src/App.tsx](file:///c:/Users/Adonis/Downloads/App/src/App.tsx)
+- Add distinct routes aliasing to [Dashboard](file:///c:/Users/Adonis/Downloads/App/src/pages/Dashboard.tsx#152-382) with a pre-set tab prop or simply [Dashboard](file:///c:/Users/Adonis/Downloads/App/src/pages/Dashboard.tsx#152-382) component handling URL params.
+- `Route path="/profile" element={<Dashboard defaultTab="profile" />}` (or similar logic).
+- `Route path="/orders" element={<Dashboard defaultTab="orders" />}`.
+- `Route path="/settings" element={<Dashboard defaultTab="settings" />}`.
+
+### 2. User Dashboard Components
+Finish the implementation of user-specific components.
+
+#### [MODIFY] [src/pages/UserDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/UserDashboard.tsx)
+- **UserProfile**: Ensure it displays dynamic user data (already mostly there, double check).
+- **UserOrders**: Ensure real data fetch (already implemented, needs verification of display).
+- **UserSettings** (New): Create a component for User Settings (Change Password, etc.) to replace the placeholder.
+
+#### [MODIFY] [src/pages/Dashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Dashboard.tsx)
+- Accept `defaultTab` prop.
+- Initialize `activeTab` from prop or URL.
+- Replace placeholder "Settings" div with `<UserSettings />`.
+- Updating `USER_NAV_GROUPS` to remove generic "Home/Overview" if we are deprecating it, or rename it. The user said "remove user dashboard and switch to profile". We will make "Profile" the first/default tab if no other is specified.
+
+### 3. User Menu
+Update [UserMenu.tsx](file:///c:/Users/Adonis/Downloads/App/src/components/layout/UserMenu.tsx) to link to the new specific routes/tabs.
+
+## Verification Plan
+
+### Manual Verification
+1.  **Navigation**: Click "Profile", "Orders", "Settings" in User Menu.
+2.  **Redirects**: Verify URL updates (e.g. `/profile`, `/settings`).
+3.  **Content**: Verify the correct tab is active and content loads.
+4.  **Data**: Verify real data in Orders and correct user info in Profile.

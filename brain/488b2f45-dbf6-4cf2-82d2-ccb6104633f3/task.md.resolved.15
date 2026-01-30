@@ -1,0 +1,48 @@
+# Security Fixes Implementation
+
+## Mục tiêu
+Fix critical và high-priority security vulnerabilities identified trong security audit để protect R4B Platform against common attacks.
+
+## Checklist
+
+### Critical Fixes (IMMEDIATE)
+- [x] Replace hardcoded JWT secret trong .env.example
+- [x] Replace exposed Gmail credentials trong .env.example
+- [x] Add ADMIN_EMAIL field to .env.example
+- [x] Install security dependencies (express-rate-limit, helmet, express-mongo-sanitize, validator)
+
+### High Priority Fixes
+- [x] Create rateLimiter middleware (authLimiter, apiLimiter, strictLimiter)
+- [x] Apply authLimiter to /register endpoint
+- [x] Apply authLimiter to /login endpoint
+- [x] Apply authLimiter to /forgot-password endpoint
+- [x] Apply strictLimiter to /reset-password endpoint
+- [x] Add helmet middleware (security headers)
+- [x] Add express-mongo-sanitize (MongoDB injection protection)
+- [x] Add global API rate limiting
+- [/] Add email format validation to registration
+- [ ] Add CSRF protection (csurf)
+- [ ] Implement password strength validation
+
+### Medium Priority Fixes
+- [ ] Create AuditLog model
+- [ ] Add audit logging to admin actions
+  - [ ] Balance adjustments
+  - [ ] Order status changes
+  - [ ] User role changes
+  - [ ] Coupon creation/deletion
+- [ ] Implement token blacklist for logout
+- [ ] Implement refresh token system
+
+### Testing
+- [ ] Test rate limiting on auth endpoints
+- [ ] Verify helmet headers in responses
+- [ ] Test MongoDB injection protection
+- [ ] Verify email validation
+- [ ] Run npm audit
+- [ ] Performance testing với security middleware
+
+### Documentation
+- [x] Create security-audit.md report
+- [ ] Update API documentation với rate limits
+- [ ] Create security best practices guide for developers

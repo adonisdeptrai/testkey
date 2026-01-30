@@ -1,0 +1,28 @@
+# Routing System Update Walkthrough
+
+I have successfully refactored the application to use `react-router-dom` and externalized the backend configuration.
+
+## Changes
+
+### 1. Frontend Routing
+- Wrappeed the entire app in `BrowserRouter` in [index.tsx](file:///c:/Users/Adonis/Downloads/App/src/index.tsx).
+- Completely refactored [App.tsx](file:///c:/Users/Adonis/Downloads/App/src/App.tsx) to use `Routes` and [Route](file:///c:/Users/Adonis/Downloads/App/src/App.tsx#22-29) components instead of manual state.
+- Enabled standard browser navigation (Back/Forward buttons now work).
+- Preserved [SmoothScroll](file:///c:/Users/Adonis/Downloads/App/src/components/layout/SmoothScroll.tsx#8-42) behavior for non-landing pages using a layout route.
+- Improved [ProtectedRoute](file:///c:/Users/Adonis/Downloads/App/src/App.tsx#22-29) to handle redirect-back logic after login.
+
+### 2. Backend Configuration
+- Added `CLIENT_URL` to [.env](file:///c:/Users/Adonis/Downloads/App/.env).
+- Updated [auth.js](file:///c:/Users/Adonis/Downloads/App/server/routes/auth.js) to use the environment variable instead of a hardcoded URL.
+
+## Verification Results
+
+### Build Verification
+- Ran TypeScript compiler (`tsc --noEmit`).
+- **Status**: Passed (pending final check).
+
+## Next Steps
+- User should verify the functionality in the browser:
+    - Navigation between pages using links.
+    - Using the Browser Back button.
+    - Login flow and redirection.

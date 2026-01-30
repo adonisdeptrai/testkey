@@ -1,0 +1,38 @@
+# Task: Tích Hợp Binance Crypto Transaction History API
+
+## Objective
+Tích hợp Binance API để theo dõi lịch sử giao dịch crypto theo pattern TPBank hiện có.
+
+## Checklist
+
+### Backend Implementation
+- [x] Cài đặt `binance` package (official Node.js SDK)
+- [x] Tạo `server/utils/binance.js` - Binance client wrapper
+  - [x] Implement `getSpotTransactionHistory()` method
+  - [x] Implement `getDepositHistory()` method
+  - [x] Implement `getWithdrawHistory()` method
+  - [x] Error handling và retry logic
+- [x] Cập nhật `server/models/Settings.js`
+  - [x] Thêm `binance` object với `apiKey` và `secretKey`
+- [x] Cập nhật `server/routes/settings.js`
+  - [x] Thêm endpoint `POST /api/settings/test-binance` để test connection
+  - [x] Thêm endpoint `POST /api/settings/binance-history` để fetch transactions
+
+### Frontend Implementation
+- [x] Tạo `src/components/admin/BinanceMonitor.tsx`
+  - [x] Dashboard tab với stats (Total transactions, Volume, Latest activity)
+  - [x] Raw Data tab để xem lịch sử giao dịch
+  - [x] System Logs tab (optional, có thể reuse TPBank logs)
+  - [x] Refresh button và auto-refresh toggle
+- [x] Tích hợp vào `src/pages/AdminDashboard.tsx`
+  - [x] Thêm tab "Crypto History" bên cạnh "Transfer History"
+  - [x] Thêm Settings section cho Binance API credentials
+
+### Testing & Verification
+- [ ] Test Binance API connection với credentials
+- [ ] Test fetch transaction history
+- [ ] Verify UI hiển thị đúng dữ liệu
+- [ ] Test error handling (invalid credentials, network issues)
+
+### Documentation
+- [ ] Tạo `docs/API-BINANCE-HISTORY.md` với hướng dẫn setup

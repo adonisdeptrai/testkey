@@ -1,0 +1,62 @@
+# Ticket/Support System Implementation
+
+## Mục tiêu
+Implement complete customer support ticket system với user ticket submission, admin response capability, status tracking, message threading, và email notifications.
+
+## Checklist
+
+### Backend - Database Model
+- [x] Create Ticket model (ticketId, userId, subject, category, priority, status, messages[], assignedTo)
+- [x] Add auto-generated ticketId (TKT-XXXX)
+- [x] Add message threading structure
+
+### Backend - API Routes
+- [x] Create `/api/tickets` routes file
+  - GET /api/tickets/my-tickets (user's tickets)
+  - POST /api/tickets (create ticket)
+  - GET /api/tickets/:id (ticket details)
+  - POST /api/tickets/:id/reply (add message)
+  - PUT /api/tickets/:id/status (change status - admin)
+  - GET /api/tickets (all tickets - admin)
+  - PUT /api/tickets/:id/assign (assign to admin)
+- [x] Register routes trong server index.js
+- [x] Add authorization middleware (user own tickets, admin all)
+
+### Backend - Email Notifications
+- [x] Email on new ticket created (to admin)
+- [x] Email on admin reply (to user)
+- [x] Email on user reply (to admin)
+- [x] Email on status change (to user)
+- [x] Email templates (HTML)
+
+### Frontend - User Tickets Tab
+- [ ] Add "Tickets" tab to Dashboard.tsx
+- [ ] Tickets list table (ID, Subject, Status, Priority, Updated)
+- [ ] Create CreateTicketModal component
+- [ ] Create TicketDetailModal component
+- [ ] Message thread display
+- [ ] Reply input và submit
+- [ ] Status badge styling
+
+### Frontend - Admin Ticket Management
+- [ ] Update "Tickets" tab trong AdminDashboard.tsx
+- [ ] Replace AdminMessages với AdminTickets component
+- [ ] Ticket list với filters (status, priority, category)
+- [ ] Create AdminTicketDetailModal component
+- [ ] Status dropdown (Open/In Progress/Resolved/Closed)
+- [ ] Assign to admin dropdown
+- [ ] Priority indicators
+
+### Testing
+- [ ] Create test-ticket-system.ps1 script
+- [ ] Test create ticket flow
+- [ ] Test admin reply
+- [ ] Test user reply
+- [ ] Test status change
+- [ ] Test email notifications
+- [ ] Test authorization (user only sees own tickets)
+
+### Documentation
+- [ ] Update API documentation
+- [ ] Add user guide for submitting tickets
+- [ ] Add admin guide for ticket management

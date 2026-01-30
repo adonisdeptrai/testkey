@@ -1,0 +1,143 @@
+# Kế Hoạch Tích Hợp Google OAuth với Supabase
+
+Tích hợp đăng nhập Google OAuth vào website hiện tại sử dụng Supabase Authentication.
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Supabase OAuth Flow**: Supabase sẽ handle OAuth flow hoàn toàn. Backend chỉ cần verify JWT token từ Supabase và sync user data.
+
+> [!WARNING]
+> **Google Cloud Console Required**: Bạn cần tạo OAuth 2.0 credentials trong Google Cloud Console và cung cấp Client ID + Secret.
+
+**Câu hỏi cần xác nhận:**
+1. Bạn đã có Google Cloud Project chưa? Nếu chưa, tôi sẽ hướng dẫn tạo.
+2. Sau khi đăng nhập Google thành công, bạn có muốn user tự động được verify (bypass email verification) không?
+3. Có cần giữ đồng bộ email từ Google account với database không? (recommended: yes)
+
+---
+
+## Proposed Changes
+
+### Backend Components
+
+#### [MODIFY] [supabase.js](file:///c:/Users/Adonis/Downloads/App/server/config/supabase.js)
+
+Tạo thêm client instance cho frontend authentication với `anon` key:
+
+```javascript
+// Export cả service client (cho backend) và anon client (cho frontend auth)
+const supabaseAnonClient = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+        autoRefreshToken: true,
+        persistSession: false,
+        detectSessionInUrl: false
+    }
+});
+
+module.exports = { supabase, supabaseAnonClient };
+```
+
+---
+
+#### [NEW] [auth-callback.js](file:///c:/Users/Adonis/Downloads/App/server/routes/auth-callback.js)
+
+Route mới để xử lý callback từ Google OAuth:
+
+- Verify Supabase session từ callback
+- Sync user data từ Google vào database `users` table
+- Generate JWT token cho session management
+- Redirect về frontend với token
+
+---
+
+### Frontend Components
+
+#### [MODIFY] [AuthContext.tsx](file:///c:/Users/Adonis/Downloads/App/src/contexts/AuthContext.tsx)
+
+Thêm method mới:
+
+```typescript
+const loginWithGoogle = async () => {
+  // Gọi Supabase signInWithOAuth
+  // Redirect về /auth/callback
+}
+```
+
+---
+
+#### [MODIFY] [Auth.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Auth.tsx)
+
+Kết nối button "Sign in with Google" (dòng 184) với `loginWithGoogle()`:
+
+```tsx
+<button 
+  onClick={loginWithGoogle}
+  className="w-full h-12 bg-white/5..."
+>
+  <Chrome size={18} />
+  <span>Sign in with Google</span>
+</button>
+```
+
+---
+
+#### [NEW] [AuthCallback.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AuthCallback.tsx)
+
+Page mới để xử lý redirect từ Google:
+
+- Parse session từ URL hash
+- Gửi session lên backend để sync user data
+- Nhận JWT token và lưu vào localStorage
+- Redirect về dashboard
+
+---
+
+### Configuration
+
+#### [MODIFY] [.env](file:///c:/Users/Adonis/Downloads/App/.env)
+
+Thêm biến môi trường:
+
+```bash
+# Google OAuth (sẽ được cấu hình trong Supabase Dashboard)
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-client-secret
+```
+
+---
+
+## Verification Plan
+
+### Automated Tests
+
+```bash
+# Start dev server
+npm run dev
+
+# Backend server
+cd server && npm start
+```
+
+### Manual Verification
+
+1. **Browser Testing**:
+   - Click "Sign in with Google" button
+   - Chọn Google account
+   - Xác nhận permissions
+   - Verify redirect về dashboard thành công
+
+2. **Database Check**:
+   - Kiểm tra user mới được tạo trong Supabase `users` table
+   - Verify `is_verified = true` cho OAuth users
+   - Verify `email` khớp với Google account
+
+3. **Session Persistence**:
+   - Refresh page → vẫn logged in
+   - Logout → session cleared
+   - Login lại với Google → nhận lại user data
+
+4. **Error Scenarios**:
+   - Cancel OAuth flow → hiển thị error message
+   - Network error → retry mechanism
+   - Invalid credentials → error handling

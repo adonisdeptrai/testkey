@@ -1,0 +1,56 @@
+# Fix User Menu Navigation
+
+The User Menu has broken links and displays restricted items to regular users. This plan outlines the fixes for [UserMenu.tsx](file:///c:/Users/Adonis/Downloads/App/src/components/layout/UserMenu.tsx).
+
+## Proposed Changes
+
+### [MODIFY] [src/components/layout/UserMenu.tsx](file:///c:/Users/Adonis/Downloads/App/src/components/layout/UserMenu.tsx)
+
+1.  **Restrict "Dashboard" Link**:
+    - Condition: Show only if `user?.role === 'admin'`.
+    - Action: Navigate to `admin` view instead of `dashboard`.
+
+2.  **Fix "Profile" Link**:
+    - Action: Navigate to `dashboard` view (Assuming User Profile is part of `UserDashboard`).
+    - *Clarification*: The current code maps 'Profile' to 'dashboard'. If specific tab navigation is supported (e.g. `dashboard?tab=profile`), we might need to enhance `onNavigate`. For now, `dashboard` view is correct for User Profile.
+
+3.  **Fix "Settings" Link**:
+    - Action: Navigate to `dashboard` view (User Settings are typically there).
+
+4.  **Fix "Subscription" Link**:
+    - Action: Navigate to `dashboard` view (Billing/Subscription typically there).
+    - Note: If these need specific tabs, [Dashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Dashboard.tsx) needs to handle initial tab state props (currently it defaults to 'overview').
+
+5.  **Fix "Help Center"**:
+    - Action: Navigate to a new `help` view or show a modal. For now, maybe pointing to `admin` support if admin, or `dashboard` support ticket tab?
+    - *Decision*: Link to `dashboard` for now, assuming Help/Support is inside the dashboard.
+
+## Refined Navigation Logic
+I will modify `menuItems` to be dynamic based on user role.
+
+```typescript
+const menuItems = [
+    // Admin Only
+    ...(user.role === 'admin' ? [{ 
+        icon: LayoutDashboard, 
+        label: 'Admin Dashboard', 
+        onClick: () => handleNavigate('admin') 
+    }] : []),
+    
+    // User Items
+    { icon: LayoutDashboard, label: 'My Dashboard', onClick: () => handleNavigate('dashboard') },
+    { icon: UserIcon, label: 'Profile', onClick: () => handleNavigate('dashboard') },
+    // ...
+];
+```
+
+## Verification Plan
+
+### Manual Verification
+1.  **Login as User**:
+    - Verify "Admin Dashboard" is NOT visible.
+    - Click "Profile" -> Should go to User Dashboard.
+    - Click "Settings" -> Should go to User Dashboard.
+2.  **Login as Admin**:
+    - Verify "Admin Dashboard" IS visible.
+    - Click "Admin Dashboard" -> Should go to Admin Dashboard.

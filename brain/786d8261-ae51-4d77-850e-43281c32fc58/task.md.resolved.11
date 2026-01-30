@@ -1,0 +1,15 @@
+- [x] Analyze existing Docker artifacts ([Dockerfile](file:///c:/Users/Adonis/Downloads/App/Dockerfile), [docker-compose.yml](file:///c:/Users/Adonis/Downloads/App/docker-compose.yml)) <!-- id: 0 -->
+- [x] Verify project structure and dependencies ([package.json](file:///c:/Users/Adonis/Downloads/App/package.json)) <!-- id: 1 -->
+- [x] Create [docker-manage.ps1](file:///c:/Users/Adonis/Downloads/App/docker-manage.ps1) script <!-- id: 5 -->
+- [x] Create [server/.dockerignore](file:///c:/Users/Adonis/Downloads/App/server/.dockerignore) <!-- id: 6 -->
+- [x] Verify build process <!-- id: 4 -->
+- [x] Verify deployment with `docker-compose` <!-- id: 7 -->
+- [x] Analyze "Current Web" style (`LandingPage`) <!-- id: 8 -->
+- [x] Update `AdminDashboard` to match style <!-- id: 9 -->
+- [x] Update [Dashboard](file:///c:/Users/Adonis/Downloads/App/src/pages/Dashboard.tsx#152-382) wrapper layout if needed <!-- id: 10 -->
+- [x] Fix remaining light styles in `AdminDashboard` components ([VerifyOrderModal](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#110-145), [PreviewCard](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#529-631)) <!-- id: 11 -->
+- [x] Redesign [ManageProductModal](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#480-1170) for premium UX/UI <!-- id: 12 -->
+- [ ] Create [Product](file:///c:/Users/Adonis/Downloads/App/src/pages/Admin/AddProduct.tsx#7-316) Mongoose model <!-- id: 13 -->
+- [ ] Implement Product API routes in `server.js` <!-- id: 14 -->
+- [ ] Integrate Product API in [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx) <!-- id: 15 -->
+- [ ] Verify persistence with MongoDB <!-- id: 16 -->

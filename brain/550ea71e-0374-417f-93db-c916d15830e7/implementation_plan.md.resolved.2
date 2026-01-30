@@ -1,0 +1,30 @@
+# Fix UI Crash on Navigation
+
+The user reports a black screen crash when navigating sidebar sections. This is likely caused by the [AdminProducts](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#167-218) component trying to filter an undefined `products` prop before the data fetch completes or if it fails.
+
+## Root Cause
+`const filtered = filterType ? products.filter((p: any) => p.type === filterType) : products;`
+
+If `products` is `undefined` (initial state or fetch error), this line throws a runtime error, causing the React component tree to crash.
+
+## Proposed Changes
+
+### [MODIFY] [src/pages/AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+- Add a safety check for `products` in [AdminProducts](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#167-218).
+- Return an empty array or null if `products` is missing.
+- Add similar safety checks for [KeyManagementView](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#219-265) and [AdminOrders](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#266-307).
+
+```typescript
+const AdminProducts = ({ onEdit, onAdd, onDelete, filterType, products }: any) => {
+    // Safety check
+    const safeProducts = products || [];
+    const filtered = filterType ? safeProducts.filter((p: any) => p.type === filterType) : safeProducts;
+    // ...
+```
+
+## Verification Plan
+
+### Manual Verification
+1.  **Simulate Slow Network**: Use browser devtools to throttle network.
+2.  **Navigate Quickly**: Switch tabs rapidly between "Overview", "Products", "Tools" before data loads.
+3.  **Verify NO Crash**: The app should handle the loading state gracefully (empty table or loading indicator, but NO black screen).

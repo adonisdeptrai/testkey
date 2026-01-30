@@ -1,0 +1,13 @@
+# Task: Implement Liquid Morph Toggle and Direct Buy
+
+- [/] Analyze [Shop.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Shop.tsx) and [Checkout.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Checkout.tsx) <!-- id: 0 -->
+- [ ] Create `ViewToggle` component with liquid morph animation in [Shop.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Shop.tsx) <!-- id: 1 -->
+    - [ ] Use `framer-motion` `layoutId` for the sliding background <!-- id: 2 -->
+    - [ ] Match visual style of the toggle (rounded pill, icons) <!-- id: 3 -->
+- [ ] Update "Buy Now" handler in [Shop.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Shop.tsx) <!-- id: 4 -->
+    - [ ] Navigate to checkout with `state.items` containing only the selected product <!-- id: 5 -->
+    - [ ] Ensure `addToCart` is NOT called <!-- id: 6 -->
+- [ ] Update [Checkout.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Checkout.tsx) to handle Direct Buy items <!-- id: 7 -->
+    - [ ] Check `location.state.directCheckoutItem` (or similar) first <!-- id: 8 -->
+    - [ ] Fallback to `useCart` items if no state <!-- id: 9 -->
+- [ ] Verify functionality <!-- id: 10 -->

@@ -1,0 +1,24 @@
+# Bổ Sung Middleware Auth Backend
+
+## Mục tiêu
+Tăng cường bảo mật bằng cách áp dụng auth middleware cho các API endpoints nhạy cảm.
+
+---
+
+## Checklist
+
+### Planning
+- [x] Phân tích cấu trúc Backend hiện tại
+- [x] Xác định các routes cần bảo vệ
+- [x] Tạo implementation plan
+
+### Execution
+- [x] Tạo `adminAuth` middleware để kiểm tra role admin
+- [x] Áp dụng auth cho [products.js](file:///c:/Users/Adonis/Downloads/App/server/routes/products.js) (POST, PUT, DELETE)
+- [x] Áp dụng auth cho [orders.js](file:///c:/Users/Adonis/Downloads/App/server/routes/orders.js) (GET All, PUT, Verify) 
+- [x] Áp dụng auth cho [settings.js](file:///c:/Users/Adonis/Downloads/App/server/routes/settings.js) (PUT, POST test-tpbank)
+- [ ] Cập nhật Dockerfile và docker-compose nếu cần
+
+### Verification
+- [/] Test các endpoint có auth được bảo vệ đúng cách
+- [ ] Test các endpoint public vẫn hoạt động bình thường

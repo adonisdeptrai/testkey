@@ -1,0 +1,23 @@
+# Walkthrough - Restrict Admin Dashboard
+
+I have implemented access control for the Admin Dashboard.
+
+## Changes Made
+
+### 1. Admin Route Protection
+- **File**: [src/App.tsx](file:///c:/Users/Adonis/Downloads/App/src/App.tsx)
+- **Change**: Created [AdminRoute](file:///c:/Users/Adonis/Downloads/App/src/App.tsx#32-41) component.
+- **Logic**: It checks if `user.role === 'admin'`. If true, it renders the protected route. If false (or not logged in), it redirects to `/shop` (or `/auth` if not logged in).
+- **Application**: Wrapped `/dashboard`, `/admin`, and `/add-product` routes with this [AdminRoute](file:///c:/Users/Adonis/Downloads/App/src/App.tsx#32-41) component.
+
+### 2. Admin User Verification
+- **User**: `mquyendeptrai`
+- **Action**: Ran a seed script to ensure this user has `role: 'admin'`.
+
+## Verification Results
+- **Admin Access**: User `mquyendeptrai` can access `http://localhost:8080/admin`.
+- **Restricted Access**: Standard users (like `mlyeee`) are redirected to `/shop` when attempting to access admin routes.
+
+## Next Steps
+- You can now safely give the `mquyendeptrai` account to your admins.
+- To promote other users, you will need to update their `role` to `'admin'` in the database directly (via Mongo Express at `http://localhost:8081` or a script), as there is no UI for this yet.

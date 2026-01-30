@@ -1,0 +1,42 @@
+# Walkthrough - Sidebar Product Filtering Fix
+
+I have fixed the issue where "Tools", "Courses", and "License Keys" tabs were empty in the Admin Dashboard.
+
+## Changes
+
+### [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+
+I added the missing conditional rendering logic for the new tabs and verified the filtering uses strict Enums.
+
+```diff
++ {activeTab === 'tools' && (
++     <AdminProducts
++         onEdit={setEditingProduct}
++         onAdd={() => setIsAddingProduct(true)}
++         onDelete={handleDeleteProduct}
++         products={products}
++         filterType={ProductType.TOOL}
++     />
++ )}
++
++ {activeTab === 'courses' && (
++     <AdminProducts
++ ...
++         filterType={ProductType.COURSE}
++     />
++ )}
+```
+
+## Verification Results
+
+### Automated Tests
+- `npm run build` was attempted but failed due to system Execution Policy.
+- **Manual Verification Required**: Please run the app and verify the tabs as described below.
+
+### Manual Verification Steps
+1.  **Launch App**: Start the application (`npm run dev` or your preferred method).
+2.  **Login as Admin**: Access the Admin Dashboard.
+3.  **Check Tabs**:
+    - Click **Tools**: Should now show products defined as "MMO Tool".
+    - Click **Courses**: Should now show products defined as "Course".
+    - Click **License Keys**: Should show products defined as "License Key".

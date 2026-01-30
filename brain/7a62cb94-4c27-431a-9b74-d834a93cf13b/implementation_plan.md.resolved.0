@@ -1,0 +1,45 @@
+# Refactor Routing and Fix Configuration
+
+## Goal Description
+Refactor the frontend to use `react-router-dom` instead of manual state-based routing to fix the broken browser Back button functionality. Also externalize hardcoded URLs in the backend.
+
+## User Review Required
+> [!WARNING]
+> This refactor will replace the current state-based navigation (`currentView`) with standard URL-based routing. This is a significant structural change for [App.tsx](file:///c:/Users/Adonis/Downloads/App/src/App.tsx).
+
+## Proposed Changes
+
+### Frontend (Client)
+#### [MODIFY] [App.tsx](file:///c:/Users/Adonis/Downloads/App/src/App.tsx)
+- Remove `currentView` state and manual `pushState` logic.
+- Replace conditional rendering with `<Routes>` and `<Route>` from `react-router-dom`.
+- Use `useNavigate` instead of custom [navigate](file:///c:/Users/Adonis/Downloads/App/src/App.tsx#49-62) function.
+- Ensure `SmoothScroll` wraps the routes effectively.
+
+#### [MODIFY] [index.tsx](file:///c:/Users/Adonis/Downloads/App/src/index.tsx)
+- Wrap `<App />` with `<BrowserRouter>`.
+
+### Backend (Server)
+#### [MODIFY] [auth.js](file:///c:/Users/Adonis/Downloads/App/server/routes/auth.js)
+- Replace hardcoded `http://localhost:8080` with `process.env.CLIENT_URL`.
+
+#### [MODIFY] [.env](file:///c:/Users/Adonis/Downloads/App/.env)
+- Add `CLIENT_URL=http://localhost:8080`.
+
+## Verification Plan
+
+### Automated Tests
+- None available for routing currently.
+
+### Manual Verification
+1.  **Routing Test**:
+    - Start app.
+    - Click "Shop" (or any link).
+    - URL should change.
+    - Click **Browser Back Button**.
+    - **Expectation**: Page should revert to previous view (Landing).
+    - **Current Behavior (Bug)**: URL changes but page stays on Shop.
+2.  **Auth Flow**:
+    - Register a new user.
+    - Check server logs for Verification Link.
+    - Link should start with `http://localhost:8080` (or value in [.env](file:///c:/Users/Adonis/Downloads/App/.env)).

@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Implementation plan cho Coupon/Discount System bao gồm Coupon model creation (code, type, value, expiry, usage limits), admin coupon management UI (create, list, disable), checkout integration với coupon validation, automatic discount calculation, usage tracking, và promotional campaigns support.",
+  "updatedAt": "2026-01-25T12:34:24.753802100Z",
+  "version": "5"
+}

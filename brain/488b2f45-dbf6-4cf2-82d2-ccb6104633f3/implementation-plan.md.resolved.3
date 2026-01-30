@@ -1,0 +1,429 @@
+# Ticket/Support System - Implementation Plan
+
+## Goal
+
+Implement complete **Customer Support Ticket System** để:
+1. Users submit support tickets (issues, questions, feature requests)
+2. Admin view và respond to tickets
+3. Track ticket status (Open → In Progress → Resolved → Closed)
+4. Message threading (conversation between user and admin)
+5. Priority management (Low, Medium, High, Critical)
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Email Notifications**: Tickets sẽ trigger email notifications khi status changes hoặc admin replies (if SMTP configured). Users nhận updates qua email.
+
+> [!WARNING]
+> **File Attachments NOT Included**: Phiên bản này chỉ support text messages. File uploads (screenshots, logs) sẽ cần separate implementation.
+
+## Proposed Changes
+
+### Backend Changes
+
+#### 1. [NEW] [Ticket.js](file:///c:/Users/Adonis/Downloads/App/server/models/Ticket.js)
+
+**Create Model:**
+```javascript
+const TicketSchema = new mongoose.Schema({
+    ticketId: { 
+        type: String, 
+        unique: true  // Auto-generated: TKT-XXXX
+    },
+    userId: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User', 
+        required: true,
+        index: true 
+    },
+    subject: { 
+        type: String, 
+        required: true,
+        maxlength: 200 
+    },
+    category: {
+        type: String,
+        enum: ['Technical Issue', 'Billing', 'Product Key', 'Feature Request', 'Other'],
+        default: 'Other'
+    },
+    priority: { 
+        type: String, 
+        enum: ['Low', 'Medium', 'High', 'Critical'], 
+        default: 'Medium' 
+    },
+    status: { 
+        type: String, 
+        enum: ['Open', 'In Progress', 'Resolved', 'Closed'], 
+        default: 'Open',
+        index: true 
+    },
+    messages: [{
+        sender: { type: String, required: true }, // username
+        senderRole: { type: String, enum: ['user', 'admin'] },
+        message: { type: String, required: true },
+        timestamp: { type: Date, default: Date.now }
+    }],
+    assignedTo: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User' // Admin user
+    },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
+});
+
+// Auto-generate ticket ID
+TicketSchema.pre('save', function(next) {
+    if (!this.ticketId) {
+        this.ticketId = 'TKT-' + Math.floor(1000 + Math.random() * 9000);
+    }
+    this.updatedAt = new Date();
+    next();
+});
+```
+
+**Indexes:**
+- `userId` - User's tickets
+- `status` - Filter by status
+- `ticketId` - Unique lookup
+
+---
+
+#### 2. [NEW] [tickets.js](file:///c:/Users/Adonis/Downloads/App/server/routes/tickets.js)
+
+**Create Routes:**
+
+**a) GET /api/tickets/my-tickets** (User)
+- List user's own tickets
+- Sort by updatedAt descending
+- Pagination
+
+**b) POST /api/tickets** (User)
+- Create new ticket
+- Initial message required
+- Auto-set status='Open'
+- Send email notification to admin
+
+**c) GET /api/tickets/:id** (User + Admin)
+- Get ticket details với full message thread
+- Authorization: User can only see own tickets, admin sees all
+
+**d) POST /api/tickets/:id/reply** (User + Admin)
+- Add message to ticket
+- Update ticket.updatedAt
+- Send email to other party
+- If admin replies → User receives email
+- If user replies → Admin receives email
+
+**e) PUT /api/tickets/:id/status** (Admin Only)
+- Change ticket status
+- Log status change in messages
+- Send email notification
+
+**f) GET /api/tickets** (Admin Only)
+- List all tickets with filters
+- Filter by: status, priority, assignedTo, category
+- Pagination
+
+**g) PUT /api/tickets/:id/assign** (Admin Only)
+- Assign ticket to specific admin
+- Update assignedTo field
+
+---
+
+#### 3. Email Notifications
+
+**Trigger Points:**
+1. **New Ticket Created** → Email to admin
+2. **Admin Replies** → Email to user
+3. **Status Changed** → Email to user
+4. **User Replies** → Email to assigned admin
+
+**Email Template (New Ticket):**
+```html
+<h1>New Support Ticket</h1>
+<p><strong>Ticket ID:</strong> TKT-1234</p>
+<p><strong>Subject:</strong> {subject}</p>
+<p><strong>Priority:</strong> {priority}</p>
+<p><strong>Message:</strong></p>
+<p>{message}</p>
+<a href="{ADMIN_URL}/admin?tab=tickets">View Ticket</a>
+```
+
+**Email Template (Reply):**
+```html
+<h1>New Reply on Ticket TKT-1234</h1>
+<p><strong>From:</strong> {senderUsername}</p>
+<p><strong>Message:</strong></p>
+<p>{message}</p>
+<a href="{CLIENT_URL}/dashboard?tab=tickets&ticket={ticketId}">View Ticket</a>
+```
+
+---
+
+### Frontend Changes
+
+#### 4. [MODIFY] [Dashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Dashboard.tsx)
+
+**Add "Tickets" Tab:**
+
+**Features:**
+- List user's tickets (table: ID, Subject, Status, Priority, Last Updated)
+- "Create Ticket" button → Opens CreateTicketModal
+- Click ticket row → Opens TicketDetailModal
+- Status badges (color-coded: Open=blue, In Progress=yellow, Resolved=green, Closed=gray)
+
+**CreateTicketModal Component:**
+```typescript
+const CreateTicketModal = ({ onClose, onSuccess }) => {
+    const [subject, setSubject] = useState('');
+    const [category, setCategory] = useState('Technical Issue');
+    const [priority, setPriority] = useState('Medium');
+    const [message, setMessage] = useState('');
+    
+    const handleSubmit = async () => {
+        await fetch('/api/tickets', {
+            method: 'POST',
+            body: JSON.stringify({ subject, category, priority, message })
+        });
+        onSuccess();
+    };
+    
+    // UI: Subject input, category dropdown, priority select, message textarea
+};
+```
+
+**TicketDetailModal Component:**
+```typescript
+const TicketDetailModal = ({ ticketId, onClose }) => {
+    const [ticket, setTicket] = useState(null);
+    const [replyMessage, setReplyMessage] = useState('');
+    
+    const handleReply = async () => {
+        await fetch(`/api/tickets/${ticketId}/reply`, {
+            method: 'POST',
+            body: JSON.stringify({ message: replyMessage })
+        });
+        // Refresh ticket
+    };
+    
+    // UI: Ticket header (ID, subject, status), message thread, reply input
+};
+```
+
+---
+
+#### 5. [MODIFY] [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+
+**Update "Tickets" Tab (Already exists as AdminMessages):**
+
+**Replace AdminMessages với AdminTickets Component:**
+
+**Features:**
+- List all tickets với filters (status, priority, category)
+- Status-based grouping/tabs (Open, In Progress, Resolved)
+- Click ticket → Opens AdminTicketDetailModal
+- Assign ticket to admin dropdown
+- Change status dropdown
+- Priority indicator (High=red dot, Critical=red badge)
+
+**AdminTicketDetailModal Component:**
+```typescript
+const AdminTicketDetailModal = ({ ticketId, onClose, onUpdate }) => {
+    const [ticket, setTicket] = useState(null);
+    const [replyMessage, setReplyMessage] = useState('');
+    const [newStatus, setNewStatus] = useState('');
+    
+    const handleReply = async () => {
+        await fetch(`/api/tickets/${ticketId}/reply`, {
+            method: 'POST',
+            body: JSON.stringify({ message: replyMessage })
+        });
+    };
+    
+    const handleStatusChange = async () => {
+        await fetch(`/api/tickets/${ticketId}/status`, {
+            method: 'PUT',
+            body: JSON.stringify({ status: newStatus })
+        });
+    };
+    
+    // UI: Message thread, reply input, status dropdown, assign dropdown
+};
+```
+
+---
+
+## Verification Plan
+
+### Manual Testing
+
+**Test Script:** `test-ticket-system.ps1`
+
+**Scenario 1: Create Ticket**
+```powershell
+# Login as user
+POST /api/tickets
+Body: {
+  "subject": "Product key not working",
+  "category": "Product Key",
+  "priority": "High",
+  "message": "I purchased license but activation fails with error code 401"
+}
+
+# Expected:
+# - Ticket created với ticketId=TKT-XXXX
+# - Status=Open
+# - Email sent to admin
+```
+
+**Scenario 2: Admin Reply**
+```powershell
+# Login as admin
+# View ticket TKT-XXXX
+POST /api/tickets/TKT-XXXX/reply
+Body: {
+  "message": "Can you provide your order ID? We'll check the key status."
+}
+
+# Expected:
+# - Message added to thread
+# - Email sent to user
+# - ticket.updatedAt updated
+```
+
+**Scenario 3: User Reply**
+```powershell
+# User replies
+POST /api/tickets/TKT-XXXX/reply
+Body: {
+  "message": "My order ID is ORD-1234"
+}
+
+# Expected:
+# - Message added
+# - Email to admin
+```
+
+**Scenario 4: Status Change**
+```powershell
+# Admin changes status
+PUT /api/tickets/TKT-XXXX/status
+Body: { "status": "In Progress" }
+
+# Expected:
+# - Status updated
+# - System message added: "Status changed to In Progress"
+# - Email to user
+```
+
+**Scenario 5: Resolve & Close**
+```powershell
+# Admin resolves
+PUT /api/tickets/TKT-XXXX/status
+Body: { "status": "Resolved" }
+
+# User confirms
+PUT /api/tickets/TKT-XXXX/status (User can only close resolved tickets)
+Body: { "status": "Closed" }
+
+# Expected: Ticket archived
+```
+
+---
+
+## Database Schema Changes
+
+**New Model:** Ticket (ticketId, userId, subject, category, priority, status, messages array, assignedTo)
+
+**No changes to existing models.**
+
+---
+
+## Implementation Order
+
+1. **Backend Foundation** (Day 1)
+   - Create Ticket model
+   - Create /api/tickets routes (CRUD)
+   - Test with Postman
+
+2. **Email Notifications** (Day 1-2)
+   - Implement email sending
+   - Templates for new ticket, reply, status change
+   - Test delivery
+
+3. **User Ticket UI** (Day 2)
+   - Add Tickets tab to Dashboard
+   - CreateTicketModal
+   - TicketDetailModal
+   - Reply functionality
+
+4. **Admin Ticket Management** (Day 2-3)
+   - Replace AdminMessages với AdminTickets
+   - AdminTicketDetailModal
+   - Status change UI
+   - Assign ticket dropdown
+
+5. **Testing & Polish** (Day 3)
+   - Manual test script
+   - Edge cases
+   - UI polish
+
+---
+
+## Security Considerations
+
+1. **Authorization:**
+   - Users can only view/reply to own tickets
+   - Only admin can change status/assign tickets
+   - Middleware auth check on all endpoints
+
+2. **Input Validation:**
+   - Subject max 200 characters
+   - Message required và non-empty
+   - Enum validation (status, priority, category)
+
+3. **Rate Limiting:**
+   - Ticket creation: Max 5 tickets/hour per user (prevent spam)
+
+4. **XSS Prevention:**
+   - Sanitize message content before display
+   - Escape HTML in emails
+
+---
+
+## File Summary
+
+**Created:** 2 files
+- `server/models/Ticket.js` - Ticket model
+- `server/routes/tickets.js` - Ticket routes (7 endpoints)
+
+**Modified:** 2 files
+- [src/pages/Dashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Dashboard.tsx) - Add Tickets tab
+- [src/pages/AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx) - Replace AdminMessages với AdminTickets
+
+**Total Code Changes:** ~500-600 lines
+
+---
+
+## Known Limitations
+
+1. **No File Attachments**: Text-only messages
+2. **No Real-time Updates**: Users must refresh to see new replies (WebSocket not implemented)
+3. **Single Admin Assignment**: Ticket assigned to 1 admin only (no team assignment)
+4. **No SLA Tracking**: No auto-escalation for old tickets
+
+---
+
+## Future Enhancements
+
+- File attachments (screenshots, logs)
+- Real-time notifications (WebSocket/SSE)
+- Ticket templates (common issues)
+- Auto-assignment (round-robin, load balancing)
+- SLA tracking (response time goals)
+- Ticket tags/labels
+- Internal notes (admin-only comments)
+
+---
+
+*Plan created: 2026-01-25*

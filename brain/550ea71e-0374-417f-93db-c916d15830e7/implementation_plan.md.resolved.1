@@ -1,0 +1,31 @@
+# Refactor Customers Section
+
+The "Customers" section in the Admin Dashboard currently displays placeholder data. This plan outlines the steps to implement a real backend endpoint for fetching users and connecting it to the frontend.
+
+## Proposed Changes
+
+### Backend
+
+#### [NEW] [server/routes/users.js](file:///c:/Users/Adonis/Downloads/App/server/routes/users.js)
+- Create a new route file for user management.
+- Implement `GET /` endpoint to fetch all users (excluding sensitive data like passwords).
+- Protect the route with `auth` and `adminAuth` middleware.
+
+#### [MODIFY] [server/index.js](file:///c:/Users/Adonis/Downloads/App/server/index.js)
+- Register the new `/api/users` route.
+
+### Frontend
+
+#### [MODIFY] [src/pages/AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+- Add state to [AdminDashboard](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#1303-1536) to store users.
+- Fetch users in the `useEffect` hook alongside products and orders.
+- Update [AdminCustomers](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#311-338) component to accept `users` prop and map over real data.
+- Remove hardcoded placeholder loop.
+
+## Verification Plan
+
+### Manual Verification
+1.  **Restart Server**: Ensure backend picks up the new route.
+2.  **Login as Admin**: Access Admin Dashboard.
+3.  **Navigate to Customers**: Verify the list displays actual users from the database.
+4.  **Verify Data**: Check if names/emails match the database content.

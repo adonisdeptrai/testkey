@@ -1,0 +1,57 @@
+# User Balance System Implementation
+
+## Mục tiêu
+Activate User Balance System để users có thể top-up balance, pay với balance at checkout, view transaction history, và admin có thể adjust balance.
+
+## Checklist
+
+### Backend - Database Models
+- [x] Create Transaction model (userId, type, amount, balanceBefore, balanceAfter, description, relatedOrder)
+- [x] Update Order model - Add `orderType` field ('product_purchase' | 'balance_topup')
+
+### Backend - API Routes
+- [x] Create `/api/balance` routes file
+  - GET /api/balance/my-balance (current balance + recent transactions)
+  - POST /api/balance/topup (create deposit order)
+  - GET /api/balance/transactions (transaction history)
+  - POST /api/balance/adjust (admin adjustment)
+- [x] Register routes trong server index.js
+
+### Backend - Balance Logic
+- [x] Add [creditBalance()](file:///c:/Users/Adonis/Downloads/App/server/routes/orders.js#200-244) function (when topup order completed)
+- [x] Add `POST /api/orders/checkout-with-balance` endpoint
+- [x] Implement balance deduction logic với transaction logging
+- [x] Add validation (insufficient balance check)
+- [x] Transaction race condition handling (mongoose session)
+
+### Frontend - User Balance Tab
+- [ ] Add "Balance" tab to Dashboard.tsx
+- [ ] Display current balance prominently
+- [ ] Create TopUpBalanceModal component
+- [ ] Transaction history table với pagination
+- [ ] Responsive UI
+
+### Frontend - Checkout Integration
+- [ ] Add payment method selector (Balance vs Crypto vs Bank)
+- [ ] Implement balance checkout flow
+- [ ] Insufficient balance warning/error
+- [ ] Success feedback sau purchase
+
+### Frontend - Admin UI
+- [ ] Add "Adjust Balance" button trong Customers tab
+- [ ] Create BalanceAdjustModal component
+- [ ] Reason input (required for adjustments)
+- [ ] Success/error feedback
+
+### Testing
+- [ ] Create test-balance-system.ps1 script
+- [ ] Test balance top-up flow
+- [ ] Test purchase with balance (sufficient)
+- [ ] Test purchase with balance (insufficient)
+- [ ] Test admin balance adjustment
+- [ ] Test transaction history display
+
+### Documentation
+- [ ] Update API documentation
+- [ ] Add user guide for balance system
+- [ ] Add admin guide for balance adjustment

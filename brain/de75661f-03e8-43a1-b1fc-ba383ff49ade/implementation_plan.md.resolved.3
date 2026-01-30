@@ -1,0 +1,29 @@
+# Implementation Plan - Restrict Admin Dashboard Access
+
+## Goal Description
+Restrict access to the Admin Dashboard routes (`/admin`, `/dashboard`) so that only users with the `role: 'admin'` can access them. Standard users should be redirected or shown an access denied message.
+
+## User Review Required
+> [!IMPORTANT]
+> Ensure at least one user in the database has the `admin` role, otherwise you may lock yourself out of the dashboard. I will verify if I need to update the seed data.
+
+## Proposed Changes
+
+### Frontend
+#### [MODIFY] [src/App.tsx](file:///c:/Users/Adonis/Downloads/App/src/App.tsx)
+- Create a new `AdminRoute` component (similar to [ProtectedRoute](file:///c:/Users/Adonis/Downloads/App/src/App.tsx#24-31)) that checks `user.role === 'admin'`.
+- Wrap `/admin`, `/dashboard`, and `/add-product` routes with `AdminRoute`.
+
+#### [MODIFY] [src/contexts/AuthContext.tsx](file:///c:/Users/Adonis/Downloads/App/src/contexts/AuthContext.tsx)
+- Ensure the `user` object in the context includes the `role` field. (I need to verify `types.ts` and the context implementation).
+
+### Backend
+#### [MODIFY] [server/routes/settings.js](file:///c:/Users/Adonis/Downloads/App/server/routes/settings.js)
+- Add authorization middleware to `PUT /` route to ensure only admins can update settings. (Ideally, but for now I will focus on Frontend restriction as requested, unless I see `auth` middleware is ready).
+- *Self-correction*: The user asked for "admin dashboard for user with role admin". Frontend protection is the primary visual requirement. Backend protection is good practice. I'll check if `middleware/auth.js` supports role checking.
+
+## Verification Plan
+### Manual Verification
+- **Login as User**: Try to access `/admin`. Should be redirected to `/shop` or show 403.
+- **Login as Admin**: Access `/admin`. Should work.
+- **Update Seed**: If needed, ensure a default admin user exists (e.g. `admin` / `admin123`).

@@ -1,0 +1,50 @@
+# Analytics & Reporting System Enhancement
+
+## Mục tiêu
+Enhance existing analytics system với time-series data, detailed metrics, date range filtering, export capabilities, và visual dashboard improvements.
+
+## Checklist
+
+### Backend - Analytics Endpoints
+- [ ] Add GET /api/stats/revenue-over-time endpoint (daily/weekly/monthly aggregation)
+- [ ] Add GET /api/stats/user-growth endpoint (new users over time)
+- [ ] Add GET /api/stats/product-performance endpoint (sales by product)
+- [ ] Add GET /api/stats/ticket-analytics endpoint (ticket metrics)
+- [ ] Add GET /api/stats/balance-metrics endpoint (balance system stats)
+- [ ] Add date range helper functions (presets: today, week, month, year)
+- [ ] Add aggregation utility functions
+
+### Backend - Export Functionality
+- [ ] Add GET /api/stats/export endpoint
+- [ ] Implement CSV export (revenue, users, orders)
+- [ ] Implement PDF export (optional)
+- [ ] Add proper headers for file downloads
+
+### Frontend - Dashboard Components
+- [ ] Create DateRangePicker component (presets + custom)
+- [ ] Enhance KPI cards với change percentage
+- [ ] Create RevenueChart component (line chart)
+- [ ] Create UserGrowthChart component
+- [ ] Create ProductPerformanceTable component
+- [ ] Create ExportButton component (CSV/PDF dropdown)
+- [ ] Install recharts library
+
+### Frontend - Dashboard Layout
+- [ ] Restructure AdminOverview layout
+- [ ] Add date range selector header
+- [ ] Add charts row (revenue + user growth)
+- [ ] Add tables row (products + tickets)
+- [ ] Responsive design for charts
+
+### Testing
+- [ ] Test time-series data endpoints
+- [ ] Test date range filtering (presets + custom)
+- [ ] Test CSV export
+- [ ] Test dashboard rendering
+- [ ] Test chart interactions
+- [ ] Performance testing (large date ranges)
+
+### Documentation
+- [ ] Update API documentation
+- [ ] Add admin guide for analytics dashboard
+- [ ] Document export formats

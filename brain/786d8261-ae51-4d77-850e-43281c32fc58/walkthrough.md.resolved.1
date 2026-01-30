@@ -1,0 +1,40 @@
+# Docker Management Walkthrough
+
+I have added a PowerShell script and updated the configuration to streamline building and pushing Docker images for your application.
+
+## Changes
+
+### 1. [docker-manage.ps1](file:///c:/Users/Adonis/Downloads/App/docker-manage.ps1)
+A new PowerShell script in the root directory that handles building and pushing images for both the `app` (frontend) and `server` (backend).
+
+**Usage:**
+- **Build images locally:**
+  ```powershell
+  .\docker-manage.ps1 -Action Build
+  ```
+- **Push images to a registry:**
+  ```powershell
+  .\docker-manage.ps1 -Action Push -Registry "your_dockerhub_username" -Version "1.0.0"
+  ```
+  *Note: You must be logged in to Docker (`docker login`) before pushing.*
+
+### 2. [server/.dockerignore](file:///c:/Users/Adonis/Downloads/App/server/.dockerignore)
+Added a [.dockerignore](file:///c:/Users/Adonis/Downloads/App/.dockerignore) file to the server directory to exclude `node_modules` and other unnecessary files from the build context, speeding up builds and reducing image size.
+
+## Verification Results
+
+### Build Verification
+I executed the build script locally, and it successfully initiated the Docker build process for the server component.
+
+```
+Building image: r4b-server:latest from ./server...
+Running: docker build -t r4b-server:latest .
+...
+#9 [4/6] RUN npm install
+```
+
+The script correctly orchestrates the Docker commands.
+
+> [!NOTE]
+> **Pushing to Docker Hub**: To push the images, you must provide your Docker Hub username. Run the script as follows:
+> `.\docker-manage.ps1 -Action Push -Registry "your_username"`

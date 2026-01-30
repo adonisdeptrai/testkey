@@ -1,0 +1,29 @@
+# Website functionality Test Walkthrough
+
+I have successfully tested the website running locally. The application loads correctly and key navigation flows are functional.
+
+## Test Results
+
+| Check | Status | Notes |
+| :--- | :--- | :--- |
+| **Server Start** | ✅ Pass | Started on `http://localhost:3000/` |
+| **Initial Load** | ✅ Pass | Dashboard loads with no errors |
+| **Navigation** | ✅ Pass | "Store" button correctly navigates to Marketplace |
+| **UI Rendering** | ✅ Pass | Layout and elements render as expected |
+
+## Visual Verification
+
+### Dashboard View
+The initial landing page (Dashboard) loads with all stats, sidebar, and header elements visible.
+
+![Initial Dashboard View](C:/Users/Adonis/.gemini/antigravity/brain/8331f160-8d92-4158-b427-e10cc500833f/initial_view_1769083645951.png)
+
+### Marketplace View
+Clicking the "Store" button successfully transitions to the Marketplace view.
+
+![Marketplace View](C:/Users/Adonis/.gemini/antigravity/brain/8331f160-8d92-4158-b427-e10cc500833f/marketplace_view_1769083662354.png)
+
+## Session Recording
+Here is a video recording of the browser session showing the navigation flow.
+
+![Test Session Recording](C:/Users/Adonis/.gemini/antigravity/brain/8331f160-8d92-4158-b427-e10cc500833f/test_website_landing_1769083639697.webp)

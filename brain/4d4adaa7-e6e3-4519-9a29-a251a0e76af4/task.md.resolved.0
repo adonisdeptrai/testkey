@@ -1,0 +1,23 @@
+# Task: Fix TPBank API TLS Connection in Docker
+
+## Problem
+- [x] TPBank API works from local environment (Node.js direct)
+- [ ] TPBank API fails from Docker container with TLS error
+- Error: "Client socket disconnected before secure TLS connection was established"
+
+## Root Cause Analysis
+- [ ] Check Node.js version differences (local vs Docker)
+- [ ] Verify SSL/TLS certificates in Alpine container
+- [ ] Check network configuration
+- [ ] Review axios SSL configuration
+
+## Implementation
+- [ ] Add SSL/TLS workaround for Docker environment
+- [ ] Update tpbank.js with proper SSL handling
+- [ ] Test from Docker container
+- [ ] Verify all TPBank endpoints work
+
+## Verification
+- [ ] Test connection from Admin Dashboard
+- [ ] Verify transaction history retrieval
+- [ ] Check auto-login retry mechanism

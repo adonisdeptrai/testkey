@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Updated debug analysis with actual root cause and final fix for admin dashboard scroll issue",
+  "updatedAt": "2026-01-24T16:37:54.538941700Z",
+  "version": "1"
+}

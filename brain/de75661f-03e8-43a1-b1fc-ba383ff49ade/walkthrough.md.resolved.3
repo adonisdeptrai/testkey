@@ -1,0 +1,29 @@
+# Walkthrough - Implement Liquid Morph & Direct Buy
+
+I have implemented the requested visual enhancements and logic changes.
+
+## Changes Made
+
+### 1. Liquid Morph View Toggle
+- **File**: [Shop.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Shop.tsx)
+- **Change**: Replaced the static List/Grid buttons with a segmented control.
+- **Effect**: The background "pill" now slides smoothly between List and Grid options using `framer-motion`'s `layoutId`, creating the requested "water drop" morph effect.
+- **Visuals**: Styled with a rounded dark background (`bg-black/20`) and a glowing cyan pill (`bg-brand-cyan`).
+
+### 2. Direct "Buy Now" Logic
+- **File**: [Shop.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Shop.tsx)
+- **Change**: Updated the "Buy Now" button in the [ProductDetailModal](file:///c:/Users/Adonis/Downloads/App/src/pages/Shop.tsx#153-286). It no longer adds the item to the persistent cart. Instead, it navigates directly to `/checkout` passing the product via navigation state.
+- **File**: [Checkout.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Checkout.tsx)
+- **Change**: Updated the content logic to prioritize `location.state.directItem`. If a user comes from "Buy Now", it displays *only* that item. If they come normally, it displays the cart items.
+- **Result**: Clicking "Buy Now" effectively starts a single-item checkout flow without modifying the user's shopping cart.
+
+## Verification
+I verified the changes using browser automation:
+1.  **View Toggle**: Confirmed the toggle switches modes and visually updates.
+2.  **Direct Buy**:
+    -   Clicked "Buy Now" on a product.
+    -   Confimed redirection to Checkout.
+    -   Confirmed ONLY the selected product was listed in the summary, bypassing any existing cart items.
+
+## Next Steps
+- The "one-off" purchase flow is now distinct from the "add to cart" flow as requested.

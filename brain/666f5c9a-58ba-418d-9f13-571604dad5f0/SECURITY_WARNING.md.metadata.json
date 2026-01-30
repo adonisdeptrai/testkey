@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Security warning document highlighting that JWT_SECRET still needs to be changed before production deployment, with instructions for generating strong secrets and production deployment checklist.",
+  "updatedAt": "2026-01-25T03:47:40.247169400Z"
+}

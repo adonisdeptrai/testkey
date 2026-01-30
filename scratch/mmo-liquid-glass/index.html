@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AETHERIA | MMO Marketplace</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Dynamic Background -->
+    <div class="ambient-light">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- UI Shell -->
+    <div class="app-layout">
+
+        <!-- Sidebar -->
+        <nav class="glass-sidebar">
+            <div class="logo">
+                <i class="ri-gamepad-fill"></i>
+                <span>AETHERIA</span>
+            </div>
+
+            <ul class="nav-links">
+                <li class="active"><i class="ri-store-2-line"></i> <span>Market</span></li>
+                <li><i class="ri-sword-line"></i> <span>Armory</span></li>
+                <li><i class="ri-group-line"></i> <span>Guilds</span></li>
+                <li><i class="ri-vip-diamond-line"></i> <span>Season Pass</span></li>
+            </ul>
+
+            <div class="user-profile">
+                <div class="avatar">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User">
+                    <div class="status-indicator"></div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="content-area">
+
+            <!-- Header -->
+            <header class="glass-header">
+                <div class="header-left">
+                    <!-- Mobile Logo (Visible only on mobile) -->
+                    <div class="mobile-logo">
+                        <i class="ri-gamepad-fill"></i>
+                    </div>
+                    <div class="search-bar">
+                        <i class="ri-search-line"></i>
+                        <input type="text" placeholder="Search...">
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <div class="currency">
+                        <div class="gem-balance">
+                            <i class="ri-vip-diamond-fill"></i> 4.2k
+                        </div>
+                        <div class="coin-balance">
+                            <i class="ri-copper-coin-fill"></i> 128k
+                        </div>
+                    </div>
+                    <!-- Mobile Profile (Visible only on mobile) -->
+                    <div class="mobile-profile">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <div class="hero-glass-card">
+                    <div class="hero-content">
+                        <span class="badge">NEW SEASON</span>
+                        <h1>Echoes of the <br><span class="gradient-text">Void Walker</span></h1>
+                        <p>Unlock exclusive legendary gear from the Abyss. Limited time event.</p>
+                        <button class="btn-primary">Explore Collection</button>
+                    </div>
+                    <div class="hero-visual">
+                        <!-- CSS Shapes/Image here -->
+                        <div class="floating-item"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Featured Marketplace -->
+            <section class="marketplace">
+                <div class="section-header">
+                    <h2>Trending Items</h2>
+                    <div class="filters">
+                        <button class="filter-btn active">All</button>
+                        <button class="filter-btn">Weapons</button>
+                        <button class="filter-btn">Armor</button>
+                        <button class="filter-btn">Artifacts</button>
+                    </div>
+                </div>
+
+                <div class="products-grid" id="products-grid">
+                    <!-- Injected by JS -->
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

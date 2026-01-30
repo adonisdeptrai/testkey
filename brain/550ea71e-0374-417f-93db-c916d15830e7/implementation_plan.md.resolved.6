@@ -1,0 +1,30 @@
+# Implementation Plan - TPBank Auto-Polling Worker
+
+## Goal
+Establish a background worker process that automatically polls TPBank for new transactions and validates pending orders when the Docker container starts.
+
+## User Review Required
+- **Matching Logic**: Will match transaction description against `orderId` (e.g. `#ORD-1234` or `ORD-1234`).
+- **Polling Interval**: Set to 60 seconds to avoid rate limiits.
+
+## Proposed Changes
+
+### Backend
+
+#### [NEW] [tpbankWorker.js](file:///c:/Users/Adonis/Downloads/App/server/workers/tpbankWorker.js)
+- `startWorker()` function.
+- `setInterval` loop (60s).
+- Fetch [Settings](file:///c:/Users/Adonis/Downloads/App/src/pages/UserDashboard.tsx#383-424) for credentials.
+- Call `tpbankClient.getHistories`.
+- Find [Pending](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx#27-38) orders.
+- Match `orderId` in transaction description.
+- Update matched orders to `Completed`.
+
+#### [MODIFY] [index.js](file:///c:/Users/Adonis/Downloads/App/server/index.js)
+- Import `startTPBankWorker`.
+- Call `startTPBankWorker()` after DB connection.
+
+## Verification
+- Start server.
+- specific log "TPBank Worker Started" should appear.
+- "TPBank Polling..." logs should appear every 60s.

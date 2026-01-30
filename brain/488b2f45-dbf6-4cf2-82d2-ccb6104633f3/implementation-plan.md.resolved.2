@@ -1,0 +1,467 @@
+# User Balance System - Implementation Plan
+
+## Goal
+
+Activate và implement complete **User Balance System** để users có thể:
+1. Top-up balance (tạo deposit order)
+2. Pay bằng balance tại checkout
+3. View balance transaction history
+4. Admin có thể adjust balance (add/subtract)
+
+## User Review Required
+
+> [!WARNING]
+> **Balance vs Real Money**: Balance là virtual currency trong hệ thống. Users top-up balance bằng real money (crypto/bank transfer), sau đó dùng balance để mua products với giá discounted hoặc faster checkout.
+
+> [!IMPORTANT]
+> **Withdrawal NOT Supported**: Phiên bản này chỉ support top-up và spend. Users không thể withdraw balance ra real money. Nếu cần refund, admin phải manually adjust.
+
+## Proposed Changes
+
+### Backend Changes
+
+#### 1. [MODIFY] [Order.js](file:///c:/Users/Adonis/Downloads/App/server/models/Order.js)
+
+**Add Field:**
+```javascript
+orderType: {
+    type: String,
+    enum: ['product_purchase', 'balance_topup'],
+    default: 'product_purchase'
+}
+```
+
+**Purpose:** Distinguish giữa product orders và balance top-up orders.
+
+---
+
+#### 2. [NEW] [Transaction.js](file:///c:/Users/Adonis/Downloads/App/server/models/Transaction.js)
+
+**Create Model để track balance changes:**
+```javascript
+const TransactionSchema = new mongoose.Schema({
+    userId: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User', 
+        required: true,
+        index: true 
+    },
+    type: { 
+        type: String, 
+        enum: ['topup', 'purchase', 'refund', 'admin_adjustment'], 
+        required: true 
+    },
+    amount: { 
+        type: Number, 
+        required: true 
+    },
+    balanceBefore: { type: Number, required: true },
+    balanceAfter: { type: Number, required: true },
+    description: { type: String },
+    relatedOrder: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Order' 
+    },
+    createdBy: { // For admin adjustments
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User' 
+    },
+    createdAt: { type: Date, default: Date.now }
+});
+```
+
+---
+
+#### 3. [NEW] [balance.js](file:///c:/Users/Adonis/Downloads/App/server/routes/balance.js)
+
+**Create Routes:**
+
+**a) GET /api/balance/my-balance** (User)
+- Return current balance + recent transactions
+
+**b) POST /api/balance/topup** (User)
+- Create a deposit order (orderType='balance_topup')
+- Amount, payment method
+- Return order for payment
+
+**c) GET /api/balance/transactions** (User)
+- List user's balance transaction history
+- Pagination support
+
+**d) POST /api/balance/adjust** (Admin)
+- Manually add/subtract balance
+- Reason required
+- Create Transaction record với type='admin_adjustment'
+
+---
+
+#### 4. [MODIFY] [orders.js](file:///c:/Users/Adonis/Downloads/App/server/routes/orders.js)
+
+**Update Auto-Processing Logic:**
+
+**When balance top-up order completed:**
+```javascript
+// In autoAssignKeys or new function
+if (order.orderType === 'balance_topup' && status === 'completed') {
+    await creditBalance(order.user, order.amount, order._id);
+}
+
+async function creditBalance(username, amount, orderId) {
+    const user = await User.findOne({ username });
+    const balanceBefore = user.balance;
+    user.balance += amount;
+    await user.save();
+    
+    // Create transaction record
+    await Transaction.create({
+        userId: user._id,
+        type: 'topup',
+        amount,
+        balanceBefore,
+        balanceAfter: user.balance,
+        description: `Balance top-up from order ${orderId}`,
+        relatedOrder: orderId
+    });
+}
+```
+
+**Add balance payment option:**
+```javascript
+// New endpoint: POST /api/orders/checkout-with-balance
+router.post('/checkout-with-balance', auth, async (req, res) => {
+    const { productId, quantity = 1 } = req.body;
+    
+    const user = await User.findById(req.user.id);
+    const product = await Product.findById(productId);
+    
+    const totalCost = product.price * quantity;
+    
+    if (user.balance < totalCost) {
+        return res.status(400).json({ 
+            message: 'Insufficient balance',
+            required: totalCost,
+            current: user.balance
+        });
+    }
+    
+    // Deduct balance
+    const balanceBefore = user.balance;
+    user.balance -= totalCost;
+    await user.save();
+    
+    // Create order với status='completed' immediately
+    const order = await Order.create({
+        user: user.username,
+        product: product.title,
+        amount: totalCost,
+        status: 'completed',
+        method: 'Balance Payment'
+    });
+    
+    // Create transaction
+    await Transaction.create({
+        userId: user._id,
+        type: 'purchase',
+        amount: -totalCost,
+        balanceBefore,
+        balanceAfter: user.balance,
+        description: `Purchase: ${product.title}`,
+        relatedOrder: order._id
+    });
+    
+    // Auto-assign key if applicable
+    await autoAssignKeys(order._id);
+    
+    res.json({ order, newBalance: user.balance });
+});
+```
+
+---
+
+### Frontend Changes
+
+#### 5. [MODIFY] [Dashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Dashboard.tsx)
+
+**Add "Balance" Tab:**
+
+**Features:**
+- Current balance display (large, prominent)
+- "Top Up Balance" button → Opens TopUpBalanceModal
+- Transaction history table (type, amount, date, description)
+- Pagination
+
+**TopUpBalanceModal Component:**
+```typescript
+const TopUpBalanceModal = ({ onClose, onSuccess }) => {
+    const [amount, setAmount] = useState('');
+    const [method, setMethod] = useState('Crypto (USDT)');
+    
+    const handleTopUp = async () => {
+        // POST /api/balance/topup
+        // Creates a deposit order
+        // Redirect to payment page
+    };
+    
+    // UI: Amount input, payment method selector, confirm button
+};
+```
+
+---
+
+#### 6. [MODIFY] [Checkout.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Checkout.tsx)
+
+**Add Payment Method Selector:**
+
+**Before showing bank/crypto QR:**
+```typescript
+<div className="payment-method-selector">
+    <label>
+        <input type="radio" value="balance" checked={method === 'balance'} />
+        Pay with Balance (${user.balance})
+        {user.balance < totalCost && <span className="text-red">Insufficient</span>}
+    </label>
+    <label>
+        <input type="radio" value="crypto" checked={method === 'crypto'} />
+        Crypto (USDT)
+    </label>
+    <label>
+        <input type="radio" value="bank" checked={method === 'bank'} />
+        Bank Transfer
+    </label>
+</div>
+
+{method === 'balance' && (
+    <button onClick={handleBalanceCheckout}>
+        Complete Purchase (Balance: ${user.balance})
+    </button>
+)}
+```
+
+**handleBalanceCheckout:**
+```typescript
+const handleBalanceCheckout = async () => {
+    if (user.balance < totalCost) {
+        toast.error('Insufficient balance');
+        return;
+    }
+    
+    const res = await fetch('/api/orders/checkout-with-balance', {
+        method: 'POST',
+        body: JSON.stringify({ productId, quantity })
+    });
+    
+    if (res.ok) {
+        toast.success('Purchase successful!');
+        navigate('/dashboard'); // Show order + key
+    }
+};
+```
+
+---
+
+#### 7. [MODIFY] [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+
+**Add Balance Adjustment in "Customers" Tab:**
+
+**For each user:**
+```tsx
+<button onClick={() => openBalanceAdjustModal(user)}>
+    Adjust Balance
+</button>
+
+// BalanceAdjustModal
+const BalanceAdjustModal = ({ user, onClose, onSuccess }) => {
+    const [amount, setAmount] = useState('');
+    const [type, setType] = useState<'add' | 'subtract'>('add');
+    const [reason, setReason] = useState('');
+    
+    const handleAdjust = async () => {
+        await fetch('/api/balance/adjust', {
+            method: 'POST',
+            body: JSON.stringify({ 
+                userId: user._id, 
+                amount: type === 'add' ? amount : -amount,
+                reason 
+            })
+        });
+        onSuccess();
+    };
+};
+```
+
+---
+
+## Verification Plan
+
+### Manual Testing
+
+**Test Script:** `test-balance-system.ps1`
+
+**Scenario 1: Top-Up Balance**
+```powershell
+# Login as user
+# Navigate to Dashboard → Balance tab
+# Click "Top Up Balance"
+# Enter amount: 100 USD
+# Select payment method: Crypto
+# Complete payment (or admin manually verifies)
+# Expected: Balance increased by 100, transaction record created
+```
+
+**Scenario 2: Purchase with Balance**
+```powershell
+# User has balance = 150 USD
+# View product = 50 USD
+# Checkout → Select "Pay with Balance"
+# Click confirm
+# Expected:
+#   - Order created with status='completed'
+#   - Balance deducted to 100 USD
+#   - Transaction: -50 USD, type='purchase'
+#   - Product key assigned (if applicable)
+```
+
+**Scenario 3: Insufficient Balance**
+```powershell
+# User balance = 20 USD
+# Product = 50 USD
+# Try checkout with balance
+# Expected: Error "Insufficient balance"
+```
+
+**Scenario 4: Admin Adjustment**
+```powershell
+# Admin → Customers tab
+# Select user
+# Adjust Balance → Add 50 USD, Reason: "Refund for order #123"
+# Expected:
+#   - User balance +50
+#   - Transaction created với type='admin_adjustment'
+#   - createdBy = admin user ID
+```
+
+**Scenario 5: Transaction History**
+```powershell
+# User → Dashboard → Balance tab
+# View transaction history
+# Expected: List of topup, purchase, refund transactions
+# Pagination works
+```
+
+---
+
+## Database Schema Changes
+
+**New Model:** Transaction
+**Modified Models:**
+- Order (add orderType field)
+- User (balance field already exists, no changes)
+
+---
+
+## Implementation Order
+
+1. **Backend Foundation** (Day 1)
+   - Create Transaction model
+   - Update Order model (add orderType)
+   - Create /api/balance routes
+
+2. **Balance Top-Up** (Day 1-2)
+   - Implement topup endpoint (creates deposit order)
+   - Credit balance when deposit order completed
+   - Transaction logging
+
+3. **Balance Payment** (Day 2)
+   - Checkout-with-balance endpoint
+   - Deduction logic
+   - Immediate order completion (no payment wait)
+
+4. **Frontend - User Balance Tab** (Day 2-3)
+   - Balance display
+   - TopUpBalanceModal
+   - Transaction history table
+
+5. **Frontend - Checkout Integration** (Day 3)
+   - Payment method selector
+   - Balance checkout flow
+   - Insufficient balance handling
+
+6. **Admin Balance Adjustment** (Day 3)
+   - Admin adjust endpoint
+   - Admin UI modal
+   - Reason tracking
+
+7. **Testing & Polish** (Day 4)
+   - Test all scenarios
+   - Edge cases
+   - UI polish
+
+---
+
+## Security Considerations
+
+1. **Balance Manipulation Prevention:**
+   - ALL balance changes MUST go through controlled endpoints
+   - Transaction logging (audit trail)
+   - Admin adjustments require reason
+
+2. **Race Conditions:**
+   - Use Mongoose optimistic locking (version field) hoặc transactions
+   ```javascript
+   const session = await mongoose.startSession();
+   session.startTransaction();
+   try {
+       // Deduct balance
+       // Create order
+       await session.commitTransaction();
+   } catch (err) {
+       await session.abortTransaction();
+       throw err;
+   }
+   ```
+
+3. **Negative Balance Prevention:**
+   - Validate `user.balance >= cost` before deduction
+   - Validation in both frontend và backend
+
+4. **Transaction Immutability:**
+   - Transaction records are append-only (no updates/deletes)
+
+---
+
+## File Summary
+
+**Created:** 2 files
+- `server/models/Transaction.js` - Transaction history model
+- `server/routes/balance.js` - Balance management routes
+
+**Modified:** 4 files
+- [server/models/Order.js](file:///c:/Users/Adonis/Downloads/App/server/models/Order.js) - Add orderType field
+- [server/routes/orders.js](file:///c:/Users/Adonis/Downloads/App/server/routes/orders.js) - Add balance checkout endpoint, credit balance logic
+- [src/pages/Dashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Dashboard.tsx) - Add Balance tab, TopUpBalanceModal, transaction history
+- [src/pages/Checkout.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Checkout.tsx) - Add payment method selector, balance checkout flow
+- [src/pages/AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx) - Add balance adjustment modal
+
+**Total Code Changes:** ~600-700 lines
+
+---
+
+## Known Limitations
+
+1. **No Withdrawal**: Users cannot convert balance back to real money
+2. **No Balance Transfer**: Users cannot send balance to other users
+3. **Single Currency**: Balance is in USD only (no multi-currency)
+4. **Manual Refunds**: Admin must manually adjust balance for refunds
+
+---
+
+## Future Enhancements
+
+- Balance expiry (e.g., expire after 1 year unused)
+- Promotional balance (non-withdrawable bonus)
+- Balance gift cards
+- Loyalty points system (separate from balance)
+
+---
+
+*Plan created: 2026-01-25*

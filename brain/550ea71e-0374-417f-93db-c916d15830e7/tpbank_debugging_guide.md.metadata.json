@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Debugging guide for TPBank API connection issues. Documents JSON syntax errors, TPBank firewall blocks, enhanced authentication implementation, and provides step-by-step testing recommendations for both Postman and Admin Dashboard approaches.",
+  "updatedAt": "2026-01-24T04:57:37.638038500Z"
+}

@@ -1,0 +1,7 @@
+# Task: Install IDEAutoRetry Extension
+
+- [ ] Clone repository `https://github.com/xmannv/IDEAutoRetry.git` <!-- id: 0 -->
+- [ ] Inspect repository structure (check for package.json, vsix, etc.) <!-- id: 1 -->
+- [ ] Build extension if necessary <!-- id: 2 -->
+- [ ] Install extension to VS Code <!-- id: 3 -->
+- [ ] Verify installation <!-- id: 4 -->

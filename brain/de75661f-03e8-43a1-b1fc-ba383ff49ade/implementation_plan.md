@@ -1,0 +1,46 @@
+# Implementation Plan - Complete Admin Dashboard Functionality
+
+## Goal Description
+Finalize the Admin Dashboard features to ensure it is fully functional as requested.
+Key areas:
+1.  **Product Management**: Ensure Add, Edit, and Delete work seamlessly with the backend.
+2.  **Order Management**: Implement "Verify Payment" logic to update order status.
+3.  **QR & Settings**: Ensure Admin Settings (Bank Info) are saved and correctly used by the Checkout page for QR generation.
+
+## User Review Required
+> [!NOTE]
+> I will assume the `uploads/` directory logic in `products.js` is sufficient for image handling for now (using local storage), unless cloud storage is requested later.
+
+## Proposed Changes
+
+### Backend
+#### [MODIFY] [server/routes/orders.js](file:///c:/Users/Adonis/Downloads/App/server/routes/orders.js)
+-   Implement `PUT /:id/verify` (or similar) to allow admins to mark orders as 'Completed'.
+-   Ensure `GET /` returns all orders for admins (it currently might only return user's own orders if I copied it from a user-facing route? I need to check).
+
+#### [MODIFY] [server/routes/products.js](file:///c:/Users/Adonis/Downloads/App/server/routes/products.js)
+-   Review current implementation (it seemed mostly done in previous steps) to ensure `PUT` and `DELETE` are robust.
+
+### Frontend
+#### [MODIFY] [src/pages/AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+-   Connect `handleDeleteProduct` to the UI (it logic exists but need to verify `Button` trigger).
+-   Implement `onVerify` in `AdminOrders` to call the new backend API.
+-   Ensure `AdminSettings` properly pre-fills data from the backend.
+
+### Integration
+-   Verify that `Checkout.tsx` uses the bank info from `GET /api/settings`.
+
+## Verification Plan
+### Automated Tests
+-   None planned (manual verification via Browser Subagent).
+
+### Manual Verification
+-   **Add Product**: Create a new product via Dashboard. Check Shop to see it.
+-   **Edit Product**: Change price/title. Check Shop.
+-   **Delete Product**: Delete a product. Check Shop.
+-   **Order Flow**:
+    1.  User buys item (creating 'Processing' order).
+    2.  Admin sees order in Dashboard.
+    3.  Admin clicks 'Verify'. Status changes to 'Completed'.
+    4.  User sees 'Completed' in their history (if User Profile exists, otherwise just Admin side).
+-   **Settings**: Change Bank Info in Admin. Go to Checkout. QR code content should reflect new bank info.

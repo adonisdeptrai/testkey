@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Summary of TPBank API integration work including security headers updates, authentication fixes, testing via Postman, and the persistent 400 error root cause analysis. Documents that TPBank is blocking requests due to invalid/missing credentials in the database rather than header issues.",
+  "updatedAt": "2026-01-24T05:05:58.401505400Z"
+}

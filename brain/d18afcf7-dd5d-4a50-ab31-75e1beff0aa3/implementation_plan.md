@@ -1,0 +1,178 @@
+# Binance API Integration - Implementation Plan
+
+Tích hợp Binance Spot API để theo dõi lịch sử giao dịch crypto trong Admin Dashboard.
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Binance API Key Requirements:**
+> - API Key sẽ được lưu trong Settings (database), giống TPBank
+> - Admin sẽ nhập API Key + Secret Key vào Settings UI
+> - Binance API **chỉ yêu cầu quyền READ** (Enable Reading permissions only, không cần Trading/Withdrawal)
+> - Bạn có thể tạo API key tại: https://www.binance.com/en/my/settings/api-management
+
+> [!WARNING]
+> **Security Note:**
+> - Secret Key sẽ được lưu plaintext trong database (giống TPBank password hiện tại)
+> - Nếu cần encryption, sẽ phải refactor cả TPBank credentials
+> - Recommend: Sử dụng API key với **IP whitelist** và **chỉ quyền READ**
+
+## Proposed Changes
+
+### Backend - Binance Integration
+
+#### [NEW] [binance.js](file:///c:/Users/Adonis/Downloads/App/server/utils/binance.js)
+
+Tạo Binance client wrapper tương tự `tpbank.js`:
+
+```javascript
+class BinanceClient {
+  constructor() { }
+  
+  async getSpotTransactionHistory(apiKey, secretKey) {
+    // Fetch Spot Trading History (BUY/SELL orders)
+    // Use Binance Official SDK or REST API
+  }
+  
+  async getDepositHistory(apiKey, secretKey) {
+    // Fetch deposit history
+  }
+  
+  async getWithdrawHistory(apiKey, secretKey) {
+    // Fetch withdrawal history
+  }
+}
+```
+
+**Key Features:**
+- Error handling với retry logic nếu API rate limit
+- Parse response về format chuẩn cho frontend
+- Support multiple transaction types (Spot, Deposit, Withdraw)
+
+---
+
+#### [MODIFY] [Settings.js](file:///c:/Users/Adonis/Downloads/App/server/models/Settings.js)
+
+Thêm `binance` credentials vào Settings schema:
+
+```javascript
+binance: {
+  apiKey: { type: String, default: '' },
+  secretKey: { type: String, default: '' }
+}
+```
+
+---
+
+#### [MODIFY] [settings.js](file:///c:/Users/Adonis/Downloads/App/server/routes/settings.js)
+
+Thêm 2 endpoints mới:
+
+**1. Test Binance Connection:**
+```javascript
+POST /api/settings/test-binance
+Body: { apiKey, secretKey }
+Response: { success: true/false, message: "..." }
+```
+
+**2. Fetch Transaction History:**
+```javascript
+POST /api/settings/binance-history
+Headers: Authorization Bearer token (Admin only)
+Body: { type: "spot" | "deposit" | "withdraw" } // optional filter
+Response: Array of transactions
+```
+
+---
+
+### Frontend - Admin UI
+
+#### [NEW] [BinanceMonitor.tsx](file:///c:/Users/Adonis/Downloads/App/src/components/admin/BinanceMonitor.tsx)
+
+Tạo component tương tự `TPBankMonitor.tsx` với:
+
+**Tabs:**
+1. **Dashboard** - Stats overview:
+   - Total Transactions Count
+   - Total Volume (BTC, USDT, etc.)
+   - Latest Activity timestamp
+   - Most traded pairs (chart)
+
+2. **Raw Data** - Transaction table:
+   - Time, Symbol (BTC/USDT), Type (BUY/SELL/DEPOSIT/WITHDRAW), Amount, Price, Status
+
+3. **Filters:**
+   - Date range picker
+   - Transaction type selector
+   - Symbol/Coin filter
+
+**UI Style:**
+- Cream Cyan brand color
+- Liquid Glass effects (glassmorphism)
+- Responsive table với pagination
+- Refresh button với loading state
+
+---
+
+#### [MODIFY] [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx)
+
+**Settings Tab:**
+- Thêm section "Binance API Configuration"
+- Input fields: API Key, Secret Key
+- Test Connection button
+- Save button (update Settings)
+
+**New Tab: "Crypto History"**
+- Render `<BinanceMonitor />` component
+- Icon: Bitcoin/Crypto icon
+- Positioned after "Transfer History" tab
+
+---
+
+## Verification Plan
+
+### Automated Tests
+
+```bash
+# Test Binance Connection
+curl -X POST http://localhost:5000/api/settings/test-binance \
+  -H "Content-Type: application/json" \
+  -d '{"apiKey":"YOUR_KEY","secretKey":"YOUR_SECRET"}'
+
+# Fetch History
+curl -X POST http://localhost:5000/api/settings/binance-history \
+  -H "Authorization: Bearer ADMIN_TOKEN"
+```
+
+### Manual Verification
+
+1. **Admin Settings UI:**
+   - Nhập Binance API Key + Secret
+   - Click "Test Connection" → phải thấy success message
+   - Click "Save" → credentials lưu vào database
+
+2. **Crypto History Tab:**
+   - Xem được danh sách transactions từ Binance
+   - Filter theo loại (Spot/Deposit/Withdraw)
+   - Stats hiển thị chính xác
+   - Refresh button hoạt động
+
+3. **Error Handling:**
+   - Nhập sai credentials → hiển thị error message rõ ràng
+   - Network timeout → show loading state và retry
+
+### Browser Testing
+- Sử dụng browser tool để navigate và verify UI/UX
+- Check responsive design trên mobile
+- Verify animations (Liquid Glass effects)
+
+---
+
+## Dependencies
+
+**New Package:**
+```bash
+npm install binance
+```
+
+Binance Official Node.js SDK: https://www.npmjs.com/package/binance

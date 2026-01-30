@@ -1,0 +1,8 @@
+# Task: Install IDEAutoRetry Extension
+
+- [x] Clone repository `https://github.com/xmannv/IDEAutoRetry.git` <!-- id: 0 -->
+- [x] Inspect repository structure (check for package.json, vsix, etc.) <!-- id: 1 -->
+- [x] Build extension if necessary <!-- id: 2 -->
+    - [x] Fix Tailwind/PostCSS parent conflict
+- [/] Install extension to VS Code <!-- id: 3 -->
+- [ ] Verify installation <!-- id: 4 -->

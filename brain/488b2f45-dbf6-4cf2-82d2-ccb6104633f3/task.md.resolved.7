@@ -1,0 +1,55 @@
+# Product Key Distribution System Implementation
+
+## Mục tiêu
+Implement complete license key distribution system với auto-assignment khi order completed, admin key inventory management, và user dashboard key display.
+
+## Checklist
+
+### Backend - Database Models
+- [ ] Create ProductKey model (productId, key, status, orderId, userId, assignedAt)
+- [ ] Update Order model - Add `assignedKeys` field
+
+### Backend - API Routes
+- [ ] Create `/api/keys` routes file
+  - GET /api/keys?productId&status (list keys)
+  - POST /api/keys (bulk add keys)
+  - DELETE /api/keys/:id (delete available key)
+  - GET /api/keys/assigned/:orderId (get keys for order)
+  - POST /api/keys/assign (manual assignment)
+
+### Backend - Auto-Assignment Logic
+- [ ] Add `autoAssignKeys()` function in orders.js
+- [ ] Trigger auto-assignment when order status → Completed
+- [ ] Handle errors (no keys available)
+- [ ] Only assign for ProductType.KEY products
+
+### Frontend - Admin UI
+- [ ] Connect KeyManagementView to real API (replace mock data)
+- [ ] Update SendKeyModal với POST /api/keys/assign
+- [ ] Create BulkKeyUploadModal component
+- [ ] Add "Manage Keys" tab to ManageProductModal
+- [ ] Show key inventory count per product
+
+### Frontend - User Dashboard
+- [ ] Fetch assigned keys với orders
+- [ ] Display keys in Orders tab
+- [ ] Add copy-to-clipboard functionality
+- [ ] Responsive key display UI
+
+### Email Notification (Optional)
+- [ ] Implement sendKeyEmail() function
+- [ ] Send email after key assignment
+- [ ] HTML email template với key display
+
+### Testing
+- [ ] Create test-key-distribution.ps1 script
+- [ ] Test admin add keys
+- [ ] Test auto-assignment on order completion
+- [ ] Test user view keys
+- [ ] Test edge case: no keys available
+- [ ] Test edge case: wrong product type
+
+### Documentation
+- [ ] Update API documentation
+- [ ] Add admin guide for key management
+- [ ] Add troubleshooting guide

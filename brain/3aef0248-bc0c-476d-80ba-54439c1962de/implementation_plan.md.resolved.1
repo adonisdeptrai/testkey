@@ -1,0 +1,33 @@
+# Shop Design Synchronization Plan
+
+## Goal Description
+Synchronize the [Shop](file:///c:/Users/Adonis/Downloads/landing-page---v3/Shop.tsx#224-379) interface with the [Landing](file:///c:/Users/Adonis/Downloads/landing-page---v3/Landing.tsx#619-642) page design. This involves shifting [Shop.tsx](file:///c:/Users/Adonis/Downloads/landing-page---v3/Shop.tsx) from a light theme to the "Cream Cyan" and "Liquid Glass" dark theme (#020617) used in [Landing.tsx](file:///c:/Users/Adonis/Downloads/landing-page---v3/Landing.tsx).
+
+## User Review Required
+> [!NOTE]
+> This change will completely replace the current light-themed "Marketplace" design with a dark, cinematic interface matching the Landing page.
+
+## Proposed Changes
+
+### [MODIFY] [Shop.tsx](file:///c:/Users/Adonis/Downloads/landing-page---v3/Shop.tsx)
+- **Background**: Replace `ShopBackground` (Light) with [AnimatedBackground](file:///c:/Users/Adonis/Downloads/landing-page---v3/Landing.tsx#19-87) (Dark/Animated) logic from [Landing.tsx](file:///c:/Users/Adonis/Downloads/landing-page---v3/Landing.tsx).
+- **Theme**: Change root container from `bg-[#F8FAFC]` to `#020617` (Dark Slate).
+- **Navbar**: Update to match the "Floating Glass" aesthetic.
+- **Product Cards**:
+  - Change background from White to `bg-[#0a0f1e]` (Dark).
+  - Add borders `border-white/10`.
+  - Add hover glow effects (Cream Cyan).
+  - Update badges and text colors to be legible on dark backgrounds.
+- **Cart Drawer**:
+  - Update to Dark Mode (`bg-[#020617]`, white text).
+  - Style formatting.
+
+## Verification Plan
+
+### Manual Verification
+- **Visual Check**:
+  - Open the "Marketplace" view.
+  - Verify the background is dark and animated.
+  - Verify product cards use the new glassmorphism style.
+  - Check the Cart Drawer visibility and styling.
+  - Ensure "Cream Cyan" accents are present.

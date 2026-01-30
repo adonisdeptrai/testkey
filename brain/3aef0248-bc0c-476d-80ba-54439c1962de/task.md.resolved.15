@@ -1,0 +1,32 @@
+# Tasks
+
+- [ ] Analyze project structure and dependencies <!-- id: 0 -->
+- [x] Create Dockerfile <!-- id: 1 -->
+- [x] Create .dockerignore <!-- id: 2 -->
+- [x] Create docker-compose.yml (optional but recommended) <!-- id: 3 -->
+- [x] Verify Docker build (optional verification step) <!-- id: 4 -->
+
+## Shop Design Sync
+- [x] Analyze Landing.tsx design patterns <!-- id: 5 -->
+- [x] Analyze Shop.tsx current state <!-- id: 6 -->
+- [x] Refactor Shop.tsx to match Landing.tsx style (Cream Cyan, Liquid Glass) <!-- id: 7 -->
+- [x] Verify Shop design consistency <!-- id: 8 -->
+
+## Performance Optimization
+- [x] Analyze rendering performance (Landing.tsx & Shop.tsx) <!-- id: 9 -->
+- [x] Optimize AnimatedBackground (css-will-change, reduce blurs) <!-- id: 10 -->
+- [x] Optimize React re-renders (memoization) <!-- id: 11 -->
+- [x] Verify performance improvement <!-- id: 12 -->
+
+## Content Updates
+- [x] Rename "Ban Protection" to "Antidetect" in Landing.tsx <!-- id: 13 -->
+
+## Layout Redesign
+- [x] Refactor Hero section to 2-column layout (Text Left, Terminal Right) <!-- id: 14 -->
+- [x] Adjust HeroTerminal sizing and spacing <!-- id: 15 -->
+- [x] Verify responsive behavior (Stack on mobile) <!-- id: 16 -->
+
+## Partners Section
+- [ ] Research & Compile Partner List (GenLogin, AdsPower, etc.) <!-- id: 17 -->
+- [ ] Implement Partners Ticker Component in Landing.tsx <!-- id: 18 -->
+- [ ] Verify scrolling animation and positioning <!-- id: 19 -->

@@ -1,0 +1,17 @@
+# Walkthrough - User Menu Navigation & Access Control
+
+I have addressed the navigation issues in the User Menu and implemented access control for the Dashboard link.
+
+## 4. User Menu Navigation
+Fixed "dead end" links and incorrect redirects.
+
+### Changes
+- **Route Authorization**: Updated [App.tsx](file:///c:/Users/Adonis/Downloads/App/src/App.tsx) to allow regular users to access `/dashboard` (User Dashboard), removing the forced redirect to `/shop`.
+- **Menu Links**:
+    - **Admin Dashboard**: Only visible to users with `admin` role. Redirects to `/admin`.
+    - **My Dashboard**: Added explicit link to User Dashboard.
+    - **Profile / Settings / Subscription / Help**: All now correctly navigate to the User Dashboard instead of doing nothing or redirecting to Shop.
+
+## Verification
+- **Admin**: Sees "Admin Dashboard" in menu. Clicking it goes to Admin Dashboard.
+- **User**: Does NOT see "Admin Dashboard". Clicking "Profile" or "My Dashboard" successfully loads the User Dashboard.

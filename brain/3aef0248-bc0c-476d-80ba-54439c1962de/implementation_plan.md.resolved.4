@@ -1,0 +1,36 @@
+# Partners Section Implementation Plan
+
+## Goal Description
+Add a "Trusted by Industry Leaders" section above the "Everything you need to scale" header in [Landing.tsx](file:///c:/Users/Adonis/Downloads/landing-page---v3/Landing.tsx). This will feature a scrolling ticker of reputable anti-detect browser partners.
+
+## User Review Required
+> [!NOTE]
+> I have selected the following partners based on your request and market research: GenLogin, GenFarmer, GPMLogin, AdsPower, GoLogin, Multilogin, Dolphin{anty}, and Incogniton.
+
+## Proposed Changes
+
+### [NEW] [components/PartnersTicker.tsx](file:///c:/Users/Adonis/Downloads/landing-page---v3/components/PartnersTicker.tsx)
+- Create a reusable `PartnersTicker` component.
+- **Animation**: Infinite scrolling loop (CSS marquee).
+- **Style**: Grayscale logos that turn to "Cream Cyan" or white on hover.
+- **Content**:
+  - GenLogin
+  - GenFarmer
+  - GPMLogin
+  - AdsPower
+  - GoLogin
+  - Multilogin
+  - Dolphin{anty}
+  - Incogniton
+
+### [MODIFY] [Landing.tsx](file:///c:/Users/Adonis/Downloads/landing-page---v3/Landing.tsx)
+- Import `PartnersTicker`.
+- Insert it immediately before the `<Features />` section.
+- Add a section heading "Software Partners" or similar if needed, or just let the ticker speak for itself. (Plan: Small label "Trusted by Top Anti-Detect Softwares").
+
+## Verification Plan
+
+### Manual Verification
+- **Visual Check**: Verify the ticker scrolls smoothly.
+- **Responsiveness**: Ensure logos are sized correctly on mobile.
+- **Hover Effects**: Verify logos light up on hover.

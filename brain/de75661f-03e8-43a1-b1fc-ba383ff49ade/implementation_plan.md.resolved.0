@@ -1,0 +1,31 @@
+# Implementation Plan - Redesign Order Success Page
+
+## Goal Description
+Redesign the [OrderSuccess.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/OrderSuccess.tsx) page to match the provided high-fidelity mockup. The design shifts from a dark, transparent "Liquid Glass" theme to a clean, light/white card design, but will incorporate the brand's "Cream Cyan" touches where appropriate.
+
+## User Review Required
+> [!NOTE]
+> The new design is significantly different (Light Theme) from the previous Dark Theme implementation. This is based on the user's specific request "Confirm giống thế này" referring to the light-themed image.
+
+## Proposed Changes
+
+### Pages
+#### [MODIFY] [OrderSuccess.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/OrderSuccess.tsx)
+- Change background to a light theme (Slate-50 or white gradient).
+- Implement a centralized white card layout with soft shadows.
+- Update typography to use dark text (Slate-900) for headings and gray (Slate-500) for secondary text.
+- Reconstruct the "Order Details" section with a light gray background box.
+- Update buttons:
+    - Primary: Dark/Black button "Access My Library".
+    - Secondary: Outline/White button "Return to Home".
+- Add a floating chat action button in the bottom right.
+
+## Verification Plan
+
+### Automated Tests
+- None.
+
+### Manual Verification
+- Render the `/order-success` route in the browser.
+- Verify the layout matches the uploaded image.
+- Check responsiveness on mobile (resize window).

@@ -1,0 +1,56 @@
+# Product API & Database Integration Walkthrough
+
+I have successfully migrated the product management system from static files to a robust MongoDB backend.
+
+## 1. Backend Implementation
+
+### Product Model
+Created a Mongoose schema ([server/models/Product.js](file:///c:/Users/Adonis/Downloads/App/server/models/Product.js)) to define the product structure, including:
+- `title`, `price`, `description`, `image`
+- `features` (replacing the old `tags` system)
+- `stock` and inventory management fields
+- `type` (Script, Tool, Course, Key)
+
+### API Routes
+Implemented full CRUD operations in [server/routes/products.js](file:///c:/Users/Adonis/Downloads/App/server/routes/products.js):
+- `GET /api/products`: Fetch all products
+- `POST /api/products`: Create new product (supports image upload)
+- `PUT /api/products/:id`: Update existing product
+- `DELETE /api/products/:id`: Remove product
+
+## 2. Frontend Integration
+
+### Admin Dashboard
+- Updated [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx) to fetch products from the API on load.
+- Replaced local state management with API calls for Saving and Deleting products.
+- Fixed HTML nesting issues that were causing build failures.
+
+### Public Shop
+- Updated [Shop.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Shop.tsx) to fetch products dynamically from the backend.
+- Refactored [ProductCard](file:///c:/Users/Adonis/Downloads/App/src/pages/Shop.tsx#46-151) and filters to use the new `features` property instead of `tags`, ensuring consistency with the backend model.
+
+## 3. Database "Auto-Fix" (Seeding)
+
+To ensure the website isn't empty, I created and ran a **Seed Script**.
+- **Script**: [server/seed.js](file:///c:/Users/Adonis/Downloads/App/server/seed.js)
+- **Action**: Populated the MongoDB database with the initial premium products (GenLogin Auto-Farmer, GPM Manager, etc.).
+- **Result**: The website now displays these products directly from the database.
+
+## Verification
+
+### Build Status
+The Docker build is **SUCCESSFUL**.
+```
+Image app-server Built
+Image app-app Built
+Container app-server-1 Started
+Container app-app-1 Started
+```
+
+### API Check
+- `GET /api/products` is active and serving data.
+- Database connection is established.
+
+## Next Steps
+- You can now log in to the admin dashboard and add/edit products freely.
+- Changes will persist even if you restart the containers.

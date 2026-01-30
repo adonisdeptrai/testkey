@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_TASK",
+  "summary": "Task breakdown cho việc migrate từ custom JWT sang Supabase Auth built-in system. Bao gồm 4 phases: Backend refactor (remove custom JWT, use Supabase session), Frontend refactor (use Supabase hooks), Database sync, và Testing.",
+  "updatedAt": "2026-01-30T01:54:46.295000500Z",
+  "version": "2"
+}

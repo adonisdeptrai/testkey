@@ -1,0 +1,63 @@
+# Migration MongoDB → Supabase - Task Breakdown
+
+## 🎯 Objective
+Migrate toàn bộ R4B Application từ MongoDB sang Supabase Postgres, bao gồm database, authentication, và file storage.
+
+---
+
+## Phase 1: Database Schema Migration
+- [x] Phân tích 8 models hiện tại (User, Product, Order, ProductKey, Settings, SystemLog, Ticket, Transaction)
+- [x] Thiết kế Postgres schema với proper relationships
+- [x] Tạo migrations cho Supabase database
+- [x] Apply migrations và verify schema
+
+## Phase 2: Backend Refactoring
+- [x] Cài đặt `@supabase/supabase-js` SDK
+- [x] Tạo Supabase client configuration
+- [x] Refactor User routes (auth.js, users.js)
+- [/] Refactor Product routes (products.js, keys.js)
+- [/] Refactor Order routes (orders.js, payment.js)
+- [/] Refactor Settings routes (settings.js)
+- [ ] Refactor Ticket routes (tickets.js)
+- [ ] Refactor Stats routes (stats.js)
+- [ ] Migrate Transaction và SystemLog logging
+
+## Phase 3: Authentication Strategy
+- [ ] Đánh giá: Keep JWT custom vs Migrate to Supabase Auth
+- [ ] Implement authentication layer
+- [ ] Migrate password verification
+- [ ] Migrate email verification flow
+- [ ] Migrate password reset flow
+
+## Phase 4: File Storage Migration
+- [ ] Identify current file storage (product images, QR codes, avatars)
+- [ ] Setup Supabase Storage buckets
+- [ ] Migrate existing files to Supabase Storage
+- [ ] Update upload routes to use Supabase Storage
+
+## Phase 5: Workers & External Integrations
+- [ ] Verify TPBank worker compatibility
+- [ ] Verify Binance worker compatibility
+- [ ] Update database connections in workers
+
+## Phase 6: Testing & Validation
+- [ ] Test authentication flows
+- [ ] Test product CRUD operations
+- [ ] Test order creation and payment flows
+- [ ] Test admin dashboard operations
+- [ ] Verify data integrity
+- [ ] Performance testing
+
+## Phase 7: Environment & Deployment
+- [ ] Update .env configuration
+- [ ] Update Docker configuration
+- [ ] Update docker-compose files
+- [ ] Documentation updates
+
+---
+
+## 🔴 Critical Decisions Needed
+1. Authentication strategy (JWT custom vs Supabase Auth)
+2. Data migration approach (fresh vs copy existing data)
+3. Downtime tolerance
+4. Rollback strategy

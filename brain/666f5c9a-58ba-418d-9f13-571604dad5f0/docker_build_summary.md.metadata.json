@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Docker build and deployment summary including all running containers, ports, build statistics, and verification steps with URLs for testing the application.",
+  "updatedAt": "2026-01-25T04:02:45.702977600Z"
+}
