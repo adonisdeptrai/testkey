@@ -9,7 +9,17 @@ Tôi đã hoàn tất việc sửa các lỗi liên quan đến Đăng nhập, �
 - **Giải pháp**: 
     - Gỡ bỏ hoàn toàn giao diện nhập mã OTP trong `Auth.tsx`.
     - Cập nhật thông báo sau khi đăng ký: "Registration successful! Please check your email and click the confirmation link to activate your account."
-- **Kết quả**: Người dùng giờ đây chỉ cần click vào link trong email là có thể kích hoạt tài khoản.
+- **Kết quả**: Trải nghiệm người dùng liền mạch và hiện đại hơn.
+
+### 7. Sửa lỗi "Database error saving new user"
+- **Vấn đề**: Khi người dùng đăng ký với một username đã tồn tại trong bảng `public.users`, Postgres Trigger gặp lỗi `duplicate key` và làm treo luồng đăng ký của Supabase Auth.
+- **Giải pháp**:
+    - **Frontend**: Thêm bước kiểm tra trùng lặp username trong `AuthContext.tsx` trước khi gửi yêu cầu đăng ký lên Supabase.
+    - **Database**: Cải thiện hàm Trigger `handle_new_user` để tự động thêm hậu tố (suffix) nếu phát hiện trùng lặp username ngoài ý muốn, đảm bảo transaction luôn thành công.
+- **Kết quả**: Luồng đăng ký ổn định, báo lỗi rõ ràng nếu username đã bị chiếm dụng.
+
+### 8. Lưu ý khi triển khai trên Vercel (Sửa lỗi localhost refused)
+tài khoản.
 
 ### 2. Luồng Đăng nhập (Login)
 - **Vấn đề**: Trạng thái `is_verified` trong Database không tự cập nhật sau khi user click link email, dẫn đến lỗi "Please verify your email first".

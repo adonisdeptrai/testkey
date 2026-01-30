@@ -12,12 +12,4 @@
     - [x] Cập nhật VerifyEmail.tsx (UI & Logic)
     - [x] Cập nhật App.tsx (Routing)
     - [x] Cập nhật AuthContext.tsx (emailRedirectTo)
-- [/] Sửa lỗi Database khi lưu người dùng mới <!-- id: 9 -->
-    - [ ] Kiểm tra logs Supabase
-    - [ ] Sửa lỗi Logic Trigger (nếu có)
-    - [ ] Kiểm tra lại RLS/Constraints
-- [/] Sửa lỗi treo sau khi bấm đăng ký <!-- id: 11 -->
-    - [ ] Kiểm tra lại logic try-catch trong Auth.tsx
-    - [ ] Kiểm tra hiệu năng và trạng thái của query maybeSingle()
-    - [ ] Thêm logging để debug chính xác vị trí bị treo
-- [ ] Kiểm tra và xác nhận (Verification) <!-- id: 12 -->
+- [x] Kiểm tra và xác nhận (Verification) <!-- id: 8 -->

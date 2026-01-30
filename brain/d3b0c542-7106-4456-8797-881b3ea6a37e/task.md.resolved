@@ -8,8 +8,16 @@
 - [x] Cập nhật Auth.tsx để tương thích với Supabase Client <!-- id: 3 -->
 - [x] Xử lý đồng bộ hóa `public.users` (Triggers/Edge Functions hoặc Backend Hook) <!-- id: 4 -->
 - [x] Gỡ bỏ các route API Auth dư thừa trong Backend <!-- id: 5 -->
-- [/] Thêm trang chờ xác thực email <!-- id: 7 -->
-    - [ ] Cập nhật VerifyEmail.tsx (UI & Logic)
-    - [ ] Cập nhật App.tsx (Routing)
-    - [ ] Cập nhật AuthContext.tsx (emailRedirectTo)
-- [ ] Kiểm tra và xác nhận (Verification) <!-- id: 8 -->
+- [x] Thêm trang chờ xác thực email <!-- id: 7 -->
+    - [x] Cập nhật VerifyEmail.tsx (UI & Logic)
+    - [x] Cập nhật App.tsx (Routing)
+    - [x] Cập nhật AuthContext.tsx (emailRedirectTo)
+- [/] Sửa lỗi Database khi lưu người dùng mới <!-- id: 9 -->
+    - [ ] Kiểm tra logs Supabase
+    - [ ] Sửa lỗi Logic Trigger (nếu có)
+    - [ ] Kiểm tra lại RLS/Constraints
+- [/] Sửa lỗi treo sau khi bấm đăng ký <!-- id: 11 -->
+    - [ ] Kiểm tra lại logic try-catch trong Auth.tsx
+    - [ ] Kiểm tra hiệu năng và trạng thái của query maybeSingle()
+    - [ ] Thêm logging để debug chính xác vị trí bị treo
+- [ ] Kiểm tra và xác nhận (Verification) <!-- id: 12 -->
