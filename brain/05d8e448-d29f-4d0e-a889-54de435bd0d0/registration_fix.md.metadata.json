@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Debug guide cho registration hanging issue. Root cause là Supabase Auth chưa được enable hoặc email confirmation đang chặn registration flow. Bao gồm quick fix và long-term solution.",
+  "updatedAt": "2026-01-30T05:12:41.335836Z"
+}

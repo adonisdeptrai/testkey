@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Báo cáo toàn diện phân tích liên kết Frontend-Backend của dự án R4BBIT Shop. Bao gồm: tổng quan kiến trúc, cấu trúc project, API endpoints mapping chi tiết (50+ endpoints), các vấn đề phát hiện (hardcoded URLs, missing handlers), authentication architecture diagram, database schema overview, và recommendations ưu tiên.",
+  "updatedAt": "2026-01-30T05:32:03.259905800Z"
+}

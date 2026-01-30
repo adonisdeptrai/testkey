@@ -1,0 +1,371 @@
+# Báo Cáo Phân Tích Liên Kết Frontend - Backend
+
+**Dự án:** R4BBIT Shop  
+**Ngày phân tích:** 2026-01-30  
+**Phiên bản:** Sau Migration Supabase
+
+---
+
+## 📊 Tổng Quan Kiến Trúc
+
+### Stack Công Nghệ
+
+| Layer | Công Nghệ |
+|-------|-----------|
+| **Frontend** | React 18 + TypeScript + Vite |
+| **Styling** | TailwindCSS + Framer Motion |
+| **State** | React Context (Auth, Cart, Toast) |
+| **Backend** | Express.js + Node.js |
+| **Database** | Supabase (PostgreSQL) |
+| **Auth** | Supabase Auth (OAuth + Email/Password) |
+| **Routing** | react-router-dom v6 |
+
+---
+
+## 🗂️ Cấu Trúc Project
+
+### Backend (`/server`)
+
+```
+server/
+├── index.js                    # Entry point, route registration
+├── config/
+│   └── supabase.js            # Supabase client configuration
+├── middleware/
+│   ├── auth.js                # Supabase token verification
+│   ├── adminAuth.js           # Admin role check
+│   └── rateLimiter.js         # Rate limiting
+├── routes/
+│   ├── auth.js                # Authentication (login, register, verify)
+│   ├── oauth.js               # Google OAuth callback
+│   ├── products.js            # Product CRUD
+│   ├── orders.js              # Order management
+│   ├── users.js               # User management (Admin)
+│   ├── settings.js            # System settings + TPBank/Binance
+│   ├── stats.js               # Dashboard statistics
+│   ├── balance.js             # Balance top-up & transactions
+│   ├── keys.js                # Product key management
+│   ├── tickets.js             # Support tickets
+│   ├── payment.js             # Binance Pay integration
+│   └── upload.js              # File upload
+├── utils/
+│   ├── encryption.js          # AES encryption for sensitive data
+│   ├── tpbank.js              # TPBank API client
+│   ├── binance.js             # Binance API client
+│   └── binancePay.js          # Binance Pay client
+└── workers/
+    └── tpbankWorker.js        # Background job for bank verification
+```
+
+### Frontend (`/src`)
+
+```
+src/
+├── App.tsx                    # Router configuration
+├── types.ts                   # TypeScript type definitions
+├── config/
+│   ├── api.ts                 # API endpoints configuration
+│   └── supabase.ts            # Supabase client for OAuth
+├── contexts/
+│   ├── AuthContext.tsx        # Authentication state
+│   ├── CartContext.tsx        # Shopping cart state
+│   └── ToastContext.tsx       # Toast notifications
+├── pages/
+│   ├── LandingPage.tsx        # Public landing
+│   ├── Auth.tsx               # Login/Register
+│   ├── AuthCallback.tsx       # OAuth callback handler
+│   ├── Shop.tsx               # Product listing
+│   ├── Checkout.tsx           # Payment flow
+│   ├── Dashboard.tsx          # User/Admin dashboard router
+│   ├── AdminDashboard.tsx     # Admin panel
+│   ├── UserDashboard.tsx      # User panel
+│   ├── VerifyEmail.tsx        # Email verification
+│   ├── ResetPassword.tsx      # Password reset
+│   └── OrderSuccess.tsx       # Order confirmation
+└── components/
+    ├── admin/                 # Admin-specific components
+    ├── common/                # Shared UI components
+    ├── dashboard/             # Dashboard widgets
+    ├── landing/               # Landing page sections
+    └── layout/                # Layout components
+```
+
+---
+
+## 🔗 API Endpoints Mapping
+
+### Authentication Routes (`/api/auth`)
+
+| Method | Endpoint | FE Consumer | BE Handler | Status |
+|--------|----------|-------------|------------|--------|
+| POST | `/api/auth/register` | `AuthContext.register()` | `routes/auth.js` | ✅ Hoạt động |
+| POST | `/api/auth/login` | `AuthContext.login()` | `routes/auth.js` | ✅ Hoạt động |
+| POST | `/api/auth/logout` | `AuthContext.logout()` | `routes/auth.js` | ✅ Hoạt động |
+| GET | `/api/auth/verify-email/:token` | `VerifyEmail.tsx` | `routes/auth.js` | ✅ Hoạt động |
+| POST | `/api/auth/forgot-password` | `Auth.tsx` | `routes/auth.js` | ⚠️ Không tìm thấy handler |
+| POST | `/api/auth/reset-password/:token` | `ResetPassword.tsx` | `routes/auth.js` | ⚠️ Không tìm thấy handler |
+| POST | `/api/auth/verify` | `Auth.tsx` | `routes/auth.js` | ⚠️ Không tìm thấy handler |
+| POST | `/api/auth/verify-payment` | `Checkout.tsx` | `routes/auth.js` | ⚠️ Không tìm thấy handler |
+| POST | `/api/auth/refresh` | - | `routes/auth.js` | ✅ Hoạt động |
+| POST | `/api/auth/oauth/callback` | `AuthCallback.tsx` | `routes/oauth.js` | ⚠️ DEPRECATED |
+
+### Products Routes (`/api/products`)
+
+| Method | Endpoint | FE Consumer | BE Handler | Status |
+|--------|----------|-------------|------------|--------|
+| GET | `/api/products` | `Shop.tsx`, `AdminDashboard.tsx` | `routes/products.js` | ✅ Public |
+| GET | `/api/products/:id` | - | `routes/products.js` | ✅ Public |
+| POST | `/api/products` | `AdminDashboard.tsx`, `AddProduct.tsx` | `routes/products.js` | ✅ Admin |
+| PUT | `/api/products/:id` | `AdminDashboard.tsx` | `routes/products.js` | ✅ Admin |
+| DELETE | `/api/products/:id` | `AdminDashboard.tsx` | `routes/products.js` | ✅ Admin |
+
+### Orders Routes (`/api/orders`)
+
+| Method | Endpoint | FE Consumer | BE Handler | Status |
+|--------|----------|-------------|------------|--------|
+| GET | `/api/orders` | `AdminDashboard.tsx` | `routes/orders.js` | ✅ Admin |
+| GET | `/api/orders/my-orders` | `UserDashboard.tsx` | `routes/orders.js` | ✅ Protected |
+| GET | `/api/orders/pending` | `AdminDashboard.tsx` | `routes/orders.js` | ✅ Admin |
+| POST | `/api/orders` | `Checkout.tsx` | `routes/orders.js` | ✅ Public |
+| PUT | `/api/orders/:id` | `AdminDashboard.tsx` | `routes/orders.js` | ✅ Admin |
+| PUT | `/api/orders/:id/verify` | `AdminDashboard.tsx` | `routes/orders.js` | ✅ Admin |
+| POST | `/api/orders/checkout-with-balance` | - | `routes/orders.js` | ✅ Protected |
+
+### Users Routes (`/api/users`)
+
+| Method | Endpoint | FE Consumer | BE Handler | Status |
+|--------|----------|-------------|------------|--------|
+| GET | `/api/users` | `AdminDashboard.tsx` | `routes/users.js` | ✅ Admin |
+| PUT | `/api/users/:id` | - | `routes/users.js` | ✅ Admin |
+| PUT | `/api/users/:id/ban` | - | `routes/users.js` | ✅ Admin |
+| PUT | `/api/users/:id/balance` | - | `routes/users.js` | ✅ Admin |
+| DELETE | `/api/users/:id` | - | `routes/users.js` | ✅ Admin |
+
+### Settings Routes (`/api/settings`)
+
+| Method | Endpoint | FE Consumer | BE Handler | Status |
+|--------|----------|-------------|------------|--------|
+| GET | `/api/settings` | `Checkout.tsx`, `AdminDashboard.tsx` | `routes/settings.js` | ✅ Public |
+| PUT | `/api/settings` | `AdminDashboard.tsx` | `routes/settings.js` | ✅ Admin |
+| POST | `/api/settings/test-tpbank` | `AdminDashboard.tsx` | `routes/settings.js` | ✅ Admin |
+| POST | `/api/settings/tpbank-history` | `TPBankMonitor.tsx` | `routes/settings.js` | ✅ Admin |
+| GET | `/api/settings/tpbank-logs` | - | `routes/settings.js` | ⚠️ Defined in api.ts, no handler |
+| POST | `/api/settings/test-binance` | `AdminDashboard.tsx` | `routes/settings.js` | ✅ Admin |
+| POST | `/api/settings/binance-fee` | - | `routes/settings.js` | ✅ Public |
+| POST | `/api/settings/binance-qr` | - | `routes/settings.js` | ✅ Public |
+| POST | `/api/settings/binance-history` | `BinanceMonitor.tsx` | `routes/settings.js` | ✅ Admin |
+
+### Payment Routes (`/api/payment`)
+
+| Method | Endpoint | FE Consumer | BE Handler | Status |
+|--------|----------|-------------|------------|--------|
+| POST | `/api/payment/binance/create` | `Checkout.tsx` | `routes/payment.js` | ✅ Protected |
+| GET | `/api/payment/binance/query/:orderId` | `Checkout.tsx` | `routes/payment.js` | ✅ Protected |
+
+### Balance Routes (`/api/balance`)
+
+| Method | Endpoint | FE Consumer | BE Handler | Status |
+|--------|----------|-------------|------------|--------|
+| GET | `/api/balance/my-balance` | - | `routes/balance.js` | ✅ Protected |
+| POST | `/api/balance/topup` | - | `routes/balance.js` | ✅ Protected |
+| GET | `/api/balance/transactions` | - | `routes/balance.js` | ✅ Protected |
+| POST | `/api/balance/adjust` | - | `routes/balance.js` | ✅ Admin |
+
+### Keys Routes (`/api/keys`)
+
+| Method | Endpoint | FE Consumer | BE Handler | Status |
+|--------|----------|-------------|------------|--------|
+| GET | `/api/keys` | - | `routes/keys.js` | ✅ Admin |
+| POST | `/api/keys` | - | `routes/keys.js` | ✅ Admin |
+| DELETE | `/api/keys/:id` | - | `routes/keys.js` | ✅ Admin |
+| GET | `/api/keys/assigned/:orderId` | - | `routes/keys.js` | ✅ Protected |
+| POST | `/api/keys/assign` | - | `routes/keys.js` | ✅ Admin |
+
+### Tickets Routes (`/api/tickets`)
+
+| Method | Endpoint | FE Consumer | BE Handler | Status |
+|--------|----------|-------------|------------|--------|
+| GET | `/api/tickets/my-tickets` | - | `routes/tickets.js` | ✅ Protected |
+| POST | `/api/tickets` | - | `routes/tickets.js` | ✅ Protected |
+| GET | `/api/tickets/:id` | - | `routes/tickets.js` | ✅ Protected |
+| POST | `/api/tickets/:id/reply` | - | `routes/tickets.js` | ✅ Protected |
+| PUT | `/api/tickets/:id/status` | - | `routes/tickets.js` | ✅ Admin |
+| PUT | `/api/tickets/:id/priority` | - | `routes/tickets.js` | ✅ Admin |
+| POST | `/api/tickets/:id/assign` | - | `routes/tickets.js` | ✅ Admin |
+| DELETE | `/api/tickets/:id` | - | `routes/tickets.js` | ✅ Admin |
+| GET | `/api/tickets` (all) | - | `routes/tickets.js` | ✅ Admin |
+
+### Stats Routes (`/api/stats`)
+
+| Method | Endpoint | FE Consumer | BE Handler | Status |
+|--------|----------|-------------|------------|--------|
+| GET | `/api/stats/overview` | `AdminDashboard.tsx` | `routes/stats.js` | ✅ Admin |
+
+### Upload Routes (`/api/upload`)
+
+| Method | Endpoint | FE Consumer | BE Handler | Status |
+|--------|----------|-------------|------------|--------|
+| POST | `/api/upload` | `AdminDashboard.tsx` | `routes/upload.js` | ✅ Admin |
+
+---
+
+## ⚠️ Vấn Đề Phát Hiện
+
+### 1. Hardcoded API URLs
+
+> [!CAUTION]
+> Nhiều file FE đang sử dụng hardcoded `http://localhost:5000` thay vì dùng `API_ENDPOINTS` từ config.
+
+**Files bị ảnh hưởng:**
+
+| File | Số lượng hardcoded URLs |
+|------|-------------------------|
+| [AdminDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/AdminDashboard.tsx) | 12 URLs |
+| [Checkout.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Checkout.tsx) | 5 URLs |
+| [UserDashboard.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/UserDashboard.tsx) | 2 URLs |
+| [Shop.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Shop.tsx) | 1 URL |
+| [Auth.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Auth.tsx) | 1 URL |
+| [AddProduct.tsx](file:///c:/Users/Adonis/Downloads/App/src/pages/Admin/AddProduct.tsx) | 1 URL |
+
+**Khuyến nghị:** Thay thế tất cả hardcoded URLs bằng `API_ENDPOINTS` hoặc `API_BASE_URL` từ `src/config/api.ts`.
+
+---
+
+### 2. Missing API Handlers
+
+> [!WARNING]
+> Một số endpoints được định nghĩa trong FE nhưng không có handler tương ứng trong BE.
+
+| Endpoint | Defined In | Missing Handler |
+|----------|------------|-----------------|
+| `POST /api/auth/forgot-password` | `api.ts`, `Auth.tsx` | ❌ Không tìm thấy trong `routes/auth.js` |
+| `POST /api/auth/reset-password/:token` | `api.ts`, `ResetPassword.tsx` | ❌ Không tìm thấy trong `routes/auth.js` |
+| `POST /api/auth/verify` | `Auth.tsx` | ❌ Không tìm thấy trong `routes/auth.js` |
+| `POST /api/auth/verify-payment` | `api.ts`, `Checkout.tsx` | ❌ Không tìm thấy trong `routes/auth.js` |
+| `GET /api/settings/tpbank-logs` | `api.ts` | ❌ Không tìm thấy trong `routes/settings.js` |
+| `PUT /api/orders/:id/manual-verify` | `api.ts` | ❌ Không tìm thấy trong `routes/orders.js` |
+
+---
+
+### 3. Unused API Endpoints (BE có, FE không dùng)
+
+| Endpoint | BE Handler | Ghi chú |
+|----------|------------|---------|
+| `/api/balance/*` | `routes/balance.js` | FE chưa integrate UI |
+| `/api/keys/*` | `routes/keys.js` | FE chưa integrate UI |
+| `/api/tickets/*` | `routes/tickets.js` | FE chưa integrate UI |
+| `/api/orders/checkout-with-balance` | `routes/orders.js` | Balance payment flow chưa implement |
+
+---
+
+### 4. Authentication Flow Issues
+
+> [!IMPORTANT]
+> FE đang sử dụng **hybrid approach** cho authentication:
+> - **Supabase Client** (frontend): Dùng cho OAuth và session management
+> - **Backend API**: Dùng cho một số verify endpoints
+
+**Vấn đề tiềm ẩn:**
+1. `Auth.tsx` gọi `/api/auth/verify` với hardcoded URL nhưng handler không tồn tại
+2. `AuthContext.tsx` login thông qua `supabase.auth.signInWithPassword()` nhưng không sync với backend session
+3. Một số backend routes yêu cầu Supabase token trong header nhưng FE không nhất quán trong việc gửi token
+
+---
+
+### 5. CORS và Security
+
+✅ **Đã cấu hình:**
+- Helmet security headers
+- Rate limiting (`apiLimiter`)
+- CORS enabled
+
+⚠️ **Cần kiểm tra:**
+- CORS origin không được restrict, có thể gây security risk trong production
+
+---
+
+## 📦 Database Schema (Supabase)
+
+Migrations đã được áp dụng:
+
+| Order | Migration | Description |
+|-------|-----------|-------------|
+| 001 | [create_users_table.sql](file:///c:/Users/Adonis/Downloads/App/server/supabase/migrations/001_create_users_table.sql) | Users table |
+| 002 | [create_products_table.sql](file:///c:/Users/Adonis/Downloads/App/server/supabase/migrations/002_create_products_table.sql) | Products table |
+| 003 | [create_product_keys_table.sql](file:///c:/Users/Adonis/Downloads/App/server/supabase/migrations/003_create_product_keys_table.sql) | Product keys |
+| 004 | [create_orders_table.sql](file:///c:/Users/Adonis/Downloads/App/server/supabase/migrations/004_create_orders_table.sql) | Orders table |
+| 005 | [create_transactions_table.sql](file:///c:/Users/Adonis/Downloads/App/server/supabase/migrations/005_create_transactions_table.sql) | Transactions |
+| 006 | [create_tickets_table.sql](file:///c:/Users/Adonis/Downloads/App/server/supabase/migrations/006_create_tickets_table.sql) | Support tickets |
+| 007 | [create_settings_table.sql](file:///c:/Users/Adonis/Downloads/App/server/supabase/migrations/007_create_settings_table.sql) | System settings |
+| 008 | [create_system_logs_table.sql](file:///c:/Users/Adonis/Downloads/App/server/supabase/migrations/008_create_system_logs_table.sql) | System logs |
+| 009 | [add_foreign_key_constraints.sql](file:///c:/Users/Adonis/Downloads/App/server/supabase/migrations/009_add_foreign_key_constraints.sql) | FK constraints |
+| 010 | [add_google_oauth_support.sql](file:///c:/Users/Adonis/Downloads/App/server/supabase/migrations/010_add_google_oauth_support.sql) | OAuth support |
+
+---
+
+## 🔐 Authentication Architecture
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant FE as Frontend
+    participant Supabase as Supabase Auth
+    participant BE as Backend API
+    participant DB as PostgreSQL
+
+    %% Login Flow
+    User->>FE: Enter credentials
+    FE->>Supabase: signInWithPassword()
+    Supabase-->>FE: Session + Access Token
+    FE->>FE: Store session in localStorage
+    
+    %% Protected API Call
+    User->>FE: Access protected resource
+    FE->>BE: API Request + Bearer Token
+    BE->>Supabase: getUser(token)
+    Supabase-->>BE: User object
+    BE->>DB: Query public.users
+    DB-->>BE: User data
+    BE-->>FE: Protected resource
+```
+
+---
+
+## ✅ Recommendations
+
+### Ưu tiên cao
+
+1. **Fix Missing Handlers**: Implement các API handlers còn thiếu hoặc remove endpoints không sử dụng
+2. **Refactor Hardcoded URLs**: Sử dụng `API_ENDPOINTS` từ config thay vì hardcode
+3. **Implement Balance/Keys/Tickets UI**: FE cần UI cho các features đã có backend
+
+### Ưu tiên trung bình
+
+4. **Add CORS Origin Restriction**: Giới hạn allowed origins trong production
+5. **Implement Error Boundary**: Thêm error handling cho API failures
+6. **Add API Response Types**: Tạo TypeScript types cho API responses
+
+### Ưu tiên thấp
+
+7. **Cleanup Deprecated OAuth**: Remove legacy `/api/auth/oauth/callback`
+8. **Add API Documentation**: Generate OpenAPI/Swagger docs
+9. **Implement Request Caching**: Add SWR hoặc React Query
+
+---
+
+## 📈 Statistics
+
+| Metric | Count |
+|--------|-------|
+| Total BE Routes | 12 files |
+| Total API Endpoints | ~50+ |
+| FE Pages | 12 |
+| FE Components | 19 |
+| Missing Handlers | 6 |
+| Hardcoded URLs | 22 |
+| DB Tables | 8+ |
+
+---
+
+> **Tạo bởi:** Gemini AI Analysis  
+> **Thời gian:** 2026-01-30T12:29:41+07:00

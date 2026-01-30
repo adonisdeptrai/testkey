@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Hướng dẫn setup email confirmation cho Supabase Auth. Bao gồm Supabase Dashboard configuration, email templates, và testing procedure.",
+  "updatedAt": "2026-01-30T05:15:00.020526200Z"
+}
